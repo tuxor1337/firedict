@@ -1,0 +1,20 @@
+{
+  "name": "dict-app",
+  "description": "A simple dictionary app",
+  "version": "1.0",
+  "launch_path": "/index.html",
+  "type": "privileged",
+  "icons": {
+    "128": "icon-128.png",
+    "256": "icon-256.png"
+  },
+  "developer": {
+    "name": "Thomas Vogt",
+    "url": "http://tovotu.de"
+  },
+  "permissions": {
+    "device-storage:sdcard": {
+        "access": "readonly"
+    }
+  }
+}
