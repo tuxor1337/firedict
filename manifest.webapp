@@ -1,6 +1,6 @@
 {
-  "name": "dict-app",
-  "description": "A simple dictionary app",
+  "name": "firedict",
+  "description": "A simple offline dictionary app",
   "version": "1.0",
   "launch_path": "/index.html",
   "type": "privileged",
@@ -9,8 +9,8 @@
     "256": "icon-256.png"
   },
   "developer": {
-    "name": "Thomas Vogt",
-    "url": "http://tovotu.de"
+    "name": "tuxor1337",
+    "url": "https://github.com/tuxor1337/firedict"
   },
   "permissions": {
     "device-storage:sdcard": {
