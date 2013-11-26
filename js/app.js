@@ -13,7 +13,7 @@ $(function() {
     })();
     
     var log_to_screen = function (text) {
-        $("#dict_test").append("<p>" + text + "</p>");
+        $("output").append("<p>" + text + "</p>");
     }
     
     var split_path = function (path) {
@@ -27,15 +27,15 @@ $(function() {
     };
     
     var load_dicts = function () {
-        log_to_screen("");
         dict_list.forEach(function (d) {
             d.dobj.onsuccess = function () {
-                log_to_screen(d.dobj.get_key("bookname"));
-                log_to_screen("&nbsp;");
                 var tmp = 0;
                 while(tmp < dict_list.length && dict_list[tmp++].dobj.loaded);
-                if(tmp == dict_list.length)
+                if(tmp == dict_list.length) {
+                    switch_mode("display");
+                    $("output div.text").show();
                     $("#search_term").prop('disabled', false);
+                }
             };
             d.dobj.load(d.main,d.res);
         });
@@ -74,8 +74,8 @@ $(function() {
     };
     
     var search_dicts = function () {
+        switch_mode("loading");
         request = sdcard.enumerate("dictdata");
-        
         request.onsuccess = function () {
             if(!this.result) {
                 process_dicts();
@@ -101,25 +101,28 @@ $(function() {
             this.continue();
             return;
         };
-        
         request.onerror = function () {
             log_to_screen("No dictionaries found: " + this.error);
         };
     };
     
-    search_dicts();
-    
     var switch_mode = function (mode) {
         window.scrollTo(0,0);
         if(mode == "display") {
-            $("#dict_test").html("");
+            $("output").html("");
             for(var d = 0; d < dict_list.length; d++) {
                 $("<div />").addClass("text dict"+d).data("did",d)
-                    .append("<h2>"+dict_list[d].dobj.get_key("bookname")+"</h2>")
-                    .appendTo("#dict_test").hide();
+                    .append("<h2>"
+                        + dict_list[d].dobj.get_key("bookname")
+                        + "</h2>")
+                    .css("border-color",dict_list[d].color)
+                    .appendTo("output").hide()
+                    .find("h2").css("background-color",dict_list[d].color);
             }
-        } else if (mode == "list") {
-            $("#dict_test").html("<ul></ul>");
+        } else if(mode == "list") {
+            $("output").html("<ul></ul>");
+        } else if(mode == "loading") {
+            $("output").html("<div class=\"loading\"><img src=\"loading.gif\" /></div>");
         }
     }
     
@@ -137,11 +140,8 @@ $(function() {
     };
     
     var render_entry = function (wid, did, term) {
-        switch_mode("display");
         $("#search_term").val(term);
-        var dict = dict_list[did].dobj;
-        
-        dict.lookup_id(wid, function (data, idx) {
+        dict_list[did].dobj.lookup_id(wid, function (data, idx) {
             data.forEach(function (d) {
                 p = $("<p />");
                 
@@ -151,10 +151,9 @@ $(function() {
                 if(term != idx[0]) syn = " <b>(Synonym: " + term + ")</b>";
                 else syn = "";
                 
-                $("#dict_test div.dict"+did)
-                    .append("<h3>" + idx[0] + syn + "</h3>").append(p)
-                    .css("border-color",dict_list[did].color).show();
-                $("#dict_test div.dict"+did).find("h2, h3")
+                $("output div.dict"+did)
+                    .append("<h3>" + idx[0] + syn + "</h3>")
+                    .append(p).show().find("h3")
                     .css("background-color",dict_list[did].color);
             });
         });
@@ -192,7 +191,7 @@ $(function() {
     var render_list = function (matches) {
         switch_mode("list");
         if(matches.length == 0) {
-            $("#dict_test").html("<i>Nichts gefunden!</i>");
+            $("output").html("<i>Nichts gefunden!</i>");
         } else {
             if(dict_list.length > 1)
                 matches.sort(function (a,b) {
@@ -216,10 +215,21 @@ $(function() {
             }
             matches = tmp;
             for(var m = 0; m < matches.length; m++) {
-                li = $(document.createElement('li'));
-                $(li).data("entries",matches[m][1]);
-                $(li).html(matches[m][0]);
-                $("#dict_test ul").append(li);
+                var dlist = [];
+                matches[m][1].forEach(function (match) {
+                        if(dlist.indexOf(match[1]) == -1)
+                            dlist.push(match[1]);
+                });
+                dlist.sort().reverse();
+                li = $("<li />");
+                dlist.forEach(function (d) {
+                        $("<span />")
+                            .css("background-color",dict_list[d].color)
+                            .addClass("marker").appendTo(li);
+                });
+                $(li).data("entries", matches[m][1])
+                    .append(matches[m][0])
+                    .appendTo("output ul");
              }
         }
     };
@@ -230,10 +240,12 @@ $(function() {
             last = last_search;
             last_search = term;
             if(term == "") {
-                $("#dict_test").html("");
+                switch_mode("display");
+                $("output div.text").show();
                 return;
             } else if(term == last) return;
             
+            switch_mode("loading");
             var matches = [];
             for(var d = 0; d < dict_list.length; d++) {
                 var tmp = dict_list[d].dobj.lookup_term(term,true);
@@ -246,16 +258,20 @@ $(function() {
         }, 300);
     });
     
-    $("#dict_test").on("click", "div.text a", function (evt) {
-        ref = $(evt.target).data("ref");
-        did = $(evt.target)
-            .parents("div.text").data("did");
+    $("output").on("click", "div.text a", function (evt) {
+        ref = $(evt.target).data("ref").trim();
+        did = $(evt.target).parents("div.text").data("did");
+        switch_mode("display");
         show_word_by_term(ref, did);
     });
     
-    $("#dict_test").on("click", "li", function(evt) {
-        $(evt.target).data("entries").forEach(function (entr) {
+    $("output").on("click", "li", function(evt) {
+        entries = $(evt.target).data("entries");
+        switch_mode("display");
+        entries.forEach(function (entr) {
             render_entry(entr[0], entr[1], $(evt.target).text());
         });
     });
+    
+    search_dicts();
 });
