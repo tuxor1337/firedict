@@ -3,7 +3,9 @@
  <head>
     <title>Stardict API</title>
     
-    <link rel="stylesheet" type="text/css" href="layout.css" />
+    <link rel="stylesheet" type="text/css" href="style/layout.css" />
+    <link rel="stylesheet" type="text/css" href="style/searchbar.css" />
+    <link rel="stylesheet" type="text/css" href="style/wordlist.css" />
     
     <script src="js/jquery.min.js" type="text/javascript"></script>
     <script src="js/rawinflate.js" type="text/javascript"></script>
@@ -13,9 +15,18 @@
     <script src="js/app.js" type="text/javascript"></script>
  </head>
  <body>
+    <form role="search">
+      <p>
+        <input type="text" placeholder="Search..." required="" />
+        <button type="reset">Clear</button>
+      </p>
+    </form>
     <div>
-        <input type="text" id="search_term" name="search_term" disabled />
-        <output></output>
+        <section data-type="list">
+          <ul></ul>
+        </section>
+        <section data-type="output"></section>
+        <p class="loading"><progress></progress></p>
     </div>
  </body>
 </html>

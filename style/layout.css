@@ -1,0 +1,65 @@
+html { height: 100%; }
+ 
+body {
+  font-family: sans-serif; margin: 0;
+}
+
+body > div { padding:0; margin:2.6rem 0 0; }
+
+p.loading { margin:5rem 0 0; padding:0; text-align:center; }
+
+section[data-type=output] {
+    background-color: #eee;
+    font-family:monospace;
+    display:block;
+    padding:0; margin:0.2rem 0;
+}
+
+section[data-type=output] div.text {
+    background-color:#fff; padding: 0; margin:0 1px 2px;
+    border: 2px #000 solid;
+}
+section[data-type=output] div.text h2 {
+    overflow: hidden;
+    white-space: nowrap;
+    margin:0; padding:0.1rem 0.3rem;
+    text-align:center;
+    color:#fff; font-size:0.7rem;
+    font-weight:normal;
+    background-color:#000;
+}
+section[data-type=output] div.text p.entry {
+    padding: 0.5rem 0.4rem; margin:0;
+}
+section[data-type=output] div.text h3 {
+    font-size:0.7rem; font-weight:bold;
+    margin:0; padding:0.1rem 0.2rem;
+    background-color:#000; color:#fff;
+}
+section[data-type=output] div.text h3 b {
+    font-weight:normal;
+}
+
+/* Spinner */
+progress:not([value]) {
+  background: url(images/spinner.png) no-repeat center center / 100% auto;
+  animation: 0.9s rotate infinite steps(30);
+  width: 2.9rem;
+  height: 2.9rem;
+  border: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+progress:not([value])::-moz-progress-bar {
+ background: none;
+}
+@keyframes rotate {
+  from { transform: rotate(1deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes move {
+  from { background-position: 0 0; }
+  to   { background-position: 1rem 0; }
+}
