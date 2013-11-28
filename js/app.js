@@ -1,4 +1,10 @@
 $(function() {
+    var search_reset = "form[role=search] button[type=reset]";
+    var search_input = "form[role=search] input[type=text]";
+    var output_area = "section[data-type=output]";
+    var list_section = "section[data-type=list]";
+    var progress = "p.loading";
+    
     var dict_list = [];
     var res_files = [];
     var last_search = "";
@@ -12,9 +18,17 @@ $(function() {
       };
     })();
     
+    var random_color = function () {
+        var min = 0x33, max = 0xbb, result = "";
+        for(var i = 0; i < 3; i++)
+            result += (0x100+min + (max-min) * Math.random())
+                .toString(16).substr(1,2);
+        return result;
+    };
+    
     var log_to_screen = function (text) {
-        $("output").append("<p>" + text + "</p>");
-    }
+        $(output_area).append("<p>" + text + "</p>");
+    };
     
     var split_path = function (path) {
         pos_slash = path.lastIndexOf('/');
@@ -33,8 +47,7 @@ $(function() {
                 while(tmp < dict_list.length && dict_list[tmp++].dobj.loaded);
                 if(tmp == dict_list.length) {
                     switch_mode("display");
-                    $("output div.text").show();
-                    $("#search_term").prop('disabled', false);
+                    $(output_area).find("div.text").show();
                 }
             };
             d.dobj.load(d.main,d.res);
@@ -91,8 +104,7 @@ $(function() {
                     "res": [],
                     "main": [],
                     "dobj": new StarDict(),
-                    "color": '#'+(0x1000000+(Math.random())*0xffffff)
-                        .toString(16).substr(1,6)
+                    "color": '#'+random_color()
                 };
                 console.log("dictionary found: " + dict.base);
                 dict_list.push(dict);
@@ -108,21 +120,24 @@ $(function() {
     
     var switch_mode = function (mode) {
         window.scrollTo(0,0);
+        $(output_area).hide();
+        $(list_section).hide();
+        $(progress).hide();
         if(mode == "display") {
-            $("output").html("");
+            $(output_area).html("").show();
             for(var d = 0; d < dict_list.length; d++) {
                 $("<div />").addClass("text dict"+d).data("did",d)
                     .append("<h2>"
                         + dict_list[d].dobj.get_key("bookname")
                         + "</h2>")
                     .css("border-color",dict_list[d].color)
-                    .appendTo("output").hide()
+                    .appendTo(output_area).hide()
                     .find("h2").css("background-color",dict_list[d].color);
             }
         } else if(mode == "list") {
-            $("output").html("<ul></ul>");
+            $(list_section).html("<ul />").show();
         } else if(mode == "loading") {
-            $("output").html("<div class=\"loading\"><img src=\"loading.gif\" /></div>");
+            $(progress).show();
         }
     }
     
@@ -140,18 +155,17 @@ $(function() {
     };
     
     var render_entry = function (wid, did, term) {
-        $("#search_term").val(term);
+        $(search_input).val(term);
         dict_list[did].dobj.lookup_id(wid, function (data, idx) {
             data.forEach(function (d) {
                 p = $("<p />");
-                
                 if(d[1] == "m") $(p).append(document.createTextNode(d[0]));
                 else if(d[1] == "h") render_html_content(p, d[0], did);
                 
                 if(term != idx[0]) syn = " <b>(Synonym: " + term + ")</b>";
                 else syn = "";
                 
-                $("output div.dict"+did)
+                $(output_area).find("div.dict"+did)
                     .append("<h3>" + idx[0] + syn + "</h3>")
                     .append(p).show().find("h3")
                     .css("background-color",dict_list[did].color);
@@ -191,7 +205,8 @@ $(function() {
     var render_list = function (matches) {
         switch_mode("list");
         if(matches.length == 0) {
-            $("output").html("<i>Nichts gefunden!</i>");
+            $(list_section + " ul")
+                .html("<li><p>Nichts gefunden!</p></li>");
         } else {
             if(dict_list.length > 1)
                 matches.sort(function (a,b) {
@@ -221,27 +236,28 @@ $(function() {
                             dlist.push(match[1]);
                 });
                 dlist.sort().reverse();
-                li = $("<li />");
+                p = $("<p />");
                 dlist.forEach(function (d) {
                         $("<span />")
                             .css("background-color",dict_list[d].color)
-                            .addClass("marker").appendTo(li);
+                            .addClass("marker").appendTo(p);
                 });
-                $(li).data("entries", matches[m][1])
-                    .append(matches[m][0])
-                    .appendTo("output ul");
+                $(p).append(matches[m][0]);
+                $("<li />").data("entries", matches[m][1])
+                    .append($("<a href=\"#\"></a>").append(p))
+                    .appendTo(list_section + " ul");
              }
         }
     };
     
-    $("#search_term").on("keyup", function() {
+    $(search_input).on("keyup", function() {
         delay(function() {
-            var term = $("#search_term").val();
+            var term = $(search_input).val();
             last = last_search;
             last_search = term;
             if(term == "") {
                 switch_mode("display");
-                $("output div.text").show();
+                $(output_area).find("div.text").show();
                 return;
             } else if(term == last) return;
             
@@ -258,15 +274,21 @@ $(function() {
         }, 300);
     });
     
-    $("output").on("click", "div.text a", function (evt) {
+    $("form[role=search]").on("mousedown", "button", function () {
+        switch_mode("display");
+        $(output_area).find("div.text").show();
+        $(search_input).val("");
+    });
+    
+    $(output_area).on("click", "div.text a", function (evt) {
         ref = $(evt.target).data("ref").trim();
         did = $(evt.target).parents("div.text").data("did");
         switch_mode("display");
         show_word_by_term(ref, did);
     });
     
-    $("output").on("click", "li", function(evt) {
-        entries = $(evt.target).data("entries");
+    $(list_section).on("click", "a", function(evt) {
+        entries = $(evt.target).parents("li").data("entries");
         switch_mode("display");
         entries.forEach(function (entr) {
             render_entry(entr[0], entr[1], $(evt.target).text());

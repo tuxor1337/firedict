@@ -1,0 +1,66 @@
+/* ----------------------------------
+ * Lists
+ * ---------------------------------- */
+
+[data-type="list"] {
+  font-weight: 400;
+  padding: 0;
+}
+
+[data-type="list"] ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* List items */
+[data-type="list"] li {
+  width: 100%;
+  height: 3rem;
+  -moz-box-sizing: border-box;
+  transition: transform 0.3s ease, padding 0.3s ease;
+  border-bottom: solid 0.1rem #e7e7e7;
+  color: #000;
+  margin: 0;
+  display: block;
+}
+
+[data-type="list"] li:last-child {
+  border: none;
+}
+
+/* Pressed State */
+[data-type="list"] li > a {
+  text-decoration: none;
+  color: #000;
+  display: block;
+  height: 3rem;
+  border: none;
+  outline: none;
+}
+
+[data-type="list"] li > a:hover {
+    background-color: #fff7df;
+}
+
+/* Text content */
+[data-type="list"] li p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: none;
+  display: block;
+  margin: 0;
+  color: #000;
+  font-size: 1.2rem;
+  line-height: 1rem;
+  padding: 1rem;
+}
+
+section[data-type=list] span.marker {
+    display:block;
+    width:7px; height:7px;
+    margin-left:3px;
+    float:right;
+}
