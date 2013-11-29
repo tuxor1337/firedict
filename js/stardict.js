@@ -1,5 +1,5 @@
-
 (function (GLOBAL) { 
+    
     function getUIntAt(arr, offs) {
         out = 0;
         for (var j = offs; j < offs+4; j++) {
@@ -42,40 +42,11 @@
         return string;
     }
     
-    function merge_sorted(a, b, callbk) {
-        if("undefined" === typeof callbk) {
-            callbk = function (x,y) {
-                if (x > y) return 1;
-                if (x < y) return -1;
-                return 0;
-            };
-        }
-        var result = [], ai = 0, bi = 0;
-        while (true) {
-            if ( ai < a.length && bi < b.length) {
-                test = callbk(a[ai],b[bi]);
-                if (test == -1) result.push(a[ai++]);
-                else if (test == 1) result.push(b[bi++]);
-                else {
-                    result.push(a[ai++]);
-                    result.push(b[bi++]);
-                }
-            } else if (ai < a.length) {
-                result.push.apply(result, a.slice(ai, a.length));
-                break;
-            } else if (bi < b.length) {
-                result.push.apply(result, b.slice(bi, b.length));
-                break;
-            } else break;
-        }
-        return result;
-    }
-    
     var StarDict = (function () {
         var cls = function() {
             var files = { };
             var index = [];
-            var synonyms = [];
+            var synonyms = new DicTree();
             var keywords = {
                 "version": "",
                 "bookname": "",
@@ -89,31 +60,19 @@
             var dict;
             
             function process_syn() {
-                if(files["syn"] != null) {
-                    reader = new FileReader();
-                    reader.onload = (function (theDict) {
-                        return function(e) {
-                            blob = e.target.result;
-                            var syn_buf = [];
-                            for(i = 0, j = 0; i < blob.length; i++) {
-                                if(blob[i] == "\0") {
-                                    synonym = readUTF8String(blob.slice(j,i));
-                                    wid = getUIntAt(blob,i+1);
-                                    syn_buf.push([synonym,wid]);
-                                    i += 5, j = i;
-                                }
-                            }
-                            synonyms = merge_sorted(synonyms, syn_buf,
-                                function (a,b) {
-                                    a = a[0].toLowerCase(), b = b[0].toLowerCase();
-                                    if (a > b) return 1;
-                                    if (a < b) return -1;
-                                    return 0;
-                            });
-                            process_res();
-                        };
-                    })(that);
-                    reader.readAsBinaryString(files["syn"]);
+                var tmp = 0;
+                if(false && files["syn"] != null) {
+                    reader = new FileReaderSync();
+                    blob = reader.readAsBinaryString(files["syn"]);
+                    for(i = 0, j = 0; i < blob.length; i++) {
+                        if(blob[i] == "\0") {
+                            synonym = readUTF8String(blob.slice(j,i));
+                            wid = getUIntAt(blob,i+1);
+                            synonyms.addWidToPath(synonym,wid);
+                            i += 5, j = i; tmp++;
+                        }
+                    }
+                    process_res();
                 } else {
                     process_res()
                 }
@@ -133,41 +92,36 @@
             }
             
             function process_idx() {
-                reader = new FileReader();
-                reader.onload = function(e) {
-                    blob = e.target.result;
-                    for(var i = 0, j = 0; i < blob.length; i++) {
-                        if(blob[i] == "\0") {
-                            word = readUTF8String(blob.slice(j,i));
-                            offset = getUIntAt(blob,i+1);
-                            size = getUIntAt(blob,i+5);
-                            synonyms.push([word,index.length]);
-                            index.push([word,offset,size]);
-                            i += 9, j = i;
-                        }
+                var tmp = 0;
+                var reader = new FileReaderSync();
+                blob = reader.readAsBinaryString(files["idx"]);
+                for(var i = 0, j = 0; i < blob.length; i++) {
+                    if(blob[i] == "\0") {
+                        // if(tmp < 23000) { i += 9, j = i; tmp++; continue; }
+                        if(tmp > 5000) break;
+                        word = readUTF8String(blob.slice(j,i));
+                        offset = getUIntAt(blob,i+1);
+                        size = getUIntAt(blob,i+5);
+                        synonyms.addWidToPath(word,index.length);
+                        index.push([word,offset,size]);
+                        i += 9, j = i; tmp++;
                     }
-                    process_syn();
-                };
-                reader.readAsBinaryString(files["idx"]);
+                }
+                process_syn();
             }
             
             function process_ifo() {
-                reader = new FileReader();
-                reader.onload = (function (theDict) {
-                    return function(e) {
-                         lines = e.target.result.split("\n");
-                         if(lines.shift() != "StarDict's dict ifo file") {
-                             theDict.onerror("Not a proper ifo file");
-                             return;
-                         }
-                         lines.forEach(function (l) {
-                             w = l.split("=");
-                             keywords[w[0]] = w[1];
-                         });
-                         process_idx();
-                    };
-                })(that);
-                reader.readAsText(files["ifo"]);
+                reader = new FileReaderSync();
+                lines = reader.readAsText(files["ifo"]).split("\n");
+                if(lines.shift() != "StarDict's dict ifo file") {
+                    theDict.onerror("Not a proper ifo file");
+                    return;
+                }
+                lines.forEach(function (l) {
+                    w = l.split("=");
+                    keywords[w[0]] = w[1];
+                });
+                process_idx();
             }
             
             function process_dictdata(data, callbk) {
@@ -227,71 +181,55 @@
                     this.onerror("Missing *.idx file!");
                     return;
                 }
-                
                 if(files["dict"] != null) is_dz = false;
                 else if(files["dict.dz"] != null) is_dz = true;
                 else {
                     this.onerror("Missing *.dict(.dz) file!");
                     return;
                 }
-                
                 process_ifo();
             };
             
             this.lookup_id = function (wid, callbk) {
+                if(wid > index.length) callbk(null,null);
                 var idx = index[wid];
                 if(is_dz) {
                     var reader = new DictZipFile(JSInflate.inflate);
                     reader.onsuccess = function () {
-                        reader.read(idx[1], idx[2], function (data) {
-                            process_dictdata(data, function(output) {
-                                callbk(output, idx);
-                            });
-                        });
+                        process_dictdata(
+                            reader.read(idx[1], idx[2]),
+                            function(output) { callbk(output, idx); }
+                        );
                     };
                     reader.load(files["dict.dz"]);
                 } else {
                     f = files["dict"].slice(
                         idx[1], idx[1] + idx[2]
                     );
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        process_dictdata(e.target.result, function(output) {
-                            callbk(output, idx);
-                        });
-                    };
-                    reader.readAsBinaryString(f);
+                    var reader = new FileReaderSync();
+                    process_dictdata(
+                        reader.readAsBinaryString(f),
+                        function(output) { callbk(output, idx); }
+                    );
                 }
             };
             
             this.lookup_term = function (word, fuzzy) {
                 if("undefined" === typeof fuzzy) fuzzy = false;
+                var node = synonyms.jumpToPath(word);
                 if(fuzzy) {
-                    var word_lower = word.toLowerCase();
-                    var matches = [];
-                    for(var s = 0; s < synonyms.length; s++) {
-                        if(synonyms[s][0]
-                            .substr(0,word.length)
-                            .toLowerCase() == word_lower) {
-                            matches.push(synonyms[s]);
-                        }
-                        if(matches.length > 20) break;
-                    }
-                    return matches;
+                    if(node == null) return [];
+                    return node.deepSearch(20);
                 } else {
-                    for(var s = 0; s < synonyms.length; s++) {
-                        if(synonyms[s][0] == word) return synonyms[s];
-                    }
-                    return null;
+                    if(node == null || node.word_ids.length == 0)
+                        return null;
+                    return node.word_ids[0];
                 }
             };
             
             this.add_resources = function (res_filelist) {
-                var filenames = "";
-                for(var f = 0; f < res_filelist.length; f++) {
+                for(var f = 0; f < res_filelist.length; f++)
                     files["res"].push(res_filelist[f]);
-                    filenames += res_filelist[f].name + ", ";
-                }
             };
             
             this.request_res = function (filename) {
@@ -307,9 +245,7 @@
                 return null;
             };
             
-            this.get_key = function (key) {
-                return keywords[key];
-            };
+            this.get_key = function (key) { return keywords[key]; };
         }
         
         return cls;

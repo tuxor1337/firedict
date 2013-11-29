@@ -31,16 +31,11 @@
             function read_fhcrc() {            
                 if((header_data["FLG"] & FHCRC) != 0x00) {
                     that.length += 2;
-                    reader = new FileReader();
-                    reader.onload = (function (theGzHeader, theN) {
-                        return function (e) {
-                            header_data["FHCRC"] = e.target.result;
-                            theGzHeader.onread(header_data);
-                        };
-                    })(that, n);
-                    reader.readAsBinaryString(
+                    var reader = new FileReaderSync();
+                    header_data["FHCRC"] = reader.readAsBinaryString(
                         dzfile.slice(that.length, that.length + 2)
                     );
+                    that.onread(header_data);
                 } else {
                     that.onread(header_data);
                 }
@@ -50,26 +45,21 @@
                 if(typeof n === "undefined") n = 1;
                 
                 if((header_data["FLG"] & FCOMMENT) != 0x00) {
-                    reader = new FileReader();
-                    reader.onload = (function (theGzHeader, theN) {
-                        return function (e) {
-                            blob = e.target.result;
-                            for(var i = 0; i < blob.length; i++) {
-                                theGzHeader.length += 1;
-                                if(blob[i] != "\0") {
-                                    header_data["FCOMMENT"] += blob[i];
-                                } else {
-                                    read_fhcrc();
-                                    return;
-                                }
-                            }
-                            read_fcomment(theN+1);
-                        };
-                    })(that, n);
+                    reader = new FileReaderSync();
                     offset = that.length - header_data["FCOMMENT"].length;
-                    reader.readAsBinaryString(
+                    blob = reader.readAsBinaryString(
                         gzfile.slice(offset, offset + n * 1024)
                     );
+                    for(var i = 0; i < blob.length; i++) {
+                        that.length += 1;
+                        if(blob[i] != "\0") {
+                            header_data["FCOMMENT"] += blob[i];
+                        } else {
+                            read_fhcrc();
+                            return;
+                        }
+                    }
+                    read_fcomment(n+1);
                 } else {
                     read_fhcrc();
                 }
@@ -79,26 +69,22 @@
                 if(typeof n === "undefined") n = 1;
                 
                 if((header_data["FLG"] & FNAME) != 0x00) {
-                    reader = new FileReader();
-                    reader.onload = (function (theGzHeader, theN) {
-                        return function (e) {
-                            blob = e.target.result;
-                            for(var i = 0; i < blob.length; i++) {
-                                theGzHeader.length += 1;
-                                if(blob[i] != "\0") {
-                                    header_data["FNAME"] += blob[i];
-                                } else {
-                                    read_fcomment();
-                                    return;
-                                }
-                            }
-                            read_fname(theN+1);
-                        };
-                    })(that, n);
-                    offset = that.length - header_data["FNAME"].length;
-                    reader.readAsBinaryString(
+                    var reader = new FileReaderSync();
+                    var offset = that.length - header_data["FNAME"].length;
+                    var blob = reader.readAsBinaryString(
                         gzfile.slice(offset, offset + n * 1024)
                     );
+                    for(var i = 0; i < blob.length; i++) {
+                        that.length += 1;
+                        if(blob[i] != "\0") {
+                            header_data["FNAME"] += blob[i];
+                        } else {
+                            read_fcomment();
+                            return;
+                        }
+                    }
+                    read_fname(n+1);
+                    
                 } else {
                     read_fcomment();
                 }
@@ -106,53 +92,48 @@
             
             function read_fextra_subfields() {
                 that.length += 2;
-                reader = new FileReader();
-                reader.onload = (function (theGzHeader) {
-                    return function (e) {
-                        blob = stringToIntArray(e.target.result);
-                        while(true) {
-                            len = blob[2] + 256*blob[3];
-                            subfield = {};
-                            subfield["SI1"] = String.fromCharCode(blob[0]);
-                            subfield["SI2"] = String.fromCharCode(blob[1]);
-                            subfield["LEN"] = len;
-                            subfield["DATA"] = intArrayToString(
-                                blob.slice(4, 4 + len)
-                            );
-                            header_data["FEXTRA"]["SUBFIELDS"].push(subfield);
-                            blob = blob.slice(4 + len);
-                            if(blob.length == 0) break;
-                        }
-                        theGzHeader.length += header_data["FEXTRA"]["XLEN"];
-                        read_fname();
-                    };
-                })(that);
-                reader.readAsBinaryString(
+                var reader = new FileReaderSync();
+                var blob = stringToIntArray(reader.readAsBinaryString(
                     gzfile.slice(
                         that.length,
                         that.length + header_data["FEXTRA"]["XLEN"]
                     )
-                );
+                ));
+                while(true) {
+                    len = blob[2] + 256*blob[3];
+                    subfield = {};
+                    subfield["SI1"] = String.fromCharCode(blob[0]);
+                    subfield["SI2"] = String.fromCharCode(blob[1]);
+                    subfield["LEN"] = len;
+                    subfield["DATA"] = intArrayToString(
+                        blob.slice(4, 4 + len)
+                    );
+                    header_data["FEXTRA"]["SUBFIELDS"].push(subfield);
+                    blob = blob.slice(4 + len);
+                    if(blob.length == 0) break;
+                }
+                that.length += header_data["FEXTRA"]["XLEN"];
+                read_fname();
             }
             
             function read_fextra() {
                 if((header_data["FLG"] & FEXTRA) != 0x00) {
-                    reader = new FileReader();
-                    reader.onload = function (e) {
-                        xlen_blob = stringToIntArray(e.target.result);
-                        xlen = xlen_blob[0] + 256 * xlen_blob[1];
-                        header_data["FEXTRA"]["XLEN"] = xlen;
-                        read_fextra_subfields();
-                    };
-                    reader.readAsBinaryString(
-                        gzfile.slice(that.length, that.length + 2)
+                    var reader = new FileReaderSync();
+                    var xlen_blob = stringToIntArray(
+                        reader.readAsBinaryString(
+                            gzfile.slice(that.length, that.length + 2)
+                        )
                     );
+                    xlen = xlen_blob[0] + 256 * xlen_blob[1];
+                    header_data["FEXTRA"]["XLEN"] = xlen;
+                    read_fextra_subfields();
                 } else {
                     read_fname();
                 }
             }
             
             this.onread = function () { };
+            this.onerror = function (err) { console.log(err); };
             this.length = 0;
             
             this.read = function (f) {
@@ -171,22 +152,19 @@
                     "FHCRC": "",
                 };
                 this.length = 10;
-                reader = new FileReader();
-                reader.onload = (function (theGzHeader) {
-                    return function (e) {
-                        blob = stringToIntArray(e.target.result);
-                        if(blob[0] != 0x1F || blob[1] != 0x8B) {
-                            theGzHeader.onerror("Not a gzip header.");
-                            return;
-                        }
-                        header_data["ID1"] = blob[0];
-                        header_data["ID2"] = blob[1];
-                        header_data["CM"] = blob[2];
-                        header_data["FLG"] = blob[3];
-                        read_fextra();
-                    };
-                })(this);
-                reader.readAsBinaryString(gzfile.slice(0,10));
+                var reader = new FileReaderSync();
+                var blob = stringToIntArray(
+                    reader.readAsBinaryString(gzfile.slice(0,10))
+                );
+                if(blob[0] != 0x1F || blob[1] != 0x8B) {
+                    this.onerror("Not a gzip header.");
+                    return;
+                }
+                header_data["ID1"] = blob[0];
+                header_data["ID2"] = blob[1];
+                header_data["CM"] = blob[2];
+                header_data["FLG"] = blob[3];
+                read_fextra();
             };
         };
         
@@ -255,21 +233,21 @@
                 var offset = pos - firstchunk*chlen;
                 var lastchunk = Math.floor((pos+len)/chlen);
                 var finish = offset + len;
-                reader = new FileReader();
-                reader.onload = function (e) {
-                    var blob = e.target.result, buf = "";
-                    for(var i = firstchunk, j = 0;
-                       i <=  lastchunk && j < blob.length;
-                       j += chunks[i][1], i++) {
-                        inflated = gunzip(blob.slice(j,j+chunks[i][1]));
-                        buf += inflated;
-                    }
-                    callbk(buf.slice(offset,finish));
-                };
-                reader.readAsBinaryString(dzfile.slice(
+                
+                var reader = new FileReaderSync();
+                var blob = reader.readAsBinaryString(dzfile.slice(
                     firstpos + chunks[firstchunk][0],
                     firstpos + chunks[lastchunk][0] + chunks[lastchunk][1]
                 ));
+                var buf = "";
+                for(var i = firstchunk, j = 0;
+                   i <=  lastchunk && j < blob.length;
+                   j += chunks[i][1], i++) {
+                    inflated = gunzip(blob.slice(j,j+chunks[i][1]));
+                    buf += inflated;
+                }
+                return buf.slice(offset,finish);
+                
             };
         };
     
