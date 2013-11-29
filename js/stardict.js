@@ -98,7 +98,7 @@
                 for(var i = 0, j = 0; i < blob.length; i++) {
                     if(blob[i] == "\0") {
                         // if(tmp < 23000) { i += 9, j = i; tmp++; continue; }
-                        if(tmp > 5000) break;
+                        if(tmp > 250) break;
                         word = readUTF8String(blob.slice(j,i));
                         offset = getUIntAt(blob,i+1);
                         size = getUIntAt(blob,i+5);
@@ -163,7 +163,6 @@
             this.load = function (main_files, res_files) {
                 if(typeof res_files === "undefined") res_files = [];
                 files["res"] = res_files;
-                
                 ["idx","syn","dict","dict.dz","ifo"].forEach(function(d) {
                     files[d] = null;
                     for(var i=0; i < main_files.length; i++) {
