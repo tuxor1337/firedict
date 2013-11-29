@@ -14,12 +14,14 @@ var dict_list = [];
     
 var queryableFunctions = {
     load_dicts: function (dlist) {
+        for(var d = 0; d < dlist.length; d++)
+            dlist[d].dobj = new StarDict();
         dict_list = dlist;
         dict_list.forEach(function (d) {
-            d.dobj = new StarDict();
             d.dobj.onsuccess = function () {
                 var tmp = 0;
-                while(tmp < dict_list.length && dict_list[tmp++].dobj.loaded);
+                while(tmp < dict_list.length 
+                    && dict_list[tmp].dobj.loaded) tmp++;
                 if(tmp == dict_list.length) {
                     var dlist = [];
                     for(var i = 0; i < dict_list.length; i++) 
