@@ -7,8 +7,8 @@ Please note, that it's kind of experimental at the moment. Dictionaries are read
 
 An even more serious issue at the moment is the memory constraint that firefox os seems to impose on web workers. Because of this, the app can only handle some 4000 entries of a dictionary at the moment: https://groups.google.com/forum/#!forum/mozilla.dev.developer-tools
 
-![screenshot0](https://raw.github.com/tuxor1337/firedict/master/screen0.png "home screen") # 
+![screenshot0](https://raw.github.com/tuxor1337/firedict/master/screen0.png "home screen") &nbsp; 
 ![screenshot1](https://raw.github.com/tuxor1337/firedict/master/screen1.png "list of matches")
 
-![screenshot2](https://raw.github.com/tuxor1337/firedict/master/screen2.png "typing a term") #
+![screenshot2](https://raw.github.com/tuxor1337/firedict/master/screen2.png "typing a term") &nbsp; 
 ![screenshot3](https://raw.github.com/tuxor1337/firedict/master/screen3.png "displaying an entry")
