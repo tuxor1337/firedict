@@ -1,43 +1,22 @@
-html { height: 100%; }
- 
+html { height: 100%; font-size:75%; }
 body {
-  font-family: sans-serif; margin: 0;
+    font-family: sans-serif;
+    margin: 0; height:100%;
+    display:block; overflow:hidden;
 }
 
-body > div { padding:0; margin:2.6rem 0 0; }
-
-p.loading { margin:5rem 0 0; padding:0; text-align:center; }
-
-section[data-type=output] {
-    background-color: #eee;
-    font-family:monospace;
-    display:block;
+div[role="main"] {
+    overflow: auto;
+    height: 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    position: relative;
+    padding: 4rem 0 1.5rem;
+    background: #fff;
+}
+div[role="main"] p.loading { margin:5rem 0 0; padding:0; text-align:center; }
+div[role="main"] section[data-type="output"] {
     padding:0; margin:0.2rem 0;
-}
-
-section[data-type=output] div.text {
-    background-color:#fff; padding: 0; margin:0 1px 2px;
-    border: 2px #000 solid;
-}
-section[data-type=output] div.text h2 {
-    overflow: hidden;
-    white-space: nowrap;
-    margin:0; padding:0.1rem 0.3rem;
-    text-align:center;
-    color:#fff; font-size:0.7rem;
-    font-weight:normal;
-    background-color:#000;
-}
-section[data-type=output] div.text p.entry {
-    padding: 0.5rem 0.4rem; margin:0;
-}
-section[data-type=output] div.text h3 {
-    font-size:0.7rem; font-weight:bold;
-    margin:0; padding:0.1rem 0.2rem;
-    background-color:#000; color:#fff;
-}
-section[data-type=output] div.text h3 b {
-    font-weight:normal;
 }
 
 /* Spinner */

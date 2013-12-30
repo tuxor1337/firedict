@@ -1,28 +1,51 @@
 <!DOCTYPE html>
 <html>
  <head>
-    <title>Stardict API</title>
+    <title>firedict</title>
     
     <link rel="stylesheet" type="text/css" href="style/layout.css" />
-    <link rel="stylesheet" type="text/css" href="style/searchbar.css" />
     <link rel="stylesheet" type="text/css" href="style/wordlist.css" />
+    <link rel="stylesheet" type="text/css" href="style/lookup.css" />
+    <link rel="stylesheet" type="text/css" href="style/drawer.css" />
+    <link rel="stylesheet" type="text/css" href="style/header.css" />
     
     <script src="js/jquery.min.js" type="text/javascript"></script>
     <script src="js/app.js" type="text/javascript"></script>
  </head>
  <body>
-    <form role="search">
-      <p>
-        <input type="text" placeholder="Search..." required="" />
-        <button type="reset">Clear</button>
-      </p>
-    </form>
-    <div>
+    <section data-type="sidebar">
+      <header>
+        <h1>FireDict</h1>
+      </header>
+      <nav>
+        <ul>
+          <li id="lookup"><a href="#content">Lookup words</a></li>
+          <li id="manage"><a href="#content">Manage dictionaries</a></li>
+          <li id="settings"><a href="#content">Settings</a></li>
+          <li id="about"><a href="#content">About</a></li>
+        </ul>
+      </nav>
+    </section>
+    <section id="drawer" role="region">
+      <header>
+        <a href="#"><span class="icon icon-menu">hide sidebar</span></a>
+        <a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
+        <menu type="toolbar">
+            <a href="#"><span class="icon icon-reindex">reindex</span></a>
+        </menu>
+        <h1>Manage Dictionaries</h1>
+        <form action="#" role="search">
+            <input type="text" placeholder="Lookup..." required="" />
+            <button type="reset">Clear</button>
+        </form>
+      </header>
+      <div role="main">
         <section data-type="list">
           <ul></ul>
         </section>
         <section data-type="output"></section>
-        <p class="loading"><progress></progress></p>
-    </div>
+        <p class="loading"><b></b><progress></progress></p>
+      </div>
+    </section>
  </body>
 </html>
