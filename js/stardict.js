@@ -43,10 +43,8 @@
     }
     
     var StarDict = (function () {
-        var cls = function() {
-            var files = { };
-            var index = [];
-            var synonyms = new DicTree();
+        var cls = function(db) {
+            var files = { }, index = [], synonyms, db = db;
             var keywords = {
                 "version": "",
                 "bookname": "",
@@ -58,25 +56,7 @@
             var is_dz = false;
             var that = this;
             var dict;
-            
-            function process_syn() {
-                var tmp = 0;
-                if(false && files["syn"] != null) {
-                    reader = new FileReaderSync();
-                    blob = reader.readAsBinaryString(files["syn"]);
-                    for(i = 0, j = 0; i < blob.length; i++) {
-                        if(blob[i] == "\0") {
-                            synonym = readUTF8String(blob.slice(j,i));
-                            wid = getUIntAt(blob,i+1);
-                            synonyms.addWidToPath(synonym,wid);
-                            i += 5, j = i; tmp++;
-                        }
-                    }
-                    process_res();
-                } else {
-                    process_res()
-                }
-            }
+            var progress = 0;
             
             function process_res() {
                 if(files["res"].length > 0) {
@@ -91,26 +71,64 @@
                 }
             }
             
-            function process_idx() {
-                var tmp = 0;
-                var reader = new FileReaderSync();
-                blob = reader.readAsBinaryString(files["idx"]);
-                for(var i = 0, j = 0; i < blob.length; i++) {
-                    if(blob[i] == "\0") {
-                        // if(tmp < 23000) { i += 9, j = i; tmp++; continue; }
-                        if(tmp > 250) break;
-                        word = readUTF8String(blob.slice(j,i));
-                        offset = getUIntAt(blob,i+1);
-                        size = getUIntAt(blob,i+5);
-                        synonyms.addWidToPath(word,index.length);
-                        index.push([word,offset,size]);
-                        i += 9, j = i; tmp++;
-                    }
-                }
-                process_syn();
+            function data_to_db(tree) {
+                console.log("writing to db...");
+                tree.toDB(db, progress, function (idb_tree) {
+                    synonyms = idb_tree;
+                    db.backup_idx(index, process_res);
+                });
             }
             
-            function process_ifo() {
+            function process_syn(tree) {
+                if(files["syn"] != null) {
+                    var reader = new FileReaderSync();
+                    var blob = reader.readAsBinaryString(files["syn"]);
+                    function rec_syn(i, j) {
+                        if(i >= blob.length || progress > 0) data_to_db(tree);
+                        else if(blob[i] == "\0") {
+                            var synonym = readUTF8String(blob.slice(j,i));
+                            var wid = getUIntAt(blob,i+1);
+                            tree.addWidToPath(synonym, wid);
+                            ++progress;
+                            rec_syn(i+5, i+5);
+                        } else rec_syn(i+1, j);
+                    }
+                    rec_syn(0,0,0);
+                } else {
+                    data_to_db(tree)
+                }
+            }
+            
+            function process_idx() {
+                var reader = new FileReaderSync();
+                var blob = reader.readAsBinaryString(files["idx"]);
+                var tree = new DicTree();
+                function rec_idx(i, j) {
+                    if(i >= blob.length || progress > 10) process_syn(tree);
+                    else if(blob[i] == "\0") {
+                        var word = readUTF8String(blob.slice(j,i));
+                        var offset = getUIntAt(blob,i+1);
+                        var size = getUIntAt(blob,i+5);
+                        index.push([word,offset,size]);
+                        tree.addWidToPath(word, index.length-1);
+                        ++progress;
+                        rec_idx(i+9, i+9);
+                    } else rec_idx(i+1, j);
+                }
+                rec_idx(0,0,0);
+            }
+            
+            function restore_from_db() {
+                db.restore_idx(function (idx) {
+                    index = idx;
+                    db.get_root(function (root) {
+                        synonyms = new DicTree_IDB(db)
+                        synonyms.fromData(root, process_res);
+                    });
+                });
+            }
+            
+            function process_ifo(from_idb) {
                 reader = new FileReaderSync();
                 lines = reader.readAsText(files["ifo"]).split("\n");
                 if(lines.shift() != "StarDict's dict ifo file") {
@@ -121,7 +139,8 @@
                     w = l.split("=");
                     keywords[w[0]] = w[1];
                 });
-                process_idx();
+                if(from_idb) restore_from_db();
+                else process_idx();
             }
             
             function process_dictdata(data, callbk) {
@@ -160,7 +179,8 @@
             this.onsuccess = function () { };
             this.loaded = false;
             
-            this.load = function (main_files, res_files) {
+            this.load = function (main_files, res_files, from_idb) {
+                var from_idb = from_idb || false;
                 if(typeof res_files === "undefined") res_files = [];
                 files["res"] = res_files;
                 ["idx","syn","dict","dict.dz","ifo"].forEach(function(d) {
@@ -186,7 +206,7 @@
                     this.onerror("Missing *.dict(.dz) file!");
                     return;
                 }
-                process_ifo();
+                process_ifo(from_idb);
             };
             
             this.lookup_id = function (wid, callbk) {
@@ -213,17 +233,18 @@
                 }
             };
             
-            this.lookup_term = function (word, fuzzy) {
+            this.lookup_term = function (word, callbk, fuzzy) {
                 if("undefined" === typeof fuzzy) fuzzy = false;
-                var node = synonyms.jumpToPath(word);
-                if(fuzzy) {
-                    if(node == null) return [];
-                    return node.deepSearch(20);
-                } else {
-                    if(node == null || node.word_ids.length == 0)
-                        return null;
-                    return node.word_ids[0];
-                }
+                synonyms.jumpToPath(word, function (node) {
+                    if(fuzzy) {
+                        if(node == null) callbk([]);
+                        else node.deepSearch(20, callbk);
+                    } else {
+                        if(node == null || node.word_ids.length == 0)
+                            callbk(null);
+                        else callbk(node.word_ids[0]);
+                    }
+                });
             };
             
             this.add_resources = function (res_filelist) {
