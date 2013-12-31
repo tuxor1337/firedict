@@ -15,6 +15,7 @@
   "permissions": {
     "device-storage:sdcard": {
         "access": "readonly"
-    }
+    },
+    "storage": { }
   }
 }
