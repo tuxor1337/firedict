@@ -8,9 +8,9 @@ $(function() {
         output_area = "section[data-type=output]",
         list_section = "section[data-type=list]",
         progress = "p.loading";
-    var history = [], last_search = "", progress_counter = 0,
+    var last_search = "", progress_counter = 0,
         dict_list = [], oDictWorker = null,
-        indexedDB_handle, IDB_transactions = {};
+        indexedDB_handle, IDB_transactions = {}, history;
     var MAX_DICTS = 20;
     
     var delay = (function(){
@@ -20,6 +20,49 @@ $(function() {
         timer = setTimeout(callback, ms);
       };
     })();
+    
+    function historyManager() {
+        var db, ostore = "history", cache = [];
+        function get_data(callbk) {
+            db.transaction(ostore, "readwrite")
+                .objectStore(ostore).get(0)
+                .onsuccess = function (evt) {
+                callbk(evt.target.result);
+            };
+        }
+        
+        function put_data(data) {
+            db.transaction(ostore, "readwrite")
+                .objectStore(ostore).put(data, 0);
+        }
+        
+        this.print = function () {
+            print_list(cache.concat().reverse());
+        };
+        this.add = function (entr) {
+            for(var h=0; h < cache.length; h++) {
+                if(cache[h][0] == entr[0]) {
+                    var a = cache.splice(h, 1)[0][1].concat(entr[1]);
+                    for(var i=0; i<a.length; ++i) {
+                        for(var j=i+1; j<a.length; ++j) {
+                            if(a[i][2] == a[j][2] && a[i][4] == a[j][4])
+                                a.splice(j--, 1);
+                        }
+                    }
+                    entr[1] = a;
+                    break;
+                }
+            }
+            cache.push(entr);
+            put_data(cache);
+        };
+        this.clear = function () { cache = []; put_data([]); };
+        this.load = function (db_handle) {
+            db = db_handle;
+            get_data(function (data) { cache = data; });
+        };
+    }
+    history = new historyManager();
     
     var random_color = function () {
         var min = 0x33, max = 0xbb, result = "";
@@ -112,7 +155,7 @@ $(function() {
             $(list_section).html("<ul />").show();
             $(output_area).html("").show();
             $(search_form).show();
-            print_history();
+            history.print();
         }
     };
     
@@ -161,27 +204,6 @@ $(function() {
         });
     };
     
-    var print_history = function () {
-        var a = history.concat().reverse();
-        print_list(a);
-    };
-    
-    var history_add = function (entr) {
-        for(var h=0; h < history.length; h++) {
-            if(history[h][0] == entr[0]) {
-                var a = history.splice(h, 1)[0][1].concat(entr[1]);
-                for(var i=0; i<a.length; ++i) {
-                    for(var j=i+1; j<a.length; ++j) {
-                        if(a[i][0] == a[j][0]) a.splice(j--, 1);
-                    }
-                }
-                entr[1] = a;
-                break;
-            }
-        }
-        history.push(entr);
-    }
-    
     var not_found = function () {
         $(list_section).find("ul")
             .html("<li><p>Nichts gefunden!</p></li>");
@@ -195,8 +217,9 @@ $(function() {
             for(var m = 0; m < Math.min(matches.length, 20); m++) {
                 var dlist = [];
                 matches[m][1].forEach(function (match) {
-                        if(dlist.indexOf(match[1]) == -1)
-                            dlist.push(match[1]);
+                        var did = match[match.length-1]; 
+                        if(dlist.indexOf(did) == -1)
+                            dlist.push(did);
                 });
                 dlist.sort().reverse();
                 p = $("<p />");
@@ -220,7 +243,7 @@ $(function() {
         $(list_section).html("<ul />").show();
         for(var d = 0; d < dict_list.length; d++) display_dict(d);
         entries.forEach(function (entr) {
-            oDictWorker.sendQuery("lookup_id", entr[1], entr[0]);
+            oDictWorker.sendQuery("get_entry", entr[entr.length-1], entr);
         });
     });
     
@@ -236,8 +259,8 @@ $(function() {
             } else if(term == last) return;
             
             $(output_area).html("").show();
-            oDictWorker.sendQuery("lookup_fuzzy", term, true);
-        }, 100);
+            oDictWorker.sendQuery("lookup_fuzzy", term);
+        }, 500);
     });
     
     $(search_form).on("mousedown", "button", function () {
@@ -279,7 +302,7 @@ $(function() {
         switch_mode("lookup");
     });
     
-    oDictWorker.addListener("loadEnd", function (d, name) {
+    oDictWorker.addListener("loadEnd", function (d, name, dbwordcount) {
         dict_list[d].name = name;
         dict_list[d].color = '#'+random_color();
         
@@ -288,21 +311,20 @@ $(function() {
         if(tmp == dict_list.length) {
             function rec_add_dict(did) {
                 if(did < dict_list.length) {
-                    var filenames = []
-                    dict_list[did].main.forEach(function (f) {
-                        filenames.push(f.name);
-                    });
-                    dict_list[did].res.forEach(function (f) {
-                        filenames.push(f.name);
-                    });
                     var data = {
-                        "did": did,
-                        "files": filenames,
-                        "color": dict_list[did].color,
-                        "name": dict_list[did].name
-                    };
+                            "path": dict_list[did].path,
+                            "base": dict_list[did].base,
+                            // skip res and main
+                            "color": dict_list[did].color,
+                            "name": dict_list[did].name,
+                            "files": dict_list[did].files,
+                            // additional value dbwordcount
+                            "dbwordcount": dbwordcount
+                        };
+                    console.log(data.name + " contains "
+                        + data.dbwordcount + " entries.");
                     indexedDB_handle.transaction("dictionaries", "readwrite")
-                        .objectStore("dictionaries").add(data)
+                        .objectStore("dictionaries").add(data, did)
                         .onsuccess = function(evt) {
                         rec_add_dict(did+1);
                     };
@@ -332,90 +354,97 @@ $(function() {
         var tmp = [];
         while(matches.length > 0) {
             var m = matches.shift();
+            var m_low = m[0].toLowerCase(), done = false;
             if(tmp.length == 0) tmp.push([m[0], []]);
-            for(var i = 0; i < tmp.length; i++) {
-                if(m[0] == tmp[i][0]) {
-                    tmp[i][1].push([m[1],m[2]]);
+            for(var i = tmp.length-1; i >= 0; i--) {
+                if(m_low == tmp[i][0].toLowerCase()) {
+                    tmp[i][1].push(m);
+                    var tmptmp = tmp[i][1];
+                    for(var j=0; j<tmptmp.length-1; j++) {
+                        if(m[2] == tmptmp[j][2] && m[4] == tmptmp[j][4]) {
+                            tmp[i][1].pop(); break;
+                        }
+                    }
+                    if(m[0] == tmp[i][0]) done = true;
+                } else {
+                    if(!done) tmp.push([m[0], [m]]);
                     break;
-                } else if (i == tmp.length-1) {
-                    tmp.push([m[0], []]);
                 }
+                if(i == 0 && !done) tmp.push([m[0], [m]]);
+                
             }
+        }
+        for(var i = tmp.length-1; i >= 0; i--) {
+            tmp[i][1].sort(function (a,b) {
+                a = a[1].toLowerCase(), b = b[1].toLowerCase();
+                if (a > b) return 1;
+                if (a < b) return -1;
+                return 0;
+            });
         }
         print_list(tmp);
     });
     
-    oDictWorker.addListener("printEntry", function (did, wid, idx, data) {
+    oDictWorker.addListener("printEntry", function (did, obj, data) {
         var term = $(search_input).val();
-        if(idx == null) not_found();
-        history_add([term, [[wid, did]]]);
+        if(data == null || data.length == 0) return;
+        history.add([term, [obj]]);
         data.forEach(function (d) {
             p = $("<p />");
             if(d[1] == "m") $(p).append(document.createTextNode(d[0]));
             else if(d[1] == "h") render_html_content(p, d[0], did);
             
-            if(term != idx[0]) syn = " <b>(Synonym: " + term + ")</b>";
+            if(term != obj[1]) syn = " <b>(Synonym: " + term + ")</b>";
             else syn = "";
             
             $(output_area).find("div.dict"+did)
-                .append("<h3>" + idx[0] + syn + "</h3>")
+                .append("<h3>" + obj[1] + syn + "</h3>")
                 .append(p).show().find("h3")
                 .css("background-color", dict_list[did].color);
         });
     });
     
-    oDictWorker.addListener("progress", function (add, total) {
-        progress_counter += add;
-        $(progress).find("b").text("Words in DB: " + progress_counter);
+    oDictWorker.addListener("progress", function (status, total) {
+        $(progress).find("b").text("Worker's status: " + status + "/" + total);
     });
     
     oDictWorker.addListener("indexedDB", function (tid, action, did, data) {
         var idb_ostore = "dict" + did;
-        if(action == "put") {
-            indexedDB_handle.transaction(idb_ostore, "readwrite")
-                .objectStore(idb_ostore).put(data)
-                .onsuccess = function(evt) {
-                    oDictWorker.sendQuery(
-                        "indexedDB", tid,
-                        evt.target.result
-                    );
-            };
-        } else if(action == "delete") {
-            indexedDB_handle.transaction(idb_ostore, "readwrite")
-                .objectStore(idb_ostore).delete(data)
-                .onsuccess = function() {
-                    oDictWorker.sendQuery(
-                        "indexedDB", tid, null
-                    );
-            };
-        } else if(action == "get") {
-            indexedDB_handle.transaction(idb_ostore)
-                .objectStore(idb_ostore).get(data)
-                .onsuccess = function(evt) {
-                    oDictWorker.sendQuery(
-                        "indexedDB", tid,
-                        evt.target.result
-                    );
-            };
-        } else if(action == "get_root") {
-            indexedDB_handle.transaction(idb_ostore)
-                .objectStore(idb_ostore).index("path")
-                .get("").onsuccess = function(evt) {
-                    oDictWorker.sendQuery(
-                        "indexedDB", tid,
-                        evt.target.result
-                    );
-            };
+        if(action == "store_synonyms") {
+            progress_counter = 0;
+            var store = indexedDB_handle
+                .transaction(idb_ostore, "readwrite")
+                .objectStore(idb_ostore);
+            function putNext(i) {
+                if(i < data.length) {
+                    store.add(data[i])
+                        .onsuccess = function () { 
+                        progress_counter += 1;
+                        if(progress_counter % 967 == 0)
+                            $(progress).find("b").text("Words in DB: " + progress_counter);
+                        putNext(i+1); 
+                    };
+                } else {
+                    oDictWorker.sendQuery("indexedDB", tid, null);
+                }
+            }
+            putNext(0);
         } else if(action == "backup_idx") {
             idb_ostore = "idx" + did;
+            progress_counter = 0;
             var index = data;
             var store = indexedDB_handle
                 .transaction(idb_ostore, "readwrite")
                 .objectStore(idb_ostore);
             function putNext(i) {
                 if(i < index.length) {
-                    store.put({ val: index[i] })
-                        .onsuccess = function () { putNext(i+1); };
+                    store.add(index[i], i)
+                        .onsuccess = function () { 
+                        progress_counter += 1;
+                        if(progress_counter % 967 == 0)
+                            $(progress).find("b").text("Indices in DB: " + progress_counter);
+                        putNext(i+1); 
+                    };
                 } else oDictWorker.sendQuery("indexedDB", tid, null);
             }
             putNext(0);
@@ -429,7 +458,29 @@ $(function() {
                 if(!!cursor == false) 
                     oDictWorker.sendQuery("indexedDB", tid, index);
                 else {
-                    index.push(cursor.value.val);
+                    index.push(cursor.value);
+                    cursor.continue()
+                }
+            };
+        } else if(action == "get") {
+            indexedDB_handle.transaction(idb_ostore)
+                .objectStore(idb_ostore).get(data)
+                .onsuccess = function(evt) {
+                    oDictWorker.sendQuery(
+                        "indexedDB", tid,
+                        evt.target.result
+                    );
+            };
+        } else if(action == "get_range") {
+            var result = [];
+            indexedDB_handle.transaction(idb_ostore)
+                .objectStore(idb_ostore).openCursor(IDBKeyRange.lowerBound(data.start))
+                .onsuccess = function (event) {
+                var cursor = event.target.result;
+                if(!!cursor == false || result.length > data.len) 
+                    oDictWorker.sendQuery("indexedDB", tid, result);
+                else {
+                    result.push(cursor.value);
                     cursor.continue()
                 }
             };
@@ -438,7 +489,7 @@ $(function() {
 
     function reindex_dictionaries() {
         console.log("reindexing dictionaries...");
-        dict_list = []; history = []; progress_counter = 0;
+        dict_list = []; history.clear(); progress_counter = 0; 
         switch_mode("manage");
         $(progress).show();
         $("section[role=region] > header > a").off('click')
@@ -471,15 +522,16 @@ $(function() {
                 
                 var file = this.result;
                 if(null != file.name.match(/\.ifo$/)) {
-                    var splitted = split_path(file.name);
-                    dict = {
-                        "path": splitted[0],
-                        "base": splitted[1].replace(/\.ifo$/,""),
-                        "res": [],
-                        "main": [],
-                        "color": null,
-                        "name": null
-                    };
+                    var splitted = split_path(file.name),
+                        dict = {
+                            "path": splitted[0],
+                            "base": splitted[1].replace(/\.ifo$/,""),
+                            "res": [],
+                            "main": [],
+                            "color": null,
+                            "name": null,
+                            "files": []
+                        };
                     dict_list.push(dict);
                 }
                 
@@ -499,14 +551,14 @@ $(function() {
                         return;
                     }
                     
-                    var file = this.result;
-                    var patt = RegExp("^" + d.base + "\.");
-                    var splitted = split_path(file.name);
+                    var file = this.result,
+                        patt = RegExp("^" + d.base + "\."),
+                        splitted = split_path(file.name);
                     if(splitted[0] == d.path + "/res" && splitted[1] != "") {
-                        d.res.push(file);
+                        d.res.push(file); d.files.push(file.name);
                     } else if(splitted[0] == d.path
                       && null != splitted[1].match(patt)) {
-                        d.main.push(file);
+                        d.main.push(file); d.files.push(file.name);
                     }
                     request.continue();
                 };
@@ -562,17 +614,11 @@ $(function() {
             var cursor = event.target.result;
             if(!!cursor == false) rec_walk_dicts(0);
             else {
-                var dict = cursor.value;
-                var did = dict_list.length;
-                dict_list.push({
-                    "path": "",
-                    "base": "",
-                    "res": [],
-                    "main": [],
-                    "color": dict.color,
-                    "name": dict.name,
-                    "files": dict.files
-                });
+                var dict = cursor.value,
+                    did = dict_list.length;
+                dict.res = [];
+                dict.main = [];
+                dict_list.push(dict);
                 for(var f = 0; f < dict.files.length; f++) {
                     if(null != dict.files[f].match(/\.ifo$/)) {
                         var splitted = split_path(dict.files[f]);
@@ -599,23 +645,20 @@ $(function() {
         indexedDB_handle.onerror = function (evt) {
             throw new Error("Database error: " + evt.target.errorCode);
         };
+        history.load(indexedDB_handle);
         load_idb_dictionaries();
     };
     
     request.onupgradeneeded = function(event) {
         console.log("IDB upgraded");
         var db = event.currentTarget.result;
-        db.createObjectStore(
-            "dictionaries", { keyPath: "did", autoIncrement: true }
-        );
+        db.createObjectStore("dictionaries");
+        db.createObjectStore("history");
         for(var i = 0; i < MAX_DICTS; i++) {
+            var objectStore = db.createObjectStore("idx"+i);
             var objectStore = db.createObjectStore(
-                "idx"+i, { keyPath: "id", autoIncrement: true }
+                "dict"+i, { keyPath: "id", autoIncrement: false }
             );
-            var objectStore = db.createObjectStore(
-                "dict"+i, { keyPath: "id", autoIncrement: true }
-            );
-            objectStore.createIndex("path", "path", { unique: true });
         }
     };
 });

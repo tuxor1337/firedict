@@ -7,7 +7,6 @@ var console = {
 
 importScripts("rawinflate.js");
 importScripts("dictzip.js");
-importScripts("tree.js");
 importScripts("stardict.js");
     
 var dict_list = [];
@@ -23,7 +22,8 @@ var queryableFunctions = {
                 dict.dobj.onsuccess = (function(theD) {
                     return function () {
                         reply("loadEnd", theD,
-                            dict_list[theD].dobj.get_key("bookname"));
+                            dict_list[theD].dobj.get_key("bookname"),
+                            dict_list[theD].dobj.get_key("dbwordcount"));
                         loadNext(d+1);
                     };
                 })(d);
@@ -41,11 +41,16 @@ var queryableFunctions = {
             var dict = dict_list[d], tmp = 0;
             dict.dobj = new StarDict(new indexedDB(d));
             dict.dobj.onsuccess = function () {
-                if(++tmp == dict_list.length)
-                    reply("dbLoadEnd");
+                if(++tmp == dict_list.length) reply("dbLoadEnd");
             };
-            dict.dobj.load(dict.main, dict.res, true);
+            dict.dobj.load(dict.main, dict.res, dict.dbwordcount);
         }
+    },
+    
+    get_entry: function (did, decodedObj) {
+        dict_list[did].dobj.get_entry(decodedObj, function (data) {
+            reply("printEntry", did, decodedObj, data);
+        });
     },
     
     lookup_fuzzy: function (term) {
@@ -53,10 +58,7 @@ var queryableFunctions = {
         function rec_lookup(d) {
             if(d < dict_list.length) {
                 dict_list[d].dobj.lookup_term(term, function (tmp) {
-                    for(var i = 0; i < tmp.length; i++) {
-                        tmp[i].push(d);
-                        matches.push(tmp[i]);
-                    }
+                    for(var i = 0; i < tmp.length; i++) matches.push(tmp[i]);
                     rec_lookup(d+1);
                 }, true);
             } else {
@@ -66,17 +68,17 @@ var queryableFunctions = {
         rec_lookup(0);
     },
     
-    lookup_id: function (did, wid) {
-        dict_list[did].dobj.lookup_id(wid, function (data, idx) {
-            reply("printEntry", did, wid, idx, data);
-        });
-    },
-    
     lookup_exact: function (did, term) {
-        dict_list[did].dobj.lookup_term(term, function(wid) {
-            dict_list[did].dobj.lookup_id(wid, function (data, idx) {
-                reply("printEntry", did, wid, idx, data);
-            });
+        dict_list[did].dobj.lookup_term(term, function(matches) {
+            function nextMatch(m) {
+                if(m < matches.length) {
+                    dict_list[did].dobj.get_entry(matches[m], function (data) {
+                        reply("printEntry", did, matches[m], data);
+                        nextMatch(m+1);
+                    });
+                }
+            }
+            nextMatch(0)
         });
     },
     
@@ -110,20 +112,8 @@ var indexedDB = (function () {
             reply("indexedDB", tid, action, did, data);
         };
         
-        this.put = function (obj, callbk) {
-            this.do_action("put", obj, callbk);
-        };
-        
-        this.delete = function (id, callbk) {
-            this.do_action("delete", id, callbk);
-        };
-        
-        this.get = function (id, callbk) {
-            this.do_action("get", id, callbk);
-        };
-        
-        this.get_root = function (callbk) {
-            this.do_action("get_root", null, callbk);
+        this.store_synonyms = function(synonyms, callbk) {
+            this.do_action("store_synonyms", synonyms, callbk);
         };
         
         this.backup_idx = function (index, callbk) {
@@ -132,6 +122,18 @@ var indexedDB = (function () {
         
         this.restore_idx = function (callbk) {
             this.do_action("restore_idx", null, callbk);
+        };
+        
+        this.get = function (id, callbk) {
+            this.do_action("get", id, callbk);
+        };
+        
+        this.get_range = function (start, len, callbk) {
+            this.do_action(
+                "get_range", 
+                { "start": start, "len": len },
+                callbk
+            );
         };
     };
     

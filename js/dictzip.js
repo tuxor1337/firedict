@@ -84,7 +84,6 @@
                         }
                     }
                     read_fname(n+1);
-                    
                 } else {
                     read_fcomment();
                 }
@@ -247,7 +246,6 @@
                     buf += inflated;
                 }
                 return buf.slice(offset,finish);
-                
             };
         };
     
