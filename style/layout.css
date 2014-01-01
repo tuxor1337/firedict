@@ -14,12 +14,39 @@ div[role="main"] {
     padding: 4rem 0 1.5rem;
     background: #fff;
 }
-div[role="main"] p.loading { margin:5rem 0 0; padding:0; text-align:center; }
 div[role="main"] section[data-type="output"] {
     padding:0; margin:0.2rem 0;
 }
 
-/* Spinner */
+/* Progress */
+section[data-type="progressbar"] {
+    position:absolute; top: 0; left:0;
+    background-color: rgba(0,0,0,.7);
+    width:100%; height:100%;
+    color:#fff; z-index:1000;
+    text-align:center;
+}
+
+section[data-type="progressbar"] div {
+    position:absolute;
+    margin:auto 0;
+    top:0; bottom:0;
+    width:100%;
+    height:6.5rem;
+    font-weight:bold;
+}
+
+progress[value] {
+   border:none;
+   width:80%; height:0.6rem;
+   background: #fff;
+}
+
+progress[value]::-moz-progress-bar {
+  background: #01c5ed;
+  border-radius: 0;
+}
+
 progress:not([value]) {
   background: url(images/spinner.png) no-repeat center center / 100% auto;
   animation: 0.9s rotate infinite steps(30);
