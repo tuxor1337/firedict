@@ -169,6 +169,63 @@ $(function() {
             .find("h2").css("background-color",dict_list[d].color);
     };
     
+    var render_pango_content = function (p, pango_markup, did) {
+        dict = dict_list[did];
+        $(p).append(pango_markup).attr("class","entry")
+            .find("span").each(function () {
+                var replacement = $("<span/>"), sup = false;
+                $.each(this.attributes, function(dummy, attrib){
+                    var name = attrib.name;
+                    var value = attrib.value;
+                    if(name == "font_desc")
+                        $(replacement).css("font", value);
+                    else if(name == "font_family" || name == "face")
+                        $(replacement).css("font-family", value);
+                    else if(name == "size" && !isNaN(value))
+                        $(replacement).css("font-size", value);
+                    else if(name == "style")
+                        $(replacement).css("font-style", value);
+                    else if(name == "weight") {
+                        if(value == "ultrabold") value = "800";
+                        else if(value == "heavy") value = "900";
+                        else if(value == "light") value = "300";
+                        else if(value == "ultralight") value = "200";
+                        $(replacement).css("font-weight", value);
+                    } else if(name == "variant")
+                        $(replacement).css("font-variant",
+                            value.replace("smallcaps","small-caps"));
+                    else if(name == "stretch") {
+                        value.replace(/(ultra|extra|semi)(condensed|expanded)/g, "$1-$2");
+                        $(replacement).css("font-stretch", value);
+                    } else if(name == "foreground")
+                        $(replacement).css("color", value);
+                    else if(name == "background")
+                        $(replacement).css("background-color", value);
+                    else if(name == "underline") {
+                        if(value == "double")
+                            $(replacement).css("border-bottom", "1px #000 double");
+                        else if(value == "low")
+                            $(replacement).css("border-bottom", "1px #000 solid");
+                        else if(value == "single")
+                            $(replacement).css("text-decoration", "underline");
+                    } else if(name == "strikethrough" && value == "true")
+                        $(replacement).css("text-decoration", "line-through");
+                    else if(name == "rise" && value != "0") sup = true;
+                });
+                if(sup) replacement = $("<sup/>").append(replacement);
+                $(this).replaceWith(replacement).html($(this).html());
+        });
+        $(p).find("big").each(function () {
+                $(this).replaceWith($("<span/>")).html($(this).html());
+        });
+        $(p).find("s").each(function () {
+                $(this).replaceWith($("<del/>")).html($(this).html());
+        });
+        $(p).find("tt").each(function () {
+                $(this).replaceWith($("<code/>")).html($(this).html());
+        });
+    };
+    
     var render_html_content = function (p, html, did) {
         dict = dict_list[did];
         $(p).append(html).attr("class","entry")
@@ -396,8 +453,12 @@ $(function() {
         history.add([term, [obj]]);
         data.forEach(function (d) {
             p = $("<p />");
-            if(d[1] == "m") $(p).append(document.createTextNode(d[0]));
-            else if(d[1] == "h") render_html_content(p, d[0], did);
+            if("mxtykwr".indexOf(d[1]) != -1)
+                $(p).append(document.createTextNode(d[0]));
+            else if("g".indexOf(d[1]) != -1)
+                render_pango_content(p, d[0], did);
+            else if("h".indexOf(d[1]) != -1)
+                render_html_content(p, d[0], did);
             
             if(term != obj[1]) syn = " <b>(Synonym: " + term + ")</b>";
             else syn = "";
@@ -485,6 +546,7 @@ $(function() {
     });
 
     function reindex_dictionaries() {
+        print_progress();
         var sdcard = navigator.getDeviceStorage('sdcard');
         
         function process_dicts() {
@@ -545,6 +607,7 @@ $(function() {
             console.log("resetting everything");
             dict_list = []; history.clear(); progress_counter = 0;
             switch_mode("manage");
+            print_progress();
             
             var ostores = ["dictionaries"];
             for(var i = 0; i < MAX_DICTS; i++) {
@@ -564,7 +627,6 @@ $(function() {
         }
         
         console.log("reindexing dictionaries...");
-        print_progress();
         clear_all();
     }
     
