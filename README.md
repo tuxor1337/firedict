@@ -40,6 +40,10 @@ okay, since it's done only once) and a single word lookup takes over a
 second. Like this firedict can't possibly keep up with any dictionary app
 out there.
 
+8. Last modifications brought a slight improvement in performance. But still,
+the UI doesn't feel smooth enough (word lookup should be significantly
+faster).
+
 ![screenshot0](https://raw.github.com/tuxor1337/firedict/master/screen0.png "drawer") # 
 ![screenshot1](https://raw.github.com/tuxor1337/firedict/master/screen1.png "list of matches")
 

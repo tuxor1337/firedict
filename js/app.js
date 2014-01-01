@@ -7,11 +7,13 @@ $(function() {
         header_toolbar = "header menu[type=toolbar]",
         output_area = "section[data-type=output]",
         list_section = "section[data-type=list]",
-        progress = "p.loading";
+        progress = "section[data-type=progressbar]",
+        progress_text = "section[data-type=progressbar] p",
+        progress_bar = "section[data-type=progressbar] progress";
     var last_search = "", progress_counter = 0,
         dict_list = [], oDictWorker = null,
         indexedDB_handle, IDB_transactions = {}, history;
-    var MAX_DICTS = 20;
+    var MAX_DICTS = 20, SYNCHUNKSIZE = 2531;
     
     var delay = (function(){
       var timer = 0;
@@ -150,7 +152,7 @@ $(function() {
             $(header).text("About FireDict").show();
         } else if(mode == "settings") {
             $(output_area).html("<h1>No settings yet.</h1>").show();
-            $(header).text("About FireDict").show();
+            $(header).text("Settings").show();
         } else if(mode == "lookup") {
             $(list_section).html("<ul />").show();
             $(output_area).html("").show();
@@ -172,8 +174,8 @@ $(function() {
         $(p).append(html).attr("class","entry")
           .find("img").each(function () {
             var img_filename = $(this).attr("src")
-                .replace(/^\x1E/, '').replace(/\x1F$/, '');
-            var img_file = null;
+                .replace(/^\x1E/, '').replace(/\x1F$/, ''),
+                img_file = null;
             for(var r = 0; r < dict.res.length; r++) {
                 var fname = dict.res[r].name;
                 if(img_filename == fname.substring(
@@ -236,6 +238,16 @@ $(function() {
         }
     };
     
+    var print_progress = function (status, total, text) {
+        var text = text || "", total = total || 0;
+        $(progress_text).html(text);
+        if(total == 0) 
+            $(progress_bar).removeAttr("value").removeAttr("max");
+        else $(progress_bar).attr("value", status)
+                .attr("max", total);
+        $(progress).show();
+    };
+    
     $(list_section).on("click", "a", function(evt) {
         entries = $(this).parents("li").data("entries");
         switch_mode("lookup");
@@ -260,7 +272,7 @@ $(function() {
             
             $(output_area).html("").show();
             oDictWorker.sendQuery("lookup_fuzzy", term);
-        }, 500);
+        }, 400);
     });
     
     $(search_form).on("mousedown", "button", function () {
@@ -297,14 +309,13 @@ $(function() {
     oDictWorker.addListener("dbLoadEnd", function () {
         $(search_input).prop("disabled", false);
         $(progress).hide();
-        $("section[role=region] > header > a").off('click')
-            .on('click', function(e) { return true; });
         switch_mode("lookup");
     });
     
     oDictWorker.addListener("loadEnd", function (d, name, dbwordcount) {
         dict_list[d].name = name;
         dict_list[d].color = '#'+random_color();
+        dict_list[d].dbwordcount = dbwordcount;
         
         var tmp = 0;
         while(tmp < dict_list.length && dict_list[tmp].color != null) tmp++;
@@ -312,14 +323,13 @@ $(function() {
             function rec_add_dict(did) {
                 if(did < dict_list.length) {
                     var data = {
+                            // skip res and main
                             "path": dict_list[did].path,
                             "base": dict_list[did].base,
-                            // skip res and main
                             "color": dict_list[did].color,
                             "name": dict_list[did].name,
                             "files": dict_list[did].files,
-                            // additional value dbwordcount
-                            "dbwordcount": dbwordcount
+                            "dbwordcount": dict_list[did].dbwordcount
                         };
                     console.log(data.name + " contains "
                         + data.dbwordcount + " entries.");
@@ -328,12 +338,7 @@ $(function() {
                         .onsuccess = function(evt) {
                         rec_add_dict(did+1);
                     };
-                } else {
-                    switch_mode("manage");
-                    $("section[role=region] > header > a").off('click')
-                        .on('click', function(e) { return true; });
-                    $("header > menu[type=toolbar] > a").attr("aria-disabled","false");
-                }
+                } else switch_mode("manage");
             }
             rec_add_dict(0);
         } else {
@@ -405,140 +410,82 @@ $(function() {
     });
     
     oDictWorker.addListener("progress", function (status, total) {
-        $(progress).find("b").text("Worker's status: " + status + "/" + total);
+        print_progress(status, total, "Worker's status");
     });
     
     oDictWorker.addListener("indexedDB", function (tid, action, did, data) {
         var idb_ostore = "dict" + did;
         if(action == "store_synonyms") {
-            progress_counter = 0;
             var store = indexedDB_handle
                 .transaction(idb_ostore, "readwrite")
-                .objectStore(idb_ostore);
-            function putNext(i) {
-                if(i < data.length) {
-                    store.add(data[i])
+                .objectStore(idb_ostore), i = 0, totalwordcount = data.length;
+            function putNext() {
+                if(data.length > 0) {
+                    store.add(data.slice(0,SYNCHUNKSIZE), i)
                         .onsuccess = function () { 
-                        progress_counter += 1;
-                        if(progress_counter % 967 == 0)
-                            $(progress).find("b").text("Words in DB: " + progress_counter);
-                        putNext(i+1); 
+                        i += 1;
+                        if(i % 7 == 0)
+                            print_progress(
+                                i*SYNCHUNKSIZE,
+                                totalwordcount,
+                                "Words in DB"
+                            );
+                        data = data.slice(SYNCHUNKSIZE);
+                        putNext(); 
                     };
                 } else {
                     oDictWorker.sendQuery("indexedDB", tid, null);
                 }
             }
-            putNext(0);
+            putNext();
         } else if(action == "backup_idx") {
             idb_ostore = "idx" + did;
-            progress_counter = 0;
-            var index = data;
-            var store = indexedDB_handle
-                .transaction(idb_ostore, "readwrite")
-                .objectStore(idb_ostore);
-            function putNext(i) {
-                if(i < index.length) {
-                    store.add(index[i], i)
-                        .onsuccess = function () { 
-                        progress_counter += 1;
-                        if(progress_counter % 967 == 0)
-                            $(progress).find("b").text("Indices in DB: " + progress_counter);
-                        putNext(i+1); 
-                    };
-                } else oDictWorker.sendQuery("indexedDB", tid, null);
-            }
-            putNext(0);
+            indexedDB_handle.transaction(idb_ostore, "readwrite")
+                .objectStore(idb_ostore).add(data,0)
+                .onsuccess = function () {
+                oDictWorker.sendQuery("indexedDB", tid, null);
+            };
         } else if(action == "restore_idx") {
             idb_ostore = "idx" + did;
-            var index = [];
             indexedDB_handle.transaction(idb_ostore)
-                .objectStore(idb_ostore).openCursor()
+                .objectStore(idb_ostore).get(0)
                 .onsuccess = function (event) {
-                var cursor = event.target.result;
-                if(!!cursor == false) 
-                    oDictWorker.sendQuery("indexedDB", tid, index);
-                else {
-                    index.push(cursor.value);
-                    cursor.continue()
-                }
+                    oDictWorker.sendQuery("indexedDB", tid, event.target.result);
             };
         } else if(action == "get") {
+            var offset = data / SYNCHUNKSIZE | 0,
+                idx = data%SYNCHUNKSIZE;
             indexedDB_handle.transaction(idb_ostore)
-                .objectStore(idb_ostore).get(data)
+                .objectStore(idb_ostore).get(offset)
                 .onsuccess = function(evt) {
-                    oDictWorker.sendQuery(
-                        "indexedDB", tid,
-                        evt.target.result
-                    );
+                    var ret = evt.target.result[idx];
+                    oDictWorker.sendQuery("indexedDB", tid, ret);
             };
         } else if(action == "get_range") {
-            var result = [];
-            indexedDB_handle.transaction(idb_ostore)
-                .objectStore(idb_ostore).openCursor(IDBKeyRange.lowerBound(data.start))
-                .onsuccess = function (event) {
-                var cursor = event.target.result;
-                if(!!cursor == false || result.length > data.len) 
-                    oDictWorker.sendQuery("indexedDB", tid, result);
-                else {
-                    result.push(cursor.value);
-                    cursor.continue()
-                }
-            };
+            data.len = Math.min(data.len, dict_list[did].dbwordcount - data.start);
+            var result = [], len, start = data.start,
+                offset = start / SYNCHUNKSIZE | 0;
+            function getNext() {
+                len = data.len - result.length;
+                if(len > 0)
+                    indexedDB_handle.transaction(idb_ostore)
+                        .objectStore(idb_ostore).get(offset)
+                        .onsuccess = function (evt) {
+                        var res = evt.target.result,
+                            chunk_a = start%SYNCHUNKSIZE,
+                            chunk_b = chunk_a + len;
+                        result = result.concat(res.slice(chunk_a, chunk_b));
+                        offset += 1; start = 0;
+                        getNext();
+                    };
+                else oDictWorker.sendQuery("indexedDB", tid, result);
+            }
+            getNext()
         }
     });
 
     function reindex_dictionaries() {
-        console.log("reindexing dictionaries...");
-        dict_list = []; history.clear(); progress_counter = 0; 
-        switch_mode("manage");
-        $(progress).show();
-        $("section[role=region] > header > a").off('click')
-            .on('click', function(e) { e.preventDefault(); return false; });
-        $("header > menu[type=toolbar] > a").attr("aria-disabled","true");
-        
         var sdcard = navigator.getDeviceStorage('sdcard');
-        var ostores = ["dictionaries"];
-        for(var i = 0; i < MAX_DICTS; i++) {
-            ostores.push("dict"+i); ostores.push("idx"+i);
-        }
-        var trans = indexedDB_handle.transaction(ostores, "readwrite");
-        
-        function rec_clear (i) {
-            if(i < ostores.length) {
-                trans.objectStore(ostores[i]).clear()
-                    .onsuccess = function () {
-                    rec_clear(i+1);
-                };
-            } else scan_files();
-        }
-        
-        function scan_files() {
-            var request = sdcard.enumerate("dictdata");
-            request.onsuccess = function () {
-                if(!this.result) {
-                    process_dicts();
-                    return;
-                }
-                
-                var file = this.result;
-                if(null != file.name.match(/\.ifo$/)) {
-                    var splitted = split_path(file.name),
-                        dict = {
-                            "path": splitted[0],
-                            "base": splitted[1].replace(/\.ifo$/,""),
-                            "res": [],
-                            "main": [],
-                            "color": null,
-                            "name": null,
-                            "files": []
-                        };
-                    dict_list.push(dict);
-                }
-                
-                this.continue();
-                return;
-            };
-        }
         
         function process_dicts() {
             var tmp = 0;
@@ -565,17 +512,66 @@ $(function() {
             });
         }
         
-        console.log("clearing objectstores");
-        rec_clear(0);
+        function scan_files() {
+            var request = sdcard.enumerate("dictdata");
+            request.onsuccess = function () {
+                if(!this.result) {
+                    process_dicts();
+                    return;
+                }
+                
+                var file = this.result;
+                if(null != file.name.match(/\.ifo$/)) {
+                    var splitted = split_path(file.name),
+                        dict = {
+                            "path": splitted[0],
+                            "base": splitted[1].replace(/\.ifo$/,""),
+                            "res": [],
+                            "main": [],
+                            "color": null,
+                            "name": null,
+                            "files": [],
+                            "dbwordcount": 0
+                        };
+                    dict_list.push(dict);
+                }
+                
+                this.continue();
+                return;
+            };
+        }
+        
+        function clear_all() {
+            console.log("resetting everything");
+            dict_list = []; history.clear(); progress_counter = 0;
+            switch_mode("manage");
+            
+            var ostores = ["dictionaries"];
+            for(var i = 0; i < MAX_DICTS; i++) {
+                ostores.push("dict"+i); ostores.push("idx"+i);
+            }
+            var trans = indexedDB_handle.transaction(ostores, "readwrite");
+            
+            function rec_clear (i) {
+                if(i < ostores.length) {
+                    trans.objectStore(ostores[i]).clear()
+                        .onsuccess = function () {
+                        rec_clear(i+1);
+                    };
+                } else scan_files();
+            }
+            rec_clear(0);
+        }
+        
+        console.log("reindexing dictionaries...");
+        print_progress();
+        clear_all();
     }
     
     function load_idb_dictionaries() {
         console.log("loading dictionaries from db");
         $(search_input).prop("disabled", true);
-        $(progress).show();
-        $("section[role=region] > header > a").off('click')
-            .on('click', function(e) { e.preventDefault(); return false; });
-        
+        print_progress();
         dict_list = [];
         
         function rec_walk_dicts(d) {
@@ -656,9 +652,7 @@ $(function() {
         db.createObjectStore("history");
         for(var i = 0; i < MAX_DICTS; i++) {
             var objectStore = db.createObjectStore("idx"+i);
-            var objectStore = db.createObjectStore(
-                "dict"+i, { keyPath: "id", autoIncrement: false }
-            );
+            var objectStore = db.createObjectStore("dict"+i);
         }
     };
 });

@@ -1,4 +1,5 @@
-(function (GLOBAL) { 
+(function (GLOBAL) {
+    var SYNCHUNKSIZE = 2531;
     
     function getUintAt(arr, offs) {
         out = 0;
@@ -64,6 +65,7 @@
                     return 0;
                 };
             var that = this;
+            var syn_chunk_list = [];
             var progress = 0; // for debugging purposes, see process_syn
                               // and process_idx respectively
             
@@ -122,10 +124,10 @@
             }
             
             function binaryInsert(arr, newElement) {
-                var minIndex = 0;
-                var maxIndex = arr.length - 1;
-                var currentIndex;
-                var currentCmp;
+                var minIndex = 0,
+                    maxIndex = arr.length - 1,
+                    currentIndex,
+                    currentCmp;
                 
                 while (minIndex <= maxIndex) {
                     currentIndex = (minIndex + maxIndex) / 2 | 0;
@@ -148,7 +150,8 @@
                 var tmp_arr = [];
                 for(var i = 0; i < tmp_synonyms.length; i++) {
                     var syn = tmp_synonyms[i];
-                    tmp_synonyms[i] = { id: i, type: syn[1], offset: syn[2] };
+                    if(i % SYNCHUNKSIZE == 0) syn_chunk_list.push(syn[0]);
+                    tmp_synonyms[i] = { type: syn[1], offset: syn[2] };
                 }
                 db.store_synonyms(tmp_synonyms, function () {
                     keywords.dbwordcount = tmp_synonyms.length;
@@ -161,7 +164,17 @@
                 console.log("restoring...");
                 db.restore_idx(function (idx) {
                     index = idx;
-                    process_res();
+                    var i = 0;
+                    function recSyn() {
+                        if(i < keywords.dbwordcount)
+                            db.get(i, function (obj) {
+                                syn_chunk_list.push(getTermFromObj(obj));
+                                i += SYNCHUNKSIZE;
+                                recSyn();
+                            });
+                        else process_res();
+                    }
+                    recSyn();
                 });
             }
             
@@ -209,9 +222,9 @@
                     if(view[i] == 0) {
                         //if(progress > 1000) break;
                         //if(progress < 50000){i+=9;j=i;progress++;continue;}
-                        progress += 1;
-                        if(progress % 2867 == 0)
-                            reply("progress", progress, keywords.wordcount);
+                        //progress += 1;
+                        //if(progress % 2867 == 0)
+                        //    reply("progress", progress, keywords.wordcount);
                         var term = readUTF8String(view.subarray(j,i));
                         binaryInsert(tmp_synonyms, [term, 0, index.length]);
                         index.push(j);
@@ -333,44 +346,60 @@
                     if(fuzzy) term = term.substr(0, word.length);
                     return cmp_func(term, word);
                 }
-                var minIndex = 0,
-                    maxIndex = keywords.dbwordcount-1,
-                    currentIndex,
-                    currentObj = null,
-                    lastMatch = null,
-                    currentCmp;
-                
-                function binary_rec() {
-                    if(minIndex <= maxIndex) {
-                        currentIndex = (minIndex + maxIndex) / 2 | 0;
-                        db.get(currentIndex, function (obj) {
-                            currentObj = obj;
-                            currentCmp = cmp(currentObj);
-                            if (currentCmp == -1) {
-                                minIndex = currentIndex + 1;
-                            } else {
-                                if(currentCmp != 1) lastMatch = obj;
-                                maxIndex = currentIndex - 1;
-                            }
-                            binary_rec();
-                        });
-                    } else {
-                        if(lastMatch == null) callbk([]);
-                        else {
-                            db.get_range(lastMatch.id, 20, function(range) {
-                                var result = [];
-                                for(var r = 0; r < range.length; r++) {
-                                    currentObj = range[r];
-                                    currentCmp = cmp(currentObj); 
-                                    if(currentCmp != 0) break;
-                                    else result.push(decodeObj(currentObj));
-                                }
-                                callbk(result);
-                            });
+                var offset;
+                    
+                function binarySearch(mode, arr) {
+                    var miIndex = 0;
+                    var maIndex = arr.length - 1;
+                    var currIndex;
+                    var currCmp;
+                    
+                    while (miIndex <= maIndex) {
+                        currIndex = (miIndex + maIndex) / 2 | 0;
+                        if(mode == "max") currCmp = cmp_func(arr[currIndex], word);
+                        else currCmp = cmp_func(getTermFromObj(arr[currIndex]), word);
+                        
+                        if (currCmp == -1) {
+                            miIndex = currIndex + 1;
+                        } else if (currCmp == 1) {
+                            maIndex = currIndex - 1;
+                        } else {
+                            if(mode == "max") maIndex = currIndex;
+                            else miIndex = currIndex;
+                            break;
                         }
                     }
+                    if(mode == "max") return maIndex;
+                    else return miIndex;
                 }
-                binary_rec();
+                offset = binarySearch("max", syn_chunk_list);
+                if(offset == -1) { callbk([]); return; }
+                else offset *= SYNCHUNKSIZE;
+                db.get_range(offset, SYNCHUNKSIZE, function (list) {
+                    var currentIndex, currentObj, currentCmp, lastMatch = null;
+                    currentIndex = binarySearch("min", list);
+                    currentObj = list[currentIndex];
+                    currentCmp = cmp(currentObj);
+                    if(currentCmp == 0) lastMatch = currentObj;
+                    if(lastMatch == null) callbk([]);
+                    else {
+                        function process_range(range) {
+                            var result = [];
+                            for(var r = 0; r < range.length; r++) {
+                                currentObj = range[r];
+                                currentCmp = cmp(currentObj, word); 
+                                if(currentCmp != 0) break;
+                                else result.push(decodeObj(currentObj));
+                            }
+                            callbk(result);
+                        }
+                        if(currentIndex + 20  < SYNCHUNKSIZE) {
+                            process_range(list.slice(currentIndex,currentIndex+20));
+                        } else {
+                            db.get_range(offset + currentIndex, 20, process_range);
+                        }
+                    }
+                });
             };
             
             this.add_resources = function (res_filelist) {

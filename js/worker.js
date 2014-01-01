@@ -19,16 +19,13 @@ var queryableFunctions = {
             if(d < dict_list.length) {
                 var dict = dict_list[d];
                 dict.dobj = new StarDict(new indexedDB(d));
-                dict.dobj.onsuccess = (function(theD) {
-                    return function () {
-                        reply("loadEnd", theD,
-                            dict_list[theD].dobj.get_key("bookname"),
-                            dict_list[theD].dobj.get_key("dbwordcount"));
-                        loadNext(d+1);
-                    };
-                })(d);
+                dict.dobj.onsuccess = function () {
+                    reply("loadEnd", d,
+                        dict_list[d].dobj.get_key("bookname"),
+                        dict_list[d].dobj.get_key("dbwordcount"));
+                    loadNext(d+1);
+                };
                 dict.dobj.load(dict.main, dict.res);
-                
             }
         }
         loadNext(0);
