@@ -162,6 +162,7 @@ $(function() {
     };
     
     var display_dict = function (d) {
+        if(!dict_list[d].loaded) return;
         $("<div />").addClass("text dict"+d).data("did",d)
             .append("<h2>" + dict_list[d].name + "</h2>")
             .css("border-color",dict_list[d].color)
@@ -311,6 +312,12 @@ $(function() {
         $(search_input).val($(this).text());
         $(list_section).html("<ul />").show();
         for(var d = 0; d < dict_list.length; d++) display_dict(d);
+        entries.sort(function (a,b) {
+            a = a[1].toLowerCase(), b = b[1].toLowerCase();
+            if (a > b) return 1;
+            if (a < b) return -1;
+            return 0;
+        });
         entries.forEach(function (entr) {
             oDictWorker.sendQuery("get_entry", entr[entr.length-1], entr);
         });
@@ -370,15 +377,24 @@ $(function() {
     });
     
     oDictWorker.addListener("loadEnd", function (d, name, dbwordcount) {
-        dict_list[d].name = name;
-        dict_list[d].color = '#'+random_color();
-        dict_list[d].dbwordcount = dbwordcount;
+        if(name == null && dbwordcount == null) {
+            dict_list[d].loaded=false;
+            dict_list[d].color="#000";
+        } else {
+            dict_list[d].loaded = true;
+            dict_list[d].name = name;
+            dict_list[d].color = '#'+random_color();
+            dict_list[d].dbwordcount = dbwordcount;
+        }
         
         var tmp = 0;
         while(tmp < dict_list.length && dict_list[tmp].color != null) tmp++;
         if(tmp == dict_list.length) {
             function rec_add_dict(did) {
                 if(did < dict_list.length) {
+                    if(dict_list[did].loaded == false) {
+                        rec_add_dict(did+1); return;
+                    }
                     var data = {
                             // skip res and main
                             "path": dict_list[did].path,
@@ -406,6 +422,18 @@ $(function() {
     });
     
     oDictWorker.addListener("printList", function (matches) {
+        function union_of_entry_sets(set1,set2) {
+            var union = set1.concat();
+            for(var i = 0; i < set2.length; i++) {
+                var e = set2[i], j = 0;
+                for(; j < set1.length; j++) {
+                    if(e[2] == set1[j][2] && e[4] == set1[j][4])
+                        break;
+                }
+                if(j == set1.length) union.push(e);
+            }
+            return union;
+        }
         if(dict_list.length > 1)
             matches.sort(function (a,b) {
                 a = a[0].toLowerCase(), b = b[0].toLowerCase();
@@ -415,34 +443,20 @@ $(function() {
             });
         var tmp = [];
         while(matches.length > 0) {
-            var m = matches.shift();
-            var m_low = m[0].toLowerCase(), done = false;
+            var m = matches.shift(), entries = [m],
+                m_low = m[0].toLowerCase(), done = false;
             if(tmp.length == 0) tmp.push([m[0], []]);
             for(var i = tmp.length-1; i >= 0; i--) {
                 if(m_low == tmp[i][0].toLowerCase()) {
-                    tmp[i][1].push(m);
-                    var tmptmp = tmp[i][1];
-                    for(var j=0; j<tmptmp.length-1; j++) {
-                        if(m[2] == tmptmp[j][2] && m[4] == tmptmp[j][4]) {
-                            tmp[i][1].pop(); break;
-                        }
-                    }
+                    tmp[i][1] = union_of_entry_sets(tmp[i][1],entries);
+                    entries = tmp[i][1].concat();
                     if(m[0] == tmp[i][0]) done = true;
                 } else {
-                    if(!done) tmp.push([m[0], [m]]);
+                    if(!done) tmp.push([m[0], entries]);
                     break;
                 }
-                if(i == 0 && !done) tmp.push([m[0], [m]]);
-                
+                if(i == 0 && !done) tmp.push([m[0], entries]);
             }
-        }
-        for(var i = tmp.length-1; i >= 0; i--) {
-            tmp[i][1].sort(function (a,b) {
-                a = a[1].toLowerCase(), b = b[1].toLowerCase();
-                if (a > b) return 1;
-                if (a < b) return -1;
-                return 0;
-            });
         }
         print_list(tmp);
     });
@@ -676,6 +690,8 @@ $(function() {
                     did = dict_list.length;
                 dict.res = [];
                 dict.main = [];
+                dict.loaded = true; // We assume everything is okay about it,
+                                    // because it went well last time.
                 dict_list.push(dict);
                 for(var f = 0; f < dict.files.length; f++) {
                     if(null != dict.files[f].match(/\.ifo$/)) {
