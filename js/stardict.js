@@ -47,6 +47,7 @@
         var cls = function(db, cmp_fct) {
             var files = { },
                 index = [],
+                syn_chunk_list = [],
                 db = db,
                 keywords = {
                     "version": "",
@@ -65,7 +66,6 @@
                     return 0;
                 };
             var that = this;
-            var syn_chunk_list = [];
             var progress = 0; // for debugging purposes, see process_syn
                               // and process_idx respectively
             
@@ -238,7 +238,7 @@
                 reader = new FileReaderSync();
                 lines = reader.readAsText(files["ifo"]).split("\n");
                 if(lines.shift() != "StarDict's dict ifo file") {
-                    theDict.onerror("Not a proper ifo file");
+                    that.onerror("Not a proper ifo file");
                     return;
                 }
                 lines.forEach(function (l) {

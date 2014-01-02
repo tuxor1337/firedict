@@ -2,6 +2,9 @@
 var console = {
     "log": function (str) {
         postMessage(str);
+    },
+    "err": function (str) {
+        postMessage("Error: " + str);
     }
 };
 
@@ -25,6 +28,11 @@ var queryableFunctions = {
                         dict_list[d].dobj.get_key("dbwordcount"));
                     loadNext(d+1);
                 };
+                dict.dobj.onerror = function (msg) {
+                    console.err(msg);
+                    reply("loadEnd", d, null, null);
+                    loadNext(d+1);
+                };
                 dict.dobj.load(dict.main, dict.res);
             }
         }
@@ -38,6 +46,10 @@ var queryableFunctions = {
             var dict = dict_list[d], tmp = 0;
             dict.dobj = new StarDict(new indexedDB(d));
             dict.dobj.onsuccess = function () {
+                if(++tmp == dict_list.length) reply("dbLoadEnd");
+            };
+            dict.dobj.onerror = function (msg) {
+                console.err(msg);
                 if(++tmp == dict_list.length) reply("dbLoadEnd");
             };
             dict.dobj.load(dict.main, dict.res, dict.dbwordcount);
@@ -54,13 +66,14 @@ var queryableFunctions = {
         var matches = [];
         function rec_lookup(d) {
             if(d < dict_list.length) {
-                dict_list[d].dobj.lookup_term(term, function (tmp) {
-                    for(var i = 0; i < tmp.length; i++) matches.push(tmp[i]);
-                    rec_lookup(d+1);
-                }, true);
-            } else {
-                reply("printList", matches);
-            }
+                if(dict_list[d].dobj.loaded == false) rec_lookup(d+1);
+                else{
+                    dict_list[d].dobj.lookup_term(term, function (tmp) {
+                        for(var i = 0; i < tmp.length; i++) matches.push(tmp[i]);
+                        rec_lookup(d+1);
+                    }, true);
+                }
+            } else reply("printList", matches);
         }
         rec_lookup(0);
     },
