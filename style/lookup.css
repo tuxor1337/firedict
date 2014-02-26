@@ -54,7 +54,7 @@ div[role="main"] section[data-type="output"] div.text img {
   display: block;
 }
 
-[data-type="list"] li > a {
+[data-type="list"] li > a.term {
   text-decoration: none;
   color: #000;
   display: block;
@@ -63,7 +63,7 @@ div[role="main"] section[data-type="output"] div.text img {
   outline: none;
 }
 
-[data-type="list"] li > a:hover {
+[data-type="list"] li > a.term:hover {
     background-color: #fff7df;
 }
 

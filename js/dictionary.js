@@ -79,7 +79,7 @@
                 that = this;
             
             function save_meta() {
-                return oDB.set_meta(that.exportable());
+                return oDB.set_meta(meta_info);
             }
             
             function getSynonymAt(offset) {
@@ -187,7 +187,7 @@
             this.init = function (path, rank) {
                 var full_term_list = [];
                 
-                function binaryInsert(arr, newElement) {
+                function binaryInsert(arr, newElement, start) {
                     var minIndex = 0,
                         maxIndex = arr.length - 1,
                         currentIndex,
@@ -290,18 +290,13 @@
                 });
             };
               
-            this.exportable = function () {
-                return {
-                    "active": meta_info.active,
-                    "path": meta_info.path,
-                    "version": meta_info.version,
-                    "color": meta_info.color,
-                    "rank": meta_info.rank,
-                    "alias": meta_info.alias,
-                    "size": meta_info.size
-                };
-            }
-              
+            this.meta = function (dict) {
+                if(typeof dict !== "undefined") {
+                    meta_info = dict; save_meta();
+                }
+                return meta_info;
+            };
+            
             this.version = function () { return meta_info.version; };
         }
         

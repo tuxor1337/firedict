@@ -1,0 +1,20 @@
+
+[data-type="list"] li.settings {
+    height:auto;
+}
+    
+[data-type="list"] li.settings > a {
+  text-decoration: none;
+  color: #000;
+  display: block;
+  border: none;
+  outline: none;
+}
+
+[data-type="list"] li.settings > a:hover {
+    background-color: #fff7df;
+}
+
+[data-type="list"] li.settings > a p {
+    padding:1.5rem; font-size:1.4rem;
+}

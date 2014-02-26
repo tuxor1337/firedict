@@ -56,7 +56,7 @@
             get_data(function (data) { cache = data; });
         };
         
-        this.get = function () { return cache; }
+        this.get = function () { return cache.concat().reverse(); }
     }
     
     var DictionaryManager = (function () {
@@ -86,8 +86,14 @@
                         });
                     } else {
                         var d = [];
+                        aDicts.sort(function (a,b) {
+                            a = a.rank, b = b.rank;
+                            if(a > b) return 1;
+                            if(a < b) return -1;
+                            return 0;
+                        });
                         for(var i = 0; i < aDicts.length; i++)
-                            d.push(aDicts[i].exportable());
+                            d.push(aDicts[i].meta());
                         reply("init_ready", d);
                     }
                 }
@@ -165,7 +171,15 @@
                                 add_matches(tmp);
                                 rec_lookup(d+1);
                             });
-                        } else resolve(matches);
+                        } else {
+                            resolve(matches.sort(function (a,b) {
+                                a = a.term.toLowerCase();
+                                b = b.term.toLowerCase();
+                                if(a > b) return 1;
+                                if(a < b) return -1;
+                                return 0;
+                            }));
+                        }
                     }
                     rec_lookup(0);
                 });
@@ -184,7 +198,13 @@
                 return dict_by_id(version).resource(name);
             };
             
+            this.edit = function (dict) {
+                dict_by_id(dict.version).meta(dict);
+            };
+            
             this.history = oHistoryManager.get;
+            
+            this.clear_history = oHistoryManager.clear;
         }
         
         return cls;

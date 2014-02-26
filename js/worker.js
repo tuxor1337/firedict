@@ -36,7 +36,11 @@ var queryableFunctions = {
     },
     
     history: function () {
-        reply("printHistory", dictMan.history());
+        reply("printList", dictMan.history());
+    },
+    
+    clear_history: function () {
+        dictMan.clear_history();
     },
     
     lookup_fuzzy: function (term) {
@@ -56,6 +60,10 @@ var queryableFunctions = {
     
     resource: function (rid, did, name) {
         reply("resource", rid, dictMan.resource(did, name));
+    },
+    
+    edit_dictionary: function (dict) {
+        dictMan.edit(dict);
     },
     
     transaction: function(tid, data) {
