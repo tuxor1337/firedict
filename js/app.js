@@ -375,6 +375,8 @@ $(function() {
                     indexedDB_handle.onerror = function (e) {
                         throw new Error("Database error: " + e.target.errorCode);
                     };
+                    indexedDB_handle.transaction("dictionaries", "readwrite")
+                        .objectStore("dictionaries").delete(data);
                     oDictWorker.sendQuery("transaction", tid);
                 };
                 request.onupgradeneeded = function (event) {
