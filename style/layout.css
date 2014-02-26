@@ -18,6 +18,11 @@ div[role="main"] section[data-type="output"] {
     padding:0; margin:0.2rem 0;
 }
 
+div[role="main"] section[data-type="output"] > p {
+    margin: 1rem;
+    font-size:1.3rem;
+}
+
 /* Progress */
 section[data-type="progressbar"] {
     position:absolute; top: 0; left:0;
@@ -34,6 +39,15 @@ section[data-type="progressbar"] div {
     width:100%;
     height:6.5rem;
     font-weight:bold;
+}
+
+
+section[data-type="progressbar"] div p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space:nowrap;
+  max-width:80%;
+  margin:0 auto 0.5rem;
 }
 
 progress[value] {
