@@ -3,6 +3,9 @@ firedict
 
 A simple offline dictionary software for Firefox OS
 
+This project is put on ice till late February 2014! Please contact me if you have plans to work on it in the meantime. Major restructuring plans are already on paper and I might have to think these plans over if somebody comes up with great new ideas.
+---
+
 There are still major problems with the way dictionaries are stored
 internally.
 
