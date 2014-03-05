@@ -67,7 +67,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
     $scope.entries = [];
     $scope.resources = {};
     
-    $scope.lookup = function (val) {
+    $scope.lookup = function () {
+        var val = $scope.search_term;
         if($scope.showingEntry) return;
         var delay = (function(){
           var timer = 0;
@@ -90,6 +91,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
     $scope.show_entry = function(matchObj) {
         $scope.showingEntry = true;
         $scope.matches = [];
+        $scope.entries = [];
         $scope.idle = true;
         var entr = matchObj, term = matchObj;
         if(matchObj instanceof Object) {
@@ -104,7 +106,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         });
     };
     
-    $scope.$watch("search_term", $scope.lookup);
+    $scope.$watch("[search_term, dictionaries]", $scope.lookup, true);
     
     $scope.back = function () {
         if($scope.showingEntry) {
@@ -136,7 +138,16 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
     };
     $scope.render_content = function (d, did) {
         function render_pango_content(pango_markup) {
-            var tmp_obj = $("<div/>").html(pango_markup);
+            var tmp_obj = $("<div/>").html(pango_markup.replace(/\n/g,"<br>"));
+            $(tmp_obj).find(":not("
+                + "span, big, s, tt, b, i, sub, sup, small, u"
+            + ")")
+            .each(function () {
+                console.log("Pango code injection: " + this.tagName);
+                if($(this).children().length == 0)
+                    $(this).replaceWith($(this).text());
+                else $(this).children().unwrap();
+            });
             $(tmp_obj).find("span").each(function () {
                 var replacement = $("<span/>"), sup = false;
                 $.each(this.attributes, function(dummy, attrib){
@@ -189,22 +200,38 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             $(tmp_obj).find("tt").each(function () {
                 $(this).replaceWith($("<code/>")).html($(this).html());
             });
+            $(tmp_obj).find("b").each(function () {
+                $(this).replaceWith($("<code/>")).html($(this).html());
+            });
             return $(tmp_obj).html();
         }
         function render_html_content(html_markup) {
             var tmp_obj = $("<div />").html(html_markup);
-            $(tmp_obj).find("img")
-            .each(function () {
+            $(tmp_obj).find(":not("
+                + "p, font, span, div, table, tr, td, tbody, strong, "
+                + "br, i, a, b, u, img, sup, sub, ul, ol, li"
+            + ")").each(function () {
+                console.log("Html code injection: " + this.tagName);
+                if($(this).children().length == 0)
+                    $(this).replaceWith($(this).text());
+                else $(this).children().unwrap();
+            });
+            $(tmp_obj).find("img").each(function () {
                 var elImg = this,
                     img_filename = $(elImg).attr("src")
                         .replace(/^\x1E/, '').replace(/\x1F$/, '');
                 $(elImg).attr("src", "{{resources['" + img_filename + "']}}");
+                if($(elImg).attr("align") == "middle") {
+                    $(elImg).removeAttr("align")
+                        .css("vertical-align","middle");
+                }
                 if(!$scope.resources.hasOwnProperty(img_filename)) {
                     dictWorker.query("resource", {
                             did: did, name: img_filename
                     }).then(function (blob) {
                         if(blob == null)
-                            console.log("File " + img_filename + " not found.");
+                            console.log($scope.dictById(did).alias +
+                                ": File " + img_filename + " not found.");
                         else {
                             var reader = new FileReader();
                             reader.onload = function (e) {
@@ -216,26 +243,29 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                     });
                 }
             });
-            $(tmp_obj).find("a")
-            .each(function () {
+            $(tmp_obj).find("a").each(function () {
                 var linkText = $(this).text(),
                     linkRef = $(this).attr("href");
                 if("bword://" != linkRef.substring(0,8)) {
                     $(this).replaceWith(linkText);
                 } else {
-                    linkRef = linkRef.substring(8).replace(/'/g, "\\'");
+                    linkRef = linkRef.substring(8).replace(/'/g, "\\'")
+                        .replace(/^ /g, "");
                     $(this).attr("href","javascript:void(0)")
                             .attr("ng-click", "show_entry('" + linkRef + "')");
                 }
             });
             return $(tmp_obj).html();
         }
-        if("mxtykwr".indexOf(d.type) != -1)
+        if("m".indexOf(d.type) != -1)
             return d.content;
         else if("g".indexOf(d.type) != -1)
             return render_pango_content(d.content);
         else if("h".indexOf(d.type) != -1)
             return render_html_content(d.content);
+        
+        console.log("Type not supported: " + d.type); // at least: "xtykwr"
+        return d.content;
     };
 }])
 .controller("settingsCtrl", ["$scope", "ngDialog", "dictWorker",
@@ -263,6 +293,6 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
 .controller("aboutCtrl", function ($scope) {
     $scope.title = "About FireDict";
     $scope.description = "<p>Open source offline dictionary webapp for StarDict dictionaries hosted on GitHub</p>"
-        + "<p>https://github.com/tuxor1337/firedict</p>"
+        + "<p>http://tuxor1337.github.io/firedict/</p>"
         + "<p>Scans for dictionaries in your sdcard's \"dictdata\" directory.</p>";
 });

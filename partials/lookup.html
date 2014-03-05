@@ -20,11 +20,14 @@
     <section data-type="output" data-ng-if="showingEntry">
         <div data-ng-repeat="dict in dictionaries | filter:entryDictFilter | orderBy: 'rank'" class="text"
              data-ng-style="{'border-color':dict.color}">
-            <h2 data-ng-style="{'background-color':dict.color}">{{dict.alias}}</h2>
-            <div data-ng-repeat="entry in entries | filter:{ did: dict.version }">
-                <h3 data-ng-style="{'background-color':dict.color}"
+            <h2 class="dictname"
+                data-ng-style="{'background-color':dict.color}">{{dict.alias}}</h2>
+            <div data-ng-repeat="entry in entries | filter:{ did: dict.version }:true">
+                <h3 class="term"
+                    data-ng-style="{'background-color':dict.color}"
                     data-ng-bind-html="render_term(entry.term)"></h3>
-                <p data-ng-repeat="dt in entry.data"
+                <p class="content"
+                   data-ng-repeat="dt in entry.data"
                    data-compile="render_content(dt, dict.version)"></p>
             </div>
         </div>
