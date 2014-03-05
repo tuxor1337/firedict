@@ -5,9 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/gallery.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <script src="javascripts/jquery.js"></script>
 
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -29,22 +31,57 @@
       <div class="inner clearfix">
         <section id="main-content">
           <h1>
-<a name="firedict" class="anchor" href="#firedict"><span class="octicon octicon-link"></span></a>firedict</h1>
+<div id="gallery1" class="gallery_div gallery_preview">
+    <a href="#" class="gallery_close">&nbsp;</a>
+    <div class="gallery_tr">
+        <a href="#" class="gallery_last gallery_hidden">&nbsp;</a>
+        <a href="#" class="gallery_toggle">
+            <div style="max-height:80%;">
+                <img src="#" />
+            </div>
+        </a>
+        <a href="#" class="gallery_next">&nbsp;</a>
+    </div>
+    <div class="gallery_title"><b></b></div>
+</div>
 
-<p>A simple offline dictionary software for Firefox OS</p>
+<script src="javascripts/gallery.js" type="text/javascript"></script>
+<script type="text/javascript"><!--
+var img_list = [
+    ["https://raw.github.com/tuxor1337/firedict/master/screen1.png", "list of matches"],
+    ["https://raw.github.com/tuxor1337/firedict/master/screen2.png", "displaying an entry"],
+    ["https://raw.github.com/tuxor1337/firedict/master/screen0.png", "drawer"],
+    ["https://raw.github.com/tuxor1337/firedict/master/screen3.png", "managing dictionaries"],
+    ["https://raw.github.com/tuxor1337/firedict/master/screen4.png", "changing a dictionary's color"],
+];
+var gall = new img_gallery("gallery1",img_list);
+gall.set_i(0);
+//--></script>
 
-<p>There are still major problems with the way dictionaries are stored internally.
-Last modifications brought a slight improvement in performance.
-But still, the UI doesn't feel smooth enough (word lookup should be significantly
-faster).</p>
+<a name="firedict" class="anchor" href="#firedict"><span class="octicon octicon-link"></span></a>FireDict...</h1>
 
-<p><img src="https://raw.github.com/tuxor1337/firedict/master/screen0.png" alt="screenshot0" title="drawer"> # 
-<img src="https://raw.github.com/tuxor1337/firedict/master/screen1.png" alt="screenshot1" title="list of matches"></p>
+<p>...is a simple offline dictionary software for Firefox OS with support for the
+StarDict format. It scans for dictionaries in your sdcard's <i>dictdata</i> directory.</p>
 
-<p><img src="https://raw.github.com/tuxor1337/firedict/master/screen2.png" alt="screenshot2" title="displaying an entry"> #
-<img src="https://raw.github.com/tuxor1337/firedict/master/screen3.png" alt="screenshot3" title="managing dictionaries"></p>
+<p>Users of ColorDict or GoldenDict (for Android) should be familiar with
+the overall user experience. You can look up words in several dictionaries
+at the same time. Each dictionary is given a color. Entries in the lookup
+view are then flagged according to the color of the respective dictionary.</p>
 
-<p><img src="https://raw.github.com/tuxor1337/firedict/master/screen4.png" alt="screenshot4" title="indexing dictionaries"></p>
+<p>FireDict is a privileged app and needs the following permissions:</p>
+
+<ul>
+    <li><i>device-storage:sdcard (readonly)</i> - FireDict will scan your sdcard's
+    <i>dictdata</i> directory and access the files stored there.</li>
+    <li><i>storage</i> - FireDict builds a word index for each dictionary 
+    and stores it in an IndexedDB. The index's size might exceed several
+    megabytes.</li>
+</ul>
+
+<p>Although FireDict is stable, there are still major performance problems
+with the way dictionaries are stored internally, because of which the UI
+doesn't feel perfectly smooth. Scanning for dictionaries can take very
+long and word lookup is sometimes a bit laggy.</p>
         </section>
 
         <aside id="sidebar">

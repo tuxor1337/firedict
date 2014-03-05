@@ -188,6 +188,11 @@ ul, ol, dl {
   margin-bottom: 20px;
 }
 
+i {
+    font-weight:bold; background-color:#ccc; padding:0 0.2em;
+    color:#000; font-size:0.9em;
+}
+
 
 /* COMMON STYLES */
 
@@ -326,8 +331,11 @@ blockquote {
 }
 
 ul {
-  list-style: disc inside;
+  list-style: disc outside;
   padding-left: 20px;
+}
+ul li {
+    margin-bottom:0.2em;
 }
 
 ol {
