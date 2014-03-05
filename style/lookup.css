@@ -3,7 +3,7 @@ section[data-type="output"] div.text {
     border: 2px #000 solid;
 }
 
-section[data-type="output"] div.text h2 {
+section[data-type="output"] div.text h2.dictname {
     overflow: hidden;
     white-space: nowrap;
     margin:0; padding:0.1rem 0.3rem;
@@ -13,17 +13,26 @@ section[data-type="output"] div.text h2 {
     background-color:#000;
 }
 
-section[data-type="output"] div.text p {
+section[data-type="output"] div.text p.content {
     padding: 0.5rem 0.4rem; margin:0;
 }
 
-section[data-type="output"] div.text h3 {
+section[data-type="output"] div.text p.content ol,
+section[data-type="output"] div.text p.content ul {
+    margin:0; padding:0;
+}
+
+section[data-type="output"] div.text p.content li {
+    margin:0 0 0 2rem;
+}
+
+section[data-type="output"] div.text h3.term {
     font-size:0.9rem; font-weight:normal;
     margin:0; padding:0.1rem 0.2rem;
     background-color:#000; color:#fff;
 }
 
-section[data-type="output"] div.text h3 b {
+section[data-type="output"] div.text h3.term b {
     font-weight:bold;
 }
 
