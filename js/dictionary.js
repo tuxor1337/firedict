@@ -14,11 +14,13 @@
             var did = version;
             
             function do_action(action, data) {
-                return new Promise(function (resolve, reject) {
-                    reply("indexedDB",
-                        new_transaction(resolve),
-                        action, { "data": data, "did": did, "chunksize": CHUNKSIZE }
-                    );
+                return query("indexedDB", {
+                        "action": action,
+                        "data": { 
+                            "data": data, 
+                            "did": did, 
+                            "chunksize": CHUNKSIZE 
+                        }
                 });
             }
             
@@ -55,10 +57,10 @@
         
         cls.create = function () {
             return new Promise(function (resolve, reject) {
-                var tid = new_transaction(function (version) {
+                query("indexedDB", { action: "add_dictionary" })
+                .then(function (version) {
                     resolve(new cls(version));
                 });
-                reply("indexedDB", tid, "add_dictionary", {});
             });
         };
         
@@ -220,10 +222,11 @@
                     raw_index.forEach(function (idx) {
                         aIndex.push(idx.offset);
                         if(aIndex.length % CHUNKSIZE == 0)
-                            reply("progress",
-                                10*aIndex.length/raw_index.length,
-                                100, oStarDict.keyword("bookname")
-                            );
+                            query("progress", {
+                                status: 10*aIndex.length/raw_index.length,
+                                total: 100,
+                                text: oStarDict.keyword("bookname")
+                            });
                         binaryInsert(full_term_list, [idx.term, 0, wid++]);
                     });
                     delete raw_index;
@@ -235,10 +238,11 @@
                     });
                     raw_synlist.forEach(function (syn) {
                         if(full_term_list.length % (CHUNKSIZE*3) == 0)
-                            reply("progress",
-                                90*full_term_list.length/(aIndex.length+raw_synlist.length),
-                                100, oStarDict.keyword("bookname")
-                            );
+                            query("progress", {
+                                status: 90*full_term_list.length/(aIndex.length+raw_synlist.length),
+                                total: 100,
+                                text: oStarDict.keyword("bookname")
+                            });
                         binaryInsert(full_term_list, [syn.term, 1, syn.offset]);
                     });
                     delete raw_synlist;

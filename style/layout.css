@@ -6,14 +6,14 @@ body {
 }
 
 div[role="main"] {
-    overflow: auto;
+    /*overflow: auto;
     height: 100%;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
-    position: relative;
-    padding: 4rem 0 1.5rem;
-    background: #fff;
+    position: relative;*/
+    padding: 4rem 0 0; /* bottom 1.5rem */
 }
+
 div[role="main"] section[data-type="output"] {
     padding:0; margin:0.2rem 0;
 }
@@ -23,63 +23,34 @@ div[role="main"] section[data-type="output"] > p {
     font-size:1.3rem;
 }
 
-/* Progress */
-section[data-type="progressbar"] {
-    position:absolute; top: 0; left:0;
-    background-color: rgba(0,0,0,.7);
-    width:100%; height:100%;
-    color:#fff; z-index:1000;
-    text-align:center;
+section[data-type="list"] ul {
+  font-weight: 400;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  overflow: hidden;
 }
 
-section[data-type="progressbar"] div {
-    position:absolute;
-    margin:auto 0;
-    top:0; bottom:0;
-    width:100%;
-    height:6.5rem;
-    font-weight:bold;
+section[data-type="list"] ul li {
+  width: 100%;
+  height: 3rem;
+  -moz-box-sizing: border-box;
+  transition: transform 0.3s ease, padding 0.3s ease;
+  border-bottom: solid 0.1rem #e7e7e7;
+  color: #000;
+  margin: 0;
+  display: block;
 }
 
-
-section[data-type="progressbar"] div p {
+section[data-type="list"] ul p {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space:nowrap;
-  max-width:80%;
-  margin:0 auto 0.5rem;
-}
-
-progress[value] {
-   border:none;
-   width:80%; height:0.6rem;
-   background: #fff;
-}
-
-progress[value]::-moz-progress-bar {
-  background: #01c5ed;
-  border-radius: 0;
-}
-
-progress:not([value]) {
-  background: url(images/spinner.png) no-repeat center center / 100% auto;
-  animation: 0.9s rotate infinite steps(30);
-  width: 2.9rem;
-  height: 2.9rem;
   border: none;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-progress:not([value])::-moz-progress-bar {
- background: none;
-}
-@keyframes rotate {
-  from { transform: rotate(1deg); }
-  to   { transform: rotate(360deg); }
-}
-
-@keyframes move {
-  from { background-position: 0 0; }
-  to   { background-position: 1rem 0; }
+  display: block;
+  margin: 0;
+  color: #000;
+  font-size: 1.2rem;
+  line-height: 1rem;
+  padding: 1rem;
 }

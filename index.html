@@ -1,57 +1,37 @@
 <!DOCTYPE html>
 <html>
- <head>
-    <title>firedict</title>
-    
-    <link rel="stylesheet" type="text/css" href="style/layout.css" />
-    <link rel="stylesheet" type="text/css" href="style/lookup.css" />
-    <link rel="stylesheet" type="text/css" href="style/drawer.css" />
-    <link rel="stylesheet" type="text/css" href="style/header.css" />
-    <link rel="stylesheet" type="text/css" href="style/manage.css" />
-    <link rel="stylesheet" type="text/css" href="style/settings.css" />
-    
-    <script src="js/lib/jquery.min.js" type="text/javascript"></script>
-    <script src="js/app.js" type="text/javascript"></script>
- </head>
- <body>
-    <section data-type="sidebar">
-      <header>
-        <h1>FireDict</h1>
-      </header>
-      <nav>
-        <ul>
-          <li id="lookup"><a href="#content">Lookup words</a></li>
-          <li id="manage"><a href="#content">Manage dictionaries</a></li>
-          <li id="settings"><a href="#content">Settings</a></li>
-          <li id="about"><a href="#content">About</a></li>
-        </ul>
-      </nav>
-    </section>
-    <section id="drawer" role="region">
-      <header>
-        <a href="#"><span class="icon icon-menu">hide sidebar</span></a>
-        <a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
-        <menu type="toolbar">
-            <a href="#"><span class="icon icon-reindex">reindex</span></a>
-        </menu>
-        <h1>Manage Dictionaries</h1>
-        <form action="#" role="search">
-            <input type="text" placeholder="Lookup..." required="" />
-            <button type="reset">Clear</button>
-        </form>
-      </header>
-      <div role="main">
-        <section data-type="list">
-          <ul></ul>
-        </section>
-        <section data-type="output"></section>
-      </div>
-    </section>
-    <section data-type="progressbar">
-        <div>
-            <p></p>
-            <progress></progress>
+    <head>
+        <title>firedict</title>
+        
+        <meta charset=utf-8 />
+        
+        <link rel="stylesheet" type="text/css" href="style/layout.css" />
+        <link rel="stylesheet" type="text/css" href="style/drawer.css" />
+        <link rel="stylesheet" type="text/css" href="style/header.css" />
+        <link rel="stylesheet" type="text/css" href="style/lookup.css" />
+        <link rel="stylesheet" type="text/css" href="style/manage.css" />
+        <link rel="stylesheet" type="text/css" href="style/dialog.css" />
+        <link rel="stylesheet" type="text/css" href="style/settings.css" />
+        
+        <script src="js/lib/jquery.min.js" type="text/javascript"></script>
+        <script src="js/lib/promise.js" type="text/javascript"></script>
+        <script src="js/lib/angular.js" type="text/javascript"></script>
+        <script src="js/lib/angular-route.js" type="text/javascript"></script>
+        <script src="js/lib/angular-sanitize.js" type="text/javascript"></script>
+        <script src="js/directives.js" type="text/javascript"></script>
+        <script src="js/controllers.js" type="text/javascript"></script>
+        <script src="js/app.js" type="text/javascript"></script>
+    </head>
+    <body data-ng-app="FireDict" data-ng-csp>
+        <div data-ng-drawer title="FireDict">
+            <li data-ng-repeat="item in menuitems">
+                <a data-ng-href="#/{{item.ref}}" data-ng-click="toggleSidebar()">
+                    {{item.label}}
+                </a>
+            </li>
         </div>
-    </section>
- </body>
+        <section id="mainArea" data-ng-class="{drawer: drawerOpen}">
+            <div data-ng-view></div>
+        </section>
+    </body>
 </html>

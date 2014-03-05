@@ -1,28 +1,42 @@
 
-[data-type="list"] li.sortable {
+[data-type="list"] ul.manage li {
     padding:0.5rem;
     height: auto;
     position:relative;
 }
 
-[data-type="list"] li.sortable p {
+[data-type="list"] ul.manage li.insertBefore {
+    border-top:#ff9 3rem solid;
+}
+
+[data-type="list"] ul.manage li.insertAfter {
+    border-bottom:#ff9 3rem solid;
+}
+
+[data-type="list"] ul.manage li p {
     font-weight: bold;
     margin-left:2.7rem;
 }
 
-[data-type="list"] li.sortable div.buttons {
-    margin-left:3.5rem;
-    margin-top:-0.5rem;
+[data-type="list"] ul.manage li div.buttons {
+    margin: 0 0.5rem 0.5rem 3.5rem;
     display:none;
 }
 
-[data-type="list"] li.sortable div.buttons button {
-    border-radius:0;
-    padding:0.25rem 0.1rem;
-    margin:0.4rem;
-    width:9rem;
+[data-type="list"] ul.manage li div.buttons button {
+    border-radius: 0.2rem;
+    background-image: linear-gradient(to top, #ddd, #fff);
+    border: 1px solid #ccc;
+    padding:0.3rem 0.1rem;
+    margin:0; width:46%;
+    -moz-box-sizing:border-box;
 }
-[data-type="list"] li.sortable div.color {
+[data-type="list"] ul.manage li div.buttons button:first-of-type {
+    margin-right:2%;
+}
+
+[data-type="list"] ul.manage li div.color {
+    font-size:0; line-height:0;
     position:absolute;
     top:0.6rem; bottom: 0.6rem;
     left:0.6rem; width:2rem;
@@ -33,14 +47,26 @@
     background-repeat: no-repeat;
 }
 
-[data-type="list"] li.sortable.selected {
+[data-type="list"] ul.manage li div.color.light {
+    background-image: url(images/checkmark-light.png);
+}
+
+[data-type="list"] ul.manage.sorting li div.color {
+    background-image: url(images/draghandle.png);
+}
+
+[data-type="list"] ul.manage.sorting li div.color.light {
+    background-image: url(images/draghandle-light.png);
+}
+
+[data-type="list"] ul.manage li.selected {
     background-color: #fff7df;
 }
 
-[data-type="list"] li.sortable.selected div.buttons {
+[data-type="list"] ul.manage li.selected div.buttons {
     display:block;
 }
 
-[data-type="list"] li.sortable.inactive div.color {
-    background-color:#fff !important;
+[data-type="list"] ul.manage li.inactive div.color {
+    background: #fff !important;
 }

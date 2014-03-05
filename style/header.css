@@ -1,18 +1,16 @@
-/* ----------------------------------
- * HEADERS: default
- * ---------------------------------- */
-section[role="region"] > header:first-child {
+
+#mainArea > div > header {
   position: absolute;
   z-index: 90;
   padding: 0;
-  height: 4rem;
   color: #fff;
-  background-color: #F97C17;
+  background-color: #111;
   border: none;
   width:100%;
+  top: 0; left: 0;
 }
 
-section[role="region"] > header:first-child h1 {
+#mainArea > div > header h1 {
   font-size: 1.7rem;
   line-height: 4rem;
   text-align: left;
@@ -27,36 +25,34 @@ section[role="region"] > header:first-child h1 {
   font-weight: lighter;
 }
 
-section[role="region"] > header:first-child h1 em {
+#mainArea > div > header h1 em {
   font-weight: 400;
   font-size: 1.5rem;
   line-height: 1em;
   font-style: normal;
 }
 
-section[role="region"] > header:first-child form {
+#mainArea > div > header form[role="search"]  {
   display: block;
   overflow: hidden;
   position: relative;
-  padding: 0.5rem 0.5rem 0;
-  margin-left: 2.3rem;
+  padding: 0.6rem 1.2rem 0 0;
+  margin-left: 3rem;
 }
 
-section[role="region"] > header:first-child input[type="text"] {
+#mainArea > div > header form[role="search"] input[type="text"] {
   width: 100%;
-  height: 3rem;
+  height: 2.8rem;
   -moz-box-sizing: border-box;
   padding: 0 0.8rem;
-  border: solid 0.1rem #9d4123;
-  border-top-color: #a6501e;
-  border-radius: 0.3rem;
+  border: 0; border-radius:0;
   background: #fff url(headers/images/ui/shadow.png) repeat-x left -0.1rem;
   font-size: 1.5rem;
-  line-height: 3em;
+  line-height: 2.8em;
   box-shadow: none;
 }
 
-section[role="region"] > header:first-child form button[type="reset"] {
+#mainArea > div > header form[role="search"] button {
   font-size: 0;
   overflow: hidden;
   position: absolute;
@@ -71,18 +67,17 @@ section[role="region"] > header:first-child form button[type="reset"] {
   background: url(images/search-clear.png) no-repeat center center / 1.7rem auto;
 }
 
-section[role="region"] > header:first-child input[type="text"]:valid + button[type="reset"] {
+#mainArea > div > header form[role="search"] input[type="text"]:valid + button {
   display: block;
 }
 
-/* Generic set of actions in toolbar */
-section[role="region"] > header:first-child menu[type="toolbar"] {
+#mainArea > div > header menu[type="toolbar"] {
   height: 100%;
   float: right;
 }
 
-section[role="region"] > header:first-child menu[type="toolbar"] a,
-section[role="region"] > header:first-child menu[type="toolbar"] button {
+#mainArea > div > header menu[type="toolbar"] a,
+#mainArea > div > header menu[type="toolbar"] button {
   -moz-box-sizing: border-box;
   position: relative;
   float: left;
@@ -100,13 +95,13 @@ section[role="region"] > header:first-child menu[type="toolbar"] button {
 }
 
 
-section[role="region"] > header:first-child menu[type="toolbar"] {
+#mainArea > div > header menu[type="toolbar"] {
   padding: 0;
   margin: 0;
 }
 
-section[role="region"] > header:first-child a,
-section[role="region"] > header:first-child button {
+#mainArea > div > header a,
+#mainArea > div > header button {
   border: none;
   padding: 0;
   overflow: hidden;
@@ -119,33 +114,30 @@ section[role="region"] > header:first-child button {
 }
 
 
-/* Pressed state */
-section[role="region"] > header:first-child button::-moz-focus-inner {
+#mainArea > div > header button::-moz-focus-inner {
   outline: none;
   border: none;
-  margin-top: -0.2rem; /* To fix line-height bug (697451) */
+  margin-top: -0.2rem;
   padding: 0;
 }
 
-section[role="region"] > header:first-child > a:not([aria-disabled="true"]):active:after,
-section[role="region"] > header:first-child > button:not(:disabled):active:after,
-section[role="region"] > header:first-child > a:not([aria-disabled="true"]):hover:after,
-section[role="region"] > header:first-child > button:not(:disabled):hover:after,
-section[role="region"] > header:first-child menu[type="toolbar"] a:not([aria-disabled="true"]):hover,
-section[role="region"] > header:first-child menu[type="toolbar"] button:not(:disabled):hover,
-section[role="region"] > header:first-child menu[type="toolbar"] a:not([aria-disabled="true"]):active,
-section[role="region"] > header:first-child menu[type="toolbar"] button:not(:disabled):active  {
-  background-color: #dc6a0e !important;
+#mainArea > div > header > a:not([aria-disabled="true"]):active:after,
+#mainArea > div > header > button:not(:disabled):active:after,
+#mainArea > div > header > a:not([aria-disabled="true"]):hover:after,
+#mainArea > div > header > button:not(:disabled):hover:after,
+#mainArea > div > header menu[type="toolbar"] a:not([aria-disabled="true"]):hover,
+#mainArea > div > header menu[type="toolbar"] button:not(:disabled):hover,
+#mainArea > div > header menu[type="toolbar"] a:not([aria-disabled="true"]):active,
+#mainArea > div > header menu[type="toolbar"] button:not(:disabled):active  {
+  background-color: #222 !important;
 }
 
-/* Disabled state */
-section[role="region"] > header:first-child menu[type="toolbar"] a[aria-disabled="true"],
-section[role="region"] > header:first-child menu[type="toolbar"] button[disabled]  {
+#mainArea > div > header menu[type="toolbar"] a[aria-disabled="true"],
+#mainArea > div > header menu[type="toolbar"] button[disabled]  {
   opacity: 0.5;
 }
 
-/* Icon definitions */
-section[role="region"] > header:first-child .icon {
+#mainArea > div > header .icon {
   position: relative;
   float: none;
   display: inline-block;
@@ -158,17 +150,16 @@ section[role="region"] > header:first-child .icon {
   overflow: hidden;
 }
 
-section[role="region"] > header:first-child .icon.icon-menu {
+#mainArea > div > header .icon.icon-menu {
   background-image: url(images/header-icon-menu.png);
 }
 
-section[role="region"] > header:first-child .icon.icon-reindex {
+#mainArea > div > header .icon.icon-reindex {
   background-image: url(images/header-icon-reindex.png);
 }
 
-/* Navigation links (back, cancel, etc) */
-section[role="region"] > header:first-child > button,
-section[role="region"] > header:first-child > a {
+#mainArea > div > header > button,
+#mainArea > div > header > a {
   position: relative;
   width: 5rem;
   height: 4rem;
@@ -178,8 +169,8 @@ section[role="region"] > header:first-child > a {
   margin: 0 -5rem 0 0;
 }
 
-section[role="region"] > header:first-child > button:after,
-section[role="region"] > header:first-child > a:after {
+#mainArea > div > header > button:after,
+#mainArea > div > header > a:after {
   content: "";
   position: absolute;
   left: 0;
@@ -189,10 +180,9 @@ section[role="region"] > header:first-child > a:after {
   height: 4rem;
 }
 
-section[role="region"] > header:first-child > button .icon,
-section[role="region"] > header:first-child > a .icon {
+#mainArea > div > header > button .icon,
+#mainArea > div > header > a .icon {
   display: block;
   margin: 0;
   font-size: 0;
 }
-

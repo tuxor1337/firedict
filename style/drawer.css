@@ -1,28 +1,21 @@
 /* Main region */
-section[role="region"] {
+#mainArea {
   width: 100%;
   height: 100%;
   transition: all 0.25s ease;
   position: relative;
   z-index: 100;
+  transform: translateX(0%);
 }
 
-section[role="region"]:target {
+#mainArea > div {
+    overflow: auto;
+    height: 100%;
+    background: #fff;
+}
+
+#mainArea.drawer {
   transform: translateX(80%);
-}
-
-/* Hide anchor to change target */
-section[role="region"] > header:first-child > a:first-of-type {
-  display: none;
-}
-section[role="region"]:target > header:first-child > a:first-of-type {
-  display: block;
-}
-section[role="region"] > header:first-child > a:last-of-type {
-  display: block;
-}
-section[role="region"]:target > header:first-child > a:last-of-type {
-  display: none;
 }
 
 /* Sidebar */
@@ -113,6 +106,7 @@ section[data-type="sidebar"] > nav > ul > li.chosen {
 }
 
 section[data-type="sidebar"] > nav > ul > li > a {
+  border:0; outline:none;
   text-decoration: none;
   color: #fff;
   font-size: 1.6rem;
@@ -127,3 +121,5 @@ section[data-type="sidebar"] > nav > ul > li > a {
   white-space: nowrap;
   overflow: hidden;
 }
+
+section[data-type="sidebar"] > nav > ul > li > a:active { border:0; outline:none; }
