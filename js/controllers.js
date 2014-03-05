@@ -137,10 +137,31 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         return result;
     };
     $scope.render_content = function (d, did) {
+        function inject_resource(name) {
+            if(!$scope.resources.hasOwnProperty(did))
+                $scope.resources[did] = {};
+            if(!$scope.resources[did].hasOwnProperty(name)) {
+                dictWorker.query("resource", {
+                        did: did, name: name
+                }).then(function (blob) {
+                    if(blob == null)
+                        console.log($scope.dictById(did).alias +
+                            ": File " + name + " not found.");
+                    else {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $scope.resources[did][name] = e.target.result;
+                            if(!$scope.$$phase) { $scope.$apply(); }
+                        };
+                        reader.readAsDataURL(blob);
+                    }
+                });
+            }
+        }
         function render_pango_content(pango_markup) {
             var tmp_obj = $("<div/>").html(pango_markup.replace(/\n/g,"<br>"));
             $(tmp_obj).find(":not("
-                + "span, big, s, tt, b, i, sub, sup, small, u"
+                + "span, big, s, tt, b, i, sub, sup, small, u, br"
             + ")")
             .each(function () {
                 console.log("Pango code injection: " + this.tagName);
@@ -220,28 +241,13 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 var elImg = this,
                     img_filename = $(elImg).attr("src")
                         .replace(/^\x1E/, '').replace(/\x1F$/, '');
-                $(elImg).attr("src", "{{resources['" + img_filename + "']}}");
+                $(elImg).attr("src", 
+                    "{{resources[" + did + "]['" + img_filename + "']}}");
                 if($(elImg).attr("align") == "middle") {
                     $(elImg).removeAttr("align")
                         .css("vertical-align","middle");
                 }
-                if(!$scope.resources.hasOwnProperty(img_filename)) {
-                    dictWorker.query("resource", {
-                            did: did, name: img_filename
-                    }).then(function (blob) {
-                        if(blob == null)
-                            console.log($scope.dictById(did).alias +
-                                ": File " + img_filename + " not found.");
-                        else {
-                            var reader = new FileReader();
-                            reader.onload = function (e) {
-                                $scope.resources[img_filename] = e.target.result;
-                                if(!$scope.$$phase) { $scope.$apply(); }
-                            };
-                            reader.readAsDataURL(blob);
-                        }
-                    });
-                }
+                inject_resource(img_filename);
             });
             $(tmp_obj).find("a").each(function () {
                 var linkText = $(this).text(),
@@ -257,14 +263,37 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             });
             return $(tmp_obj).html();
         }
-        if("m".indexOf(d.type) != -1)
-            return d.content;
-        else if("g".indexOf(d.type) != -1)
+        function render_resource_content(res) {
+            var result = [], aRes = res.split("\n");
+            aRes.forEach(function () {
+                var type = res.split(":")[0],
+                    name = res.split(":")[1];
+                if(type == "img") {
+                    inject_resource(name);
+                    result.push("<img src=\"{{resources[" + did + "]['" + name + "']}}\" />");
+                }
+                console.log("Resource type not supported: " + d.type);
+                // at least: snd, vdo, att
+                result.push("Resource: " + res);
+            });
+            return result.join("<br />\n");
+        }
+        if("g" == d.type)
             return render_pango_content(d.content);
-        else if("h".indexOf(d.type) != -1)
+        else if("h" == d.type)
             return render_html_content(d.content);
+        else if("w" == d.type)
+            return render_html_content(wiki2html(d.content));
+        else if("m" == d.type)
+            return d.content;
+        else if("t" == d.type)
+            return "Pronunciation: /"+d.content+"/";
+        else if("y" == d.type)
+            return "YinBiao/KANA: "+d.content;
+        else if("r" == d.type)
+            return render_resource_content(d.content);
         
-        console.log("Type not supported: " + d.type); // at least: "xtykwr"
+        console.log("Type not supported: " + d.type); // at least: "xkWPX"
         return d.content;
     };
 }])
