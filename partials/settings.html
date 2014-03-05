@@ -1,0 +1,10 @@
+<div data-ng-header data-toggle="toggleSidebar">{{title}}</div>
+<div role="main">
+    <section data-type="list">
+        <ul>
+            <li class="settings" data-ng-repeat="stg in settings">
+                <a data-ng-click="stg.onclick()"><p>{{stg.name}}</p></a>
+            </li>
+        </ul>
+    </section>
+</div>

@@ -1,9 +1,9 @@
-div[role="main"] section[data-type="output"] div.text {
+section[data-type="output"] div.text {
     background-color:#fff; padding: 0; margin:0 1px 2px;
     border: 2px #000 solid;
 }
 
-div[role="main"] section[data-type="output"] div.text h2 {
+section[data-type="output"] div.text h2 {
     overflow: hidden;
     white-space: nowrap;
     margin:0; padding:0.1rem 0.3rem;
@@ -13,48 +13,25 @@ div[role="main"] section[data-type="output"] div.text h2 {
     background-color:#000;
 }
 
-div[role="main"] section[data-type="output"] div.text p.entry {
+section[data-type="output"] div.text p {
     padding: 0.5rem 0.4rem; margin:0;
 }
 
-div[role="main"] section[data-type="output"] div.text h3 {
-    font-size:0.9rem; font-weight:bold;
+section[data-type="output"] div.text h3 {
+    font-size:0.9rem; font-weight:normal;
     margin:0; padding:0.1rem 0.2rem;
     background-color:#000; color:#fff;
 }
 
-div[role="main"] section[data-type="output"] div.text h3 b {
-    font-weight:normal;
+section[data-type="output"] div.text h3 b {
+    font-weight:bold;
 }
 
-div[role="main"] section[data-type="output"] div.text img {
+section[data-type="output"] div.text img {
     max-width:100%;
 }
 
-[data-type="list"] {
-  font-weight: 400;
-  padding: 0;
-}
-
-[data-type="list"] ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-[data-type="list"] li {
-  width: 100%;
-  height: 3rem;
-  -moz-box-sizing: border-box;
-  transition: transform 0.3s ease, padding 0.3s ease;
-  border-bottom: solid 0.1rem #e7e7e7;
-  color: #000;
-  margin: 0;
-  display: block;
-}
-
-[data-type="list"] li > a.term {
+section[data-type="list"] ul.matches a {
   text-decoration: none;
   color: #000;
   display: block;
@@ -63,26 +40,20 @@ div[role="main"] section[data-type="output"] div.text img {
   outline: none;
 }
 
-[data-type="list"] li > a.term:hover {
+section[data-type="list"] ul.matches a:hover {
     background-color: #fff7df;
 }
 
-[data-type="list"] li p {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border: none;
-  display: block;
-  margin: 0;
-  color: #000;
-  font-size: 1.2rem;
-  line-height: 1rem;
-  padding: 1rem;
-}
-
-section[data-type=list] span.marker {
+section[data-type="list"] ul.matches span.marker {
     display:block;
     width:7px; height:7px;
     margin-left:3px;
     float:right;
+}
+
+section[data-type="list"] ul.matches li.idle {
+  background: url(images/spinner.png) no-repeat center center;
+  animation: 0.9s rotate infinite steps(30);
+  height: 2.9rem;
+  border: none; margin: 1rem 0;
 }

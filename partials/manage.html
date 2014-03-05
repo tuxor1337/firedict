@@ -1,0 +1,19 @@
+<div data-ng-header data-type="manage" data-toggle="toggleSidebar"
+     data-reindex="reindex">{{title}}</div>
+<div role="main">
+    <section data-type="list">
+        <ul class="manage" data-ng-sortable>
+            <li data-ng-repeat="dict in dictionaries | orderBy:'rank'"
+                data-ng-class="{'inactive': !dict.active, 'selected': selected == dict.version }">
+                <div class="color handle" data-ng-class="{'light': isDark(dict.color)}"
+                     data-ng-style="{'background-color': dict.color, 'border-color': dict.color}"
+                     data-ng-click="toggleActive(dict)">{{dict.version}}</div>
+                <p data-ng-click="select(dict)">{{dict.alias}}</p>
+                <div class="buttons">
+                    <button data-ng-click="setColor(dict)">Color...</button>
+                    <button data-ng-click="rename(dict)">Rename...</button>
+                </div>
+            </li>
+        </ul>
+    </section>
+</div>

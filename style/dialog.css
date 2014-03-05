@@ -1,0 +1,110 @@
+section[role="dialog"] {
+    position:absolute; top: 0; left:0;
+    background-color: rgba(0,0,0,.8);
+    width:100%; height:100%;
+    color:#fff; z-index:1000;
+    text-align:center;
+}
+
+section[role="dialog"] div.main {
+    position:absolute;
+    margin:auto 0;
+    bottom:7rem;
+    width:100%;
+    font-weight:bold;
+}
+
+section[role="dialog"] div.main p {
+    max-width:80%;
+    margin:0 auto 0.5rem;
+}
+
+section[role="dialog"] div.main input[type=text] {
+    border:1px #444 solid;
+    font-size:1.4rem;
+    padding:0.5rem;
+    background-color: rgba(180,180,180,0.8);
+}
+
+section[role="dialog"] div.buttons {
+    position:absolute;
+    bottom:0; left:0;
+    width:100%;
+    -moz-box-sizing:border-box;
+    padding:0.5rem;
+}
+
+section[role="dialog"] div.buttons button {
+    width:43%; border-radius: 0.3rem;
+    margin: 0.4rem 2% 0.6rem; padding:0.5rem 0;
+    background-image: linear-gradient(to top, #ccc, #eee);
+    border: 1px solid #ccc;
+}
+
+section[role="dialog"] div.buttons button.cancel {
+    background-image: linear-gradient(to top, #800, #b00);
+    border-color:#a00; color:#fff;
+}
+
+section[role="dialog"] div.colorpicker input:first-of-type { margin-top:2rem; }
+section[role="dialog"] div.colorpicker input {
+    border: 0; border-radius:0; outline:none;
+    background:transparent;
+    border-radius:0;
+    width:80%;height:3rem;
+}
+
+section[role="dialog"] div.colorpicker input.red::-moz-range-track { background:#f00; }
+section[role="dialog"] div.colorpicker input.green::-moz-range-track { background:#0f0; }
+section[role="dialog"] div.colorpicker input.blue::-moz-range-track { background:#00f; }
+    
+section[role="dialog"] div.colorpicker input::-moz-range-track {
+    border: 0; border-radius:0; outline:none; height:1px;
+}
+
+section[role="dialog"] div.colorpicker input::-moz-range-thumb {
+    height:1.4rem; width:1.4rem; border-radius:0.2rem; border:0;
+    background-image: #fff;
+}
+
+section[role="dialog"] div.colorpicker div {
+    width:70%; height:3rem; margin: 2rem auto;
+    text-align:center; line-height:3rem;
+    font-size:1.3rem; letter-spacing:0.2rem;
+}
+
+/* Progress */
+section[role="dialog"] progress[value] {
+   border:none;
+   width:80%; height:0.6rem;
+   background: #fff;
+}
+
+section[role="dialog"] progress[value]::-moz-progress-bar {
+  background: #01c5ed;
+  border-radius: 0;
+}
+
+section[role="dialog"] progress:not([value]) {
+  background: url(images/spinner.png) no-repeat center center / 100% auto;
+  animation: 0.9s rotate infinite steps(30);
+  width: 2.9rem;
+  height: 2.9rem;
+  border: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+section[role="dialog"] progress:not([value])::-moz-progress-bar {
+ background: none;
+}
+
+@keyframes rotate {
+  from { transform: rotate(1deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes move {
+  from { background-position: 0 0; }
+  to   { background-position: 1rem 0; }
+}

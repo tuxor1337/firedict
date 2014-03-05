@@ -5,12 +5,11 @@
     function historyManager() {
         var cache = [];
         
-        function get_data(callbk) {
-            reply("indexedDB", new_transaction(callbk), "get_history");
-        }
-        
         function put_data(data) {
-            reply("indexedDB", -1, "set_history", data);
+            query("indexedDB", {
+                action: "set_history",
+                data: data
+            });
         }
         
         this.add = function (decodedObj) {
@@ -53,7 +52,8 @@
         };
         
         this.load = function () {
-            get_data(function (data) { cache = data; });
+            query("indexedDB", { action: "get_history" })
+            .then(function (data) { cache = data; });
         };
         
         this.get = function () { return cache.concat().reverse(); }
@@ -61,7 +61,7 @@
     
     var DictionaryManager = (function () {
         var cls = function () {
-            var aDicts = [],
+            var aDicts = [], ready = false;
                 oHistoryManager = new historyManager();
     
             function dict_by_id(version) {
@@ -94,7 +94,8 @@
                         });
                         for(var i = 0; i < aDicts.length; i++)
                             d.push(aDicts[i].meta());
-                        reply("init_ready", d);
+                        ready = true;
+                        query("init_ready", d);
                     }
                 }
                 
@@ -120,34 +121,39 @@
                         }
                         console.log("Zombie: " + aDicts[n].path);
                         oHistoryManager.clear(aDicts[n].version);
-                        var tid = new_transaction(function () {
+                        query("indexedDB", {
+                            action: "remove_dictionary",
+                            data: aDicts[n].version
+                        }).then(function () {
                             aDicts.splice(n,1);
                             remove_zombie(n);
                         });
-                        reply("indexedDB", tid, "remove_dictionary", aDicts[n].version);
                     } else load_dictionary(0);
                 }
                 
                 function process_dictdata() {
-                    var tid = new_transaction(function (file_list) {
+                    query("scan_dictdata")
+                    .then(function (file_list) {
                         dictdata_dirs = file_list;
                         remove_zombie(0);
                     });
-                    reply("scan_dictdata", tid);
                 }
                 
                 function get_dictionaries() {
-                    var tid = new_transaction(function (dict_list) {
+                    query("progress", { text: "Processing dictionaries..." })
+                    query("indexedDB", { action: "get_dictionaries" })
+                    .then(function (dict_list) {
                         aDicts = dict_list;
                         process_dictdata();
                     });
-                    reply("indexedDB", tid, "get_dictionaries");
                 }
                 
                 get_dictionaries();
             };
             
             this.lookup_fuzzy = function (term) {
+                if(!ready) return [];
+                
                 var matches = [];
                 function add_matches(raw_matches) {
                     while(raw_matches.length > 0) {
@@ -185,20 +191,42 @@
                 });
             };
             
-            this.lookup_exact = function (did, term) {
-                return dict_by_id(did).lookup(term);
+            this.lookup_exact = function (term) {
+                if(!ready) return [];
+                var result = [];
+                aDicts.forEach(function (dict) {
+                    result.push(dict.lookup(term));
+                });
+                return Promise.all(result).then(function (arr) {
+                    var tmp = [].concat.apply([], arr),
+                        u = {}, a = [];
+                    for(var i = 0, l = tmp.length; i < l; ++i){
+                        var teststr = tmp[i][2] + "_" + tmp[i][1].dictpos[0];
+                        if(u.hasOwnProperty(teststr)) continue;
+                        a.push(tmp[i]);
+                        u[teststr] = 1;
+                    }
+                    return a;
+                });
             };
             
             this.entry = function (decodedObj) {
+                if(!ready) return [];
                 oHistoryManager.add(decodedObj);
-                return dict_by_id(decodedObj[2]).entry(decodedObj);
+                return {
+                    term: decodedObj[0],
+                    data: dict_by_id(decodedObj[2]).entry(decodedObj),
+                    did: decodedObj[2]
+                };
             };
         
             this.resource = function (version, name) {
+                if(!ready) return null;
                 return dict_by_id(version).resource(name);
             };
             
             this.edit = function (dict) {
+                if(!ready) return false;
                 dict_by_id(dict.version).meta(dict);
             };
             
