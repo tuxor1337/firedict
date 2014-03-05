@@ -29,7 +29,7 @@
 	background-repeat:no-repeat;
 	background-position:center;
 	float:right;
-	margin:0 0 1em 1em; width:320px;
+	margin:0.6em 0 1em 1em; width:320px;
 } 
 .gallery_div.gallery_preview img {
     box-shadow: 0 0 10px 6px #999;
