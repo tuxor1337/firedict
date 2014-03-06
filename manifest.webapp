@@ -1,21 +1,35 @@
 {
-  "name": "firedict",
-  "description": "A simple offline dictionary app",
+  "name": "FireDict",
+  "description": "A simple offline dictionary app in the spirit of ColorDict and GoldenDict. It scans for StarDict dictionaries stored in subdirectories of the sdcard's 'dictdata' directory.",
   "version": "1.0",
+  "default_locale": "en",
+  "locales": {
+    "de": {
+        "description": "App zum Nachschlagen in Offline-Wörterbüchern, angelehnt an ColorDict und GoldenDict. Unterstützt werden Wörterbücher im StarDict-Format in Unterverzeichnissen des 'dictdata'-Verzeichnisses der SD-Karte."
+    }
+  },
   "launch_path": "/index.html",
+  "origin": "app://tovotu.de",
   "type": "privileged",
   "icons": {
     "60": "/icon-60.png",
-    "128": "/icon-128.png"
+    "128": "/icon-128.png",
+    "32": "/icon-32.png",
+    "90": "/icon-90.png",
+    "120": "/icon-120.png",
+    "256": "/icon-256.png"
   },
   "developer": {
     "name": "tuxor1337",
-    "url": "https://github.com/tuxor1337/firedict"
+    "url": "https://github.com/tuxor1337"
   },
   "permissions": {
     "device-storage:sdcard": {
-        "access": "readonly"
+        "access": "readonly",
+        "description": "FireDict will scan your sdcard's dictdata directory and access the files stored there."
     },
-    "storage": { }
+    "storage": {
+        "description": "FireDict builds a word index for each dictionary and stores it in an IndexedDB. The index's size might exceed several megabytes."
+    }
   }
 }
