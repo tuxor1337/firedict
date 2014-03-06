@@ -4,12 +4,16 @@ ICONS = $(ICON_RESOLUTIONS:%=icon-%.png)
 
 .PHONY: clean all
 
-all: $(ICONS) package.zip
+all: package.zip
 
-icon-%.png: icon-scalable.svg
-	convert -background transparent $< -resize $*x$* $@
+icon-%.png: icon-scalable.svg icon-scalable-detail.svg
+	if [ $* -lt 100 ] ; then \
+		convert -background transparent $(word 1, $^) -resize $*x$* $@ ; \
+	else \
+		convert -background transparent $(word 2, $^) -resize $*x$* $@ ; \
+	fi
 	
-package.zip:
+package.zip: $(ICONS)
 	zip package.zip -r js partials style index.html manifest.webapp $(ICONS)
 	
 clean:
