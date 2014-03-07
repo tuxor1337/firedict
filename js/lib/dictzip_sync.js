@@ -167,6 +167,8 @@
                 if(!verified) {
                     throw new Error("Read attempt before loadend.");
                 }
+                if(typeof pos === "undefined") pos = 0;
+                if(typeof len === "undefined") len = chlen * chunks.length;
                 var firstchunk = Math.min(Math.floor(pos/chlen), chunks.length-1),
                     lastchunk = Math.min(Math.floor((pos+len)/chlen), chunks.length-1),
                     offset = pos - firstchunk*chlen,

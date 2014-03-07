@@ -230,12 +230,19 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             var tmp_obj = $("<div />").html(html_markup);
             $(tmp_obj).find(":not("
                 + "p, font, span, div, table, tr, td, tbody, strong, "
-                + "br, i, a, b, u, img, sup, sub, ul, ol, li"
+                + "br, i, a, b, u, img, sup, sub, ul, ol, li, "
+                + "center, left, right"
             + ")").each(function () {
                 console.log("Html code injection: " + this.tagName);
                 if($(this).children().length == 0)
                     $(this).replaceWith($(this).text());
                 else $(this).children().unwrap();
+            });
+            $(tmp_obj).find("center, left, right").each(function () {
+                $(this).replaceWith(
+                    $("<p />").html($(this).html())
+                    .css("text-align",this.tagName)
+                );
             });
             $(tmp_obj).find("img").each(function () {
                 var elImg = this,
