@@ -158,28 +158,36 @@
                         resolve([]); return;
                     }
                     oDB.get_range(offset, CHUNKSIZE).then(function (list) {
-                        var currentIndex, currentObj, currentCmp, lastMatch = null;
+                        var currentIndex, currentObj, currentCmp;
                         currentIndex = binarySearch("min", list);
-                        currentObj = list[currentIndex];
-                        currentCmp = cmp(currentObj);
-                        if(currentCmp == 0) lastMatch = currentObj;
-                        if(lastMatch == null) resolve([]);
+                        if(currentIndex >= list.length || currentIndex < 0)
+                            resolve([]);
                         else {
-                            function process_range(range) {
-                                var result = [];
-                                for(var r = 0; r < range.length; r++) {
-                                    currentObj = range[r];
-                                    currentCmp = cmp(currentObj, word); 
-                                    if(currentCmp != 0) break;
-                                    else result.push(decodeObj(currentObj));
+                            currentObj = list[currentIndex];
+                            currentCmp = cmp(currentObj);
+                            if(currentCmp != 0) resolve([]);
+                            else {
+                                function process_range(range) {
+                                    var result = [];
+                                    for(var r = 0; r < range.length; r++) {
+                                        currentObj = range[r];
+                                        currentCmp = cmp(currentObj, word); 
+                                        if(currentCmp != 0) break;
+                                        else result.push(decodeObj(currentObj));
+                                    }
+                                    resolve(result);
                                 }
-                                resolve(result);
-                            }
-                            if(currentIndex + 20  < CHUNKSIZE) {
-                                process_range(list.slice(currentIndex,currentIndex+20));
-                            } else {
-                                oDB.get_range(offset + currentIndex, 20)
-                                    .then(process_range);
+                                if(currentIndex + 20  < CHUNKSIZE) {
+                                    process_range(
+                                        list.slice(
+                                            currentIndex,
+                                            currentIndex + 20
+                                        )
+                                    );
+                                } else {
+                                    oDB.get_range(offset + currentIndex, 20)
+                                        .then(process_range);
+                                }
                             }
                         }
                     });
