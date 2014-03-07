@@ -78,12 +78,17 @@
                 
                 function add_dictionary(n) {
                     if(n < dictdata_dirs.length) {
-                        var oDict = new Dictionary(dictdata_dirs[n].files);
-                        oDict.init(dictdata_dirs[n].path, aDicts.length)
-                        .then(function () {
-                            aDicts.push(oDict);
+                        try {
+                            var oDict = new Dictionary(dictdata_dirs[n].files);
+                            oDict.init(dictdata_dirs[n].path, aDicts.length)
+                            .then(function () {
+                                aDicts.push(oDict);
+                                add_dictionary(n+1);
+                            });
+                        } catch (err) {
+                            console.log(err.message);
                             add_dictionary(n+1);
-                        });
+                        }
                     } else {
                         var d = [];
                         aDicts.sort(function (a,b) {
