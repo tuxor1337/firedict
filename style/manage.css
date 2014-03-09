@@ -3,14 +3,16 @@
     padding:0.5rem;
     height: auto;
     position:relative;
+    min-height:40px;
+    border-top: solid 0.001rem #e7e7e7;
 }
 
 [data-type="list"] ul.manage li.insertBefore {
-    border-top:#ff9 3rem solid;
+    border-top: 60px #ff9 solid;
 }
 
 [data-type="list"] ul.manage li.insertAfter {
-    border-bottom:#ff9 3rem solid;
+    border-bottom: 60px #ff9 solid;
 }
 
 [data-type="list"] ul.manage li p {
@@ -37,9 +39,7 @@
 
 [data-type="list"] ul.manage li div.color {
     font-size:0; line-height:0;
-    position:absolute;
-    top:0.6rem; bottom: 0.6rem;
-    left:0.6rem; width:2rem;
+    width:32px; height:32px; float:left;
     border: 0.3rem #000 solid;
     border-radius:0.5rem;
     background-image: url(images/checkmark.png);
@@ -51,11 +51,18 @@
     background-image: url(images/checkmark-light.png);
 }
 
-[data-type="list"] ul.manage.sorting li div.color {
+[data-type="list"] ul.manage li.sorting {
+    position: absolute;
+    z-index: 100; left: 0;
+    background-color: #fff;
+    box-shadow: 0 0 10px 6px #999;
+}
+
+[data-type="list"] ul.manage li.sorting div.color {
     background-image: url(images/draghandle.png);
 }
 
-[data-type="list"] ul.manage.sorting li div.color.light {
+[data-type="list"] ul.manage li.sorting div.color.light {
     background-image: url(images/draghandle-light.png);
 }
 

@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("FireDict", [
-    "ngRoute", "ngSanitize",
+    "ngRoute", "ngSanitize", "ngTouch", // "hammer",
     "FireDictControllers", "FireDictDirectives"
 ])
 .config(["$compileProvider", function($compileProvider) {
