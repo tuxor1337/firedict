@@ -57,6 +57,34 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
         $scope.reindex = function () {
             dictWorker.query("init");
+        };   
+        $scope.dictMoveAfter = function (selected, target) {
+            var aDictSorted = $scope.dictionaries.concat().sort(function (a,b) {
+                if (a.rank < b.rank) return -1;
+                if (a.rank > b.rank) return 1;
+                return 0;
+            });
+            var currVer = parseInt($(selected).find(".color").text()),
+                currIdx = -1;
+            for(var i = 0; i < aDictSorted.length; i++) {
+                if(currVer == aDictSorted[i].version) currIdx = i;
+            }
+            if(target == null) {
+                if(currIdx == 0) return;
+                aDictSorted.unshift(aDictSorted.splice(currIdx, 1)[0]);
+            } else {
+                var curr = aDictSorted.splice(currIdx,1)[0],
+                    targetVer = parseInt($(target).find(".color").text());
+                for(var i = 0; i < aDictSorted.length; i++) {
+                    if(targetVer == aDictSorted[i].version) {
+                        aDictSorted.splice(i+1, 0, curr); break;
+                    }
+                }
+            }
+            for(var i = 0; i < aDictSorted.length; i++) {
+                $scope.dictById(aDictSorted[i].version).rank = i;
+            }
+            if(!$scope.$$phase) { $scope.$apply(); }
         };
     }
 ])

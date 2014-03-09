@@ -2,7 +2,7 @@
      data-reindex="reindex">{{title}}</div>
 <div role="main">
     <section data-type="list">
-        <ul class="manage" data-ng-sortable>
+        <ul class="manage" data-ng-sortable data-move-fn="dictMoveAfter">
             <li data-ng-repeat="dict in dictionaries | orderBy:'rank'"
                 data-ng-class="{'inactive': !dict.active, 'selected': selected == dict.version }">
                 <div class="color handle" data-ng-class="{'light': isDark(dict.color)}"

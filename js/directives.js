@@ -1,8 +1,4 @@
 
-Array.prototype.move = function(from, to) {
-    this.splice(to, 0, this.splice(from, 1)[0]);
-};
-
 var FireDictDirectives = angular.module("FireDictDirectives", [])
 .directive("ngHeader", function () {
     return { 
@@ -34,77 +30,123 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
 })
 .directive("ngSortable", function () {
     return {
-        compile: function ($element) {
-            $element.find("li").prop("draggable", true);
-            return function ($scope, $element) {
-                function moveDict(ver, target) {
-                    var oldrank = $rootScope.dictById(ver).rank,
-                        newrank = $rootScope.dictById(target).rank;
-                    $scope.dictionaries.forEach(function (dict) {
-                        if(oldrank > newrank && dict.rank >= newrank && dict.rank < oldrank) dict.rank += 1;
-                        else if(oldrank < newrank && dict.rank <= newrank && dict.rank > oldrank) dict.rank -=1;
-                        if(dict.version == ver) dict.rank = newrank;
-                    });
-                    if(!$scope.$$phase) { $scope.$apply(); }
+        compile: function () {
+            return function ($scope, $element, $attr) {
+                var handle, startY, currIndex = -1, dragover = null;
+                    
+                var moveAfter = $scope.$eval($attr.moveFn);
+                
+                function touchY(evt) {
+                    return evt.originalEvent.changedTouches[0].pageY;
                 }
                 
-                var target, refIdx;
-                $element
-                .on("mousedown", "li", function (e) {
-                    target = e.target;
-                    refIdx = $(this).index();
-                })
-                .on("dragstart", "li", function (e) {
-                    if($(this).find(".handle")[0].contains(target)) {
-                        $(this).css("opacity","0.1");
-                        e.originalEvent.dataTransfer.setData("text/plain","jo");
-                        $element.addClass("sorting")
-                        .find("li").removeClass("selected");
-                        $scope.selected = -1;
+                function getNext(curr, last) {
+                    $(curr).siblings().css("transition", "border 0.5s");
+                    var currRect = curr.getBoundingClientRect(),
+                        lastRect = last.getBoundingClientRect(),
+                        currMiddleY = 0.5*(currRect.bottom + currRect.top),
+                        next = null;
+                    if(currMiddleY < lastRect.top + 0.5*last.clientHeight) {
+                        if(isFirst(curr, last)) {
+                            next = last;
+                            $(next).removeClass("insertAfter")
+                                .addClass("insertBefore");
+                        } else {
+                            $(last).removeClass("insertAfter");
+                            if($(last).index() == $(curr).index() + 1)
+                                next = $(curr).prev()[0];
+                            else next = $(last).prev()[0];
+                            $(next).addClass("insertAfter");
+                        }
                     } else {
-                        e.preventDefault();
-                    }
-                })
-                .on("dragover", "li", function (e) {
-                    if(!$(this).find(".handle")[0].contains(target)) {
-                        e.preventDefault();
-                        e.originalEvent.dataTransfer.dropEffect = "move";
-                    }
-                })
-                .on("dragenter", "li", function (e) {
-                    if(!$(this).find(".handle")[0].contains(target)) {
-                        if("undefined" === typeof $(this).data("cnt"))
-                            $(this).data("cnt", 0)
-                        var cnt = $(this).data("cnt");
-                        if(cnt++ == 0) {
-                            if($(this).index() > refIdx)
-                                $(this).addClass("insertAfter");
-                            else $(this).addClass("insertBefore");
+                        var parentRect = $(curr).parent()[0].getBoundingClientRect();
+                        if($(last).hasClass("insertBefore")) {
+                            next = last;
+                            $(next).removeClass("insertBefore")
+                                .addClass("insertAfter");
+                        } else if(isLast(curr, last)) {
+                            next = last;
+                        } else {
+                            $(last).removeClass("insertAfter");
+                            if($(last).index() == $(curr).index() - 1)
+                                next = $(curr).next()[0];
+                            else next = $(last).next()[0];
+                            $(next).addClass("insertAfter");
                         }
-                        $(this).data("cnt", cnt);
                     }
-                })
-                .on("dragleave", "li", function (e) {
-                    if(!$(this).find(".handle")[0].contains(target)) {
-                        var cnt = $(this).data("cnt");
-                        if(--cnt == 0) {
-                            $(this).removeClass("insertAfter insertBefore");
+                    return next;
+                }
+                
+                function parentMiddleDistY(el) {
+                    var parentRect = $(el).parent()[0].getBoundingClientRect(),
+                        currRect = el.getBoundingClientRect();
+                    return 0.5*(currRect.bottom + currRect.top) - parentRect.top;
+                }
+                
+                function isContained(curr, testEl) {
+                    var currRect = curr.getBoundingClientRect(),
+                        testRect = testEl.getBoundingClientRect(),
+                        currMiddleY = 0.5*(currRect.bottom + currRect.top);
+                    if(isFirst(curr, testEl)) {
+                        if(parentMiddleDistY(curr) <= 0) return true;
+                        if($(testEl).hasClass("insertBefore")) {
+                            return currMiddleY <= testRect.bottom - 0.5*testEl.clientHeight;
                         }
-                        $(this).data("cnt", cnt);
+                    }
+                    var parentRect = $(curr).parent()[0].getBoundingClientRect();
+                    return (currMiddleY  >= testRect.top + 0.5*testEl.clientHeight
+                        && currMiddleY <= testRect.bottom + 0.5*testEl.clientHeight)
+                        || (currRect.bottom > parentRect.bottom && isLast(curr, testEl));
+                }
+                
+                function isFirst(curr, testEl) {
+                    return $(testEl).index() == 0
+                        || ($(testEl).index() == 1 && $(curr).index() == 0);
+                }
+                
+                function isLast(curr, testEl) {
+                    var len = $(testEl).siblings().length,
+                        result = $(testEl).index() == len
+                        || ($(testEl).index() == len-1 && $(curr).index() == len);
+                    return result;
+                }
+                
+                $element
+                .on("touchstart", "li", function (e) {
+                    if($(this).siblings().length > 0) {
+                        handle = e.target;
+                        startY = touchY(e);
                     }
                 })
-                .on("dragend", "li", function (e) {
-                    $(this).css("opacity","1");
-                    $element.find("li").data("cnt",0)
-                        .removeClass("insertBefore insertAfter");
-                    $element.removeClass("sorting");
-                })
-                .on("drop", "li", function (e) {
-                    if(!$(this).find(".handle")[0].contains(target)) {
+                .on("touchmove", "li", function (e) {
+                    if($(this).find(".handle")[0].contains(handle)) {
                         e.preventDefault();
-                        var dragver = parseInt($(target).parents("li").find("div.color").text()),
-                            dropver = parseInt($(this).find("div.color").text());
-                        moveDict(dragver,dropver);
+                        if(currIndex >= 0) {
+                            $(this).css({ "top": touchY(e) - 20 + "px" });
+                            if(dragover == null) {
+                                if($(this).index() > 0)
+                                    dragover = $(this).prev().addClass("insertAfter")[0];
+                                else dragover = $(this).next().addClass("insertBefore")[0];
+                            } else if (!isContained(this, dragover)) {
+                                dragover = getNext(this, dragover);
+                            }
+                        } else if(Math.abs(startY - touchY(e)) > 3) {
+                            $(this).parent("ul").height($(this).parent("ul").height()+20);
+                            $(this).addClass("sorting")
+                            .siblings().addBack().removeClass("selected");
+                            currIndex = $(this).index();
+                        }
+                    }
+                })
+                .on("touchend", "li", function (e) {
+                    if($(this).find(".handle")[0].contains(handle) && currIndex >= 0) {
+                        var target = $(this).siblings(".insertAfter");
+                        $(this).removeClass("sorting").css({ "top": "auto" })
+                        .siblings().css("transition", "none")
+                        .removeClass("insertBefore insertAfter")
+                        .parent("ul").height("auto");
+                        startY = null; currIndex = -1; handle = null; dragover = null;
+                        moveAfter(this, (target.length > 0) ? target[0] : null);
                     }
                 });
             };
