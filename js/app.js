@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("FireDict", [
-    "ngRoute", "ngSanitize", "ngTouch", // "hammer",
+    "ngRoute", "ngSanitize", "ngTouch",
     "FireDictControllers", "FireDictDirectives"
 ])
 .config(["$compileProvider", function($compileProvider) {
@@ -251,6 +251,12 @@ angular.module("FireDict", [
                             this.continue();
                         }
                     };
+                    req.onerror = function () { 
+                        console.log("Error while scanning '" + result[n].path
+                            + "': (" + request.error.name
+                            + ") " + request.error.message);
+                        add_subdir(n+1); 
+                    };
                 }
             }
             
@@ -274,6 +280,12 @@ angular.module("FireDict", [
                     }
                     this.continue();
                 }
+            };
+                
+            request.onerror = function () {
+                console.log("Error while scanning sdcard: (" + request.error.name
+                    + ") " + request.error.message);
+                obj.reply(result);
             };
         });
         

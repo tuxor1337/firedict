@@ -9,13 +9,13 @@ section[role="dialog"] {
 section[role="dialog"] div.main {
     position:absolute;
     margin:auto 0;
-    bottom:7rem;
+    bottom:9rem;
     width:100%;
     font-weight:bold;
 }
 
 section[role="dialog"] div.main p {
-    max-width:80%;
+    max-width:90%;
     margin:0 auto 0.5rem;
 }
 
@@ -31,19 +31,21 @@ section[role="dialog"] div.buttons {
     bottom:0; left:0;
     width:100%;
     -moz-box-sizing:border-box;
-    padding:0.5rem;
+    padding:1rem 0.5rem;
+    border-top: 1px #444 solid;
+    background-color: rgba(0,0,0,0.5);
 }
 
 section[role="dialog"] div.buttons button {
-    width:43%; border-radius: 0.3rem;
-    margin: 0.4rem 2% 0.6rem; padding:0.5rem 0;
+    width:45%; border-radius: 0.2rem;
+    margin: 0.4rem 1.2%; padding:0.7rem 0;
     background-image: linear-gradient(to top, #ccc, #eee);
     border: 1px solid #ccc;
 }
 
 section[role="dialog"] div.buttons button.cancel {
-    background-image: linear-gradient(to top, #800, #b00);
-    border-color:#a00; color:#fff;
+    background-image: linear-gradient(to top, #700, #a00);
+    border-color:#800; color:#fff;
 }
 
 section[role="dialog"] div.colorpicker input:first-of-type { margin-top:2rem; }

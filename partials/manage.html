@@ -1,19 +1,53 @@
-<div data-ng-header data-type="manage" data-toggle="toggleSidebar"
-     data-reindex="reindex">{{title}}</div>
-<div role="main">
-    <section data-type="list">
-        <ul class="manage" data-ng-sortable data-move-fn="dictMoveAfter">
-            <li data-ng-repeat="dict in dictionaries | orderBy:'rank'"
-                data-ng-class="{'inactive': !dict.active, 'selected': selected == dict.version }">
-                <div class="color handle" data-ng-class="{'light': isDark(dict.color)}"
-                     data-ng-style="{'background-color': dict.color, 'border-color': dict.color}"
-                     data-ng-click="toggleActive(dict)">{{dict.version}}</div>
-                <p data-ng-click="select(dict)">{{dict.alias}}</p>
-                <div class="buttons">
-                    <button data-ng-click="setColor(dict)">Color...</button>
-                    <button data-ng-click="rename(dict)">Rename...</button>
-                </div>
-            </li>
-        </ul>
-    </section>
+<div class="partial-container">
+    <div data-ng-header="" data-type="manage" data-toggle="toggleSidebar"
+         data-reindex="reindex">{{title}}</div>
+    <div role="main">
+        <section data-type="list">
+            <ul class="manage" data-ng-sortable="" data-move-fn="dictMoveAfter">
+                <li data-ng-if="dictionaries.length == 0" class="notfound">
+                    <h2>No dictionaries found</h2>
+                    <p>
+                        Unfortunately, scanning your memory card's <i>dictdata</i>
+                        directory for dictionaries was not successful.
+                    </p>
+                    <p>
+                        Please make sure you inserted the (right) memory card and
+                        place your dictionaries in a directory named <i>dictdata</i>
+                        directly at your memory card's root.
+                    </p>
+                    <p>
+                        Furthermore, make sure your dictionary is in proper <i>StarDict</i>
+                        format, i.e. containing at least one file of each of the
+                        following types/file endings: idx, ifo, dict.
+                    </p>
+                    <p>
+                    Examplary directory structure:
+                    </p>
+                    <ul>
+                        <li>dictdata/testDict/mydict.dict</li>
+                        <li>dictdata/testDict/mydict.idx</li>
+                        <li>dictdata/testDict/mydict.ifo</li>
+                        <li>dictdata/testdict2/a2ndDict.dict.dz</li>
+                        <li>dictdata/testdict2/a2ndDict.idx</li>
+                        <li>dictdata/testdict2/a2ndDict.ifo</li>
+                    </ul>
+                    <p>
+                        Note that files may be compressed, i.e. having an additional
+                        <i>dz</i> at the end.
+                    </p>
+                </li>
+                <li draggable="" data-ng-repeat="dict in dictionaries | orderBy:'rank'"
+                    data-ng-class="{'inactive': !dict.active, 'selected': selected == dict.version }">
+                    <div class="color handle" data-ng-class="{'light': isDark(dict.color)}"
+                         data-ng-style="{'background-color': dict.color, 'border-color': dict.color}"
+                         data-ng-click="toggleActive(dict)">{{dict.version}}</div>
+                    <p data-ng-click="select(dict)">{{dict.alias}}</p>
+                    <div class="buttons">
+                        <button data-ng-click="setColor(dict)">Color...</button>
+                        <button data-ng-click="rename(dict)">Rename...</button>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </div>
 </div>
