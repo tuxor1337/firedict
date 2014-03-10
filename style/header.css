@@ -1,5 +1,5 @@
 
-#mainArea > div > header {
+header.main {
   position: absolute;
   z-index: 90;
   padding: 0;
@@ -10,7 +10,7 @@
   top: 0; left: 0;
 }
 
-#mainArea > div > header h1 {
+header.main h1 {
   font-size: 1.7rem;
   line-height: 4rem;
   text-align: left;
@@ -25,14 +25,14 @@
   font-weight: lighter;
 }
 
-#mainArea > div > header h1 em {
+header.main h1 em {
   font-weight: 400;
   font-size: 1.5rem;
   line-height: 1em;
   font-style: normal;
 }
 
-#mainArea > div > header form[role="search"]  {
+header.main form[role="search"]  {
   display: block;
   overflow: hidden;
   position: relative;
@@ -40,7 +40,7 @@
   margin-left: 3rem;
 }
 
-#mainArea > div > header form[role="search"] input[type="text"] {
+header.main form[role="search"] input[type="text"] {
   width: 100%;
   height: 2.8rem;
   -moz-box-sizing: border-box;
@@ -52,7 +52,7 @@
   box-shadow: none;
 }
 
-#mainArea > div > header form[role="search"] button {
+header.main form[role="search"] button {
   font-size: 0;
   overflow: hidden;
   position: absolute;
@@ -67,17 +67,17 @@
   background: url(images/search-clear.png) no-repeat center center / 1.7rem auto;
 }
 
-#mainArea > div > header form[role="search"] input[type="text"]:valid + button {
+header.main form[role="search"] input[type="text"]:valid + button {
   display: block;
 }
 
-#mainArea > div > header menu[type="toolbar"] {
+header.main menu[type="toolbar"] {
   height: 100%;
   float: right;
 }
 
-#mainArea > div > header menu[type="toolbar"] a,
-#mainArea > div > header menu[type="toolbar"] button {
+header.main menu[type="toolbar"] a,
+header.main menu[type="toolbar"] button {
   -moz-box-sizing: border-box;
   position: relative;
   float: left;
@@ -95,13 +95,13 @@
 }
 
 
-#mainArea > div > header menu[type="toolbar"] {
+header.main menu[type="toolbar"] {
   padding: 0;
   margin: 0;
 }
 
-#mainArea > div > header a,
-#mainArea > div > header button {
+header.main a,
+header.main button {
   border: none;
   padding: 0;
   overflow: hidden;
@@ -114,30 +114,30 @@
 }
 
 
-#mainArea > div > header button::-moz-focus-inner {
+header.main button::-moz-focus-inner {
   outline: none;
   border: none;
   margin-top: -0.2rem;
   padding: 0;
 }
 
-#mainArea > div > header > a:not([aria-disabled="true"]):active:after,
-#mainArea > div > header > button:not(:disabled):active:after,
-#mainArea > div > header > a:not([aria-disabled="true"]):hover:after,
-#mainArea > div > header > button:not(:disabled):hover:after,
-#mainArea > div > header menu[type="toolbar"] a:not([aria-disabled="true"]):hover,
-#mainArea > div > header menu[type="toolbar"] button:not(:disabled):hover,
-#mainArea > div > header menu[type="toolbar"] a:not([aria-disabled="true"]):active,
-#mainArea > div > header menu[type="toolbar"] button:not(:disabled):active  {
+header.main > a:not([aria-disabled="true"]):active:after,
+header.main > button:not(:disabled):active:after,
+header.main > a:not([aria-disabled="true"]):hover:after,
+header.main > button:not(:disabled):hover:after,
+header.main menu[type="toolbar"] a:not([aria-disabled="true"]):hover,
+header.main menu[type="toolbar"] button:not(:disabled):hover,
+header.main menu[type="toolbar"] a:not([aria-disabled="true"]):active,
+header.main menu[type="toolbar"] button:not(:disabled):active  {
   background-color: #222 !important;
 }
 
-#mainArea > div > header menu[type="toolbar"] a[aria-disabled="true"],
-#mainArea > div > header menu[type="toolbar"] button[disabled]  {
+header.main menu[type="toolbar"] a[aria-disabled="true"],
+header.main menu[type="toolbar"] button[disabled]  {
   opacity: 0.5;
 }
 
-#mainArea > div > header .icon {
+header.main .icon {
   position: relative;
   float: none;
   display: inline-block;
@@ -150,16 +150,16 @@
   overflow: hidden;
 }
 
-#mainArea > div > header .icon.icon-menu {
+header.main .icon.icon-menu {
   background-image: url(images/header-icon-menu.png);
 }
 
-#mainArea > div > header .icon.icon-reindex {
+header.main .icon.icon-reindex {
   background-image: url(images/header-icon-reindex.png);
 }
 
-#mainArea > div > header > button,
-#mainArea > div > header > a {
+header.main > button,
+header.main > a {
   position: relative;
   width: 5rem;
   height: 4rem;
@@ -169,8 +169,8 @@
   margin: 0 -5rem 0 0;
 }
 
-#mainArea > div > header > button:after,
-#mainArea > div > header > a:after {
+header.main > button:after,
+header.main > a:after {
   content: "";
   position: absolute;
   left: 0;
@@ -180,8 +180,8 @@
   height: 4rem;
 }
 
-#mainArea > div > header > button .icon,
-#mainArea > div > header > a .icon {
+header.main > button .icon,
+header.main > a .icon {
   display: block;
   margin: 0;
   font-size: 0;

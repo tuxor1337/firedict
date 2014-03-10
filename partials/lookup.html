@@ -1,35 +1,37 @@
-<div data-ng-header data-toggle="toggleSidebar" data-type="lookup"
-     data-term="search_term" data-focus="back"></div>
-<div role="main">
-    <section data-type="list" data-ng-if="!showingEntry">
-        <ul class="matches">
-            <li data-ng-show="!matches.length &amp;&amp; !idle"><p>No matches!</p></li>
-            <li data-ng-show="idle" class="idle"></li>
-            <li data-ng-repeat="match in matches">
-                <a data-ng-click="show_entry(match)">
-                    <p>
-                        <span data-ng-repeat="dict in dictionaries | filter:matchDictFilter(match) | orderBy: 'rank'"
-                              data-ng-style="{'background-color':dict.color}"
-                              class="marker"></span>
-                        {{match.term}}
-                    </p>
-                </a>
-            </li>
-        </ul>
-    </section>
-    <section data-type="output" data-ng-if="showingEntry">
-        <div data-ng-repeat="dict in dictionaries | filter:entryDictFilter | orderBy: 'rank'" class="text"
-             data-ng-style="{'border-color':dict.color}">
-            <h2 class="dictname"
-                data-ng-style="{'background-color':dict.color}">{{dict.alias}}</h2>
-            <div data-ng-repeat="entry in entries | filter:{ did: dict.version }:true">
-                <h3 class="term"
-                    data-ng-style="{'background-color':dict.color}"
-                    data-ng-bind-html="render_term(entry.term)"></h3>
-                <p class="content"
-                   data-ng-repeat="dt in entry.data"
-                   data-compile="render_content(dt, dict.version)"></p>
+<div class="partial-container">
+    <div data-ng-header="" data-toggle="toggleSidebar" data-type="lookup"
+         data-term="search_term" data-focus="back"></div>
+    <div role="main">
+        <section data-type="list" data-ng-if="!showingEntry">
+            <ul class="matches">
+                <li data-ng-show="!matches.length &amp;&amp; !idle"><p>No matches!</p></li>
+                <li data-ng-show="idle" class="idle"></li>
+                <li data-ng-repeat="match in matches">
+                    <a data-ng-click="show_entry(match)">
+                        <p>
+                            <span data-ng-repeat="dict in dictionaries | filter:matchDictFilter(match) | orderBy: 'rank'"
+                                  data-ng-style="{'background-color':dict.color}"
+                                  class="marker"></span>
+                            {{match.term}}
+                        </p>
+                    </a>
+                </li>
+            </ul>
+        </section>
+        <section data-type="output" data-ng-if="showingEntry">
+            <div data-ng-repeat="dict in dictionaries | filter:entryDictFilter | orderBy: 'rank'"
+                 data-ng-style="{'border-color':dict.color}" class="text">
+                <h2 class="dictname"
+                    data-ng-style="{'background-color':dict.color}">{{dict.alias}}</h2>
+                <div data-ng-repeat="entry in entries | filter:{ did: dict.version }:true">
+                    <h3 class="term"
+                        data-ng-style="{'background-color':dict.color}"
+                        data-ng-bind-html="render_term(entry.term)"></h3>
+                    <p class="content"
+                       data-ng-repeat="dt in entry.data"
+                       data-compile="render_content(dt, dict.version)"></p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 </div>

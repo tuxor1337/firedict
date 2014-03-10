@@ -112,13 +112,14 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
                 }
                 
                 $element
-                .on("touchstart", "li", function (e) {
+                .on("touchstart", "li[draggable]", function (e) {
                     if($(this).siblings().length > 0) {
                         handle = e.target;
                         startY = touchY(e);
                     }
                 })
-                .on("touchmove", "li", function (e) {
+                .on("touchmove", "li[draggable]", function (e) {
+                    if($(this).find(".handle").length == 0) return;
                     if($(this).find(".handle")[0].contains(handle)) {
                         e.preventDefault();
                         if(currIndex >= 0) {
@@ -138,7 +139,8 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
                         }
                     }
                 })
-                .on("touchend", "li", function (e) {
+                .on("touchend", "li[draggable]", function (e) {
+                    if($(this).find(".handle").length == 0) return;
                     if($(this).find(".handle")[0].contains(handle) && currIndex >= 0) {
                         var target = $(this).siblings(".insertAfter");
                         $(this).removeClass("sorting").css({ "top": "auto" })
