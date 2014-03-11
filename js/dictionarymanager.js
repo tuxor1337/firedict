@@ -219,7 +219,7 @@
                 if(!ready) return [];
                 oHistoryManager.add(decodedObj);
                 return {
-                    term: decodedObj[0],
+                    term: decodedObj[1].term,
                     data: dict_by_id(decodedObj[2]).entry(decodedObj),
                     did: decodedObj[2]
                 };
