@@ -18,12 +18,22 @@ section[data-type="output"] div.text p.content {
 }
 
 section[data-type="output"] div.text p.content ol,
-section[data-type="output"] div.text p.content ul {
+section[data-type="output"] div.text p.content ul,
+section[data-type="output"] div.text p.content dl,
+section[data-type="output"] div.text p.content dt,
+section[data-type="output"] div.text p.content dd {
     margin:0; padding:0;
 }
 
+section[data-type="output"] div.text p.content dt {
+    color: #8B4513; margin-bottom:0.2rem;
+}
+section[data-type="output"] div.text p.content a {
+    color: #0044AA;
+}
+
 section[data-type="output"] div.text p.content li {
-    margin:0 0 0 2rem;
+    margin:0 0 0 2rem; padding:0;
 }
 
 section[data-type="output"] div.text h3.term {

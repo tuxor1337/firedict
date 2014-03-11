@@ -137,7 +137,6 @@
                         currIndex = (miIndex + maIndex) / 2 | 0;
                         if(mode == "max") currCmp = cmp_func(arr[currIndex], word);
                         else currCmp = cmp_func(getTermFromObj(arr[currIndex]), word);
-                        
                         if (currCmp == -1) {
                             miIndex = currIndex + 1;
                         } else if (currCmp == 1) {
@@ -148,47 +147,33 @@
                             break;
                         }
                     }
-                    if(mode == "max") return maIndex;
+                    if(mode == "max") return Math.max(maIndex,0);
                     else return miIndex;
                 }
-                var offset = binarySearch("max", aChunks) * CHUNKSIZE;
                 
                 return new Promise(function (resolve, reject) {
-                    if(!meta_info.active || offset < 0) {
-                        resolve([]); return;
+                    function process_range(range) {
+                        var result = [];
+                        for(var r = 0; r < range.length; r++) {
+                            if(cmp(range[r]) != 0) break;
+                            else result.push(decodeObj(range[r]));
+                        }
+                        resolve(result);
                     }
+                    
+                    if(!meta_info.active) { resolve([]); return; }
+                    var offset = binarySearch("max", aChunks) * CHUNKSIZE;
                     oDB.get_range(offset, CHUNKSIZE).then(function (list) {
-                        var currentIndex, currentObj, currentCmp;
-                        currentIndex = binarySearch("min", list);
-                        if(currentIndex >= list.length || currentIndex < 0)
-                            resolve([]);
-                        else {
-                            currentObj = list[currentIndex];
-                            currentCmp = cmp(currentObj);
-                            if(currentCmp != 0) resolve([]);
-                            else {
-                                function process_range(range) {
-                                    var result = [];
-                                    for(var r = 0; r < range.length; r++) {
-                                        currentObj = range[r];
-                                        currentCmp = cmp(currentObj, word); 
-                                        if(currentCmp != 0) break;
-                                        else result.push(decodeObj(currentObj));
-                                    }
-                                    resolve(result);
-                                }
-                                if(currentIndex + 20  < CHUNKSIZE) {
-                                    process_range(
-                                        list.slice(
-                                            currentIndex,
-                                            currentIndex + 20
-                                        )
-                                    );
-                                } else {
-                                    oDB.get_range(offset + currentIndex, 20)
-                                        .then(process_range);
-                                }
-                            }
+                        var currIdx = binarySearch("min", list),
+                            result = [];
+                            
+                        if(currIdx < list.length && cmp(list[currIdx]) != 0) {
+                                resolve(result); return;
+                        }
+                        if(currIdx + 20  < CHUNKSIZE) {
+                            process_range(list.slice(currIdx, currIdx + 20));
+                        } else {
+                            oDB.get_range(offset + currIdx, 20).then(process_range);
                         }
                     });
                 });
