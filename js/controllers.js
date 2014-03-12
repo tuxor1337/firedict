@@ -186,6 +186,53 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 });
             }
         }
+        function render_html_content(html_markup) {
+            var tmp_obj = $("<div />").html(html_markup);
+            $(tmp_obj).find(":not("
+                + "p, font, span, div, table, tr, td, tbody, strong, "
+                + "br, i, a, b, u, img, sup, sub, ul, ol, li, abbr, "
+                + "center, left, right, em, dd, dt, blockquote, small, "
+                + "code, del"
+            + ")").each(function () {
+                console.log("Html code injection: " + this.tagName);
+                if($(this).children().length == 0)
+                    $(this).replaceWith($(this).text());
+                else $(this).children().unwrap();
+            });
+            $(tmp_obj).find("center, left, right").each(function () {
+                $(this).replaceWith(
+                    $("<p />").html($(this).html())
+                    .css("text-align",this.tagName)
+                );
+            });
+            $(tmp_obj).find("img").each(function () {
+                var elImg = this,
+                    img_filename = $(elImg).attr("src")
+                        .replace(/^\x1E/, '').replace(/\x1F$/, '');
+                $(elImg).attr("src", 
+                    "{{resources[" + did + "]['" + img_filename + "']}}");
+                if($(elImg).attr("align") == "middle") {
+                    $(elImg).removeAttr("align")
+                        .css("vertical-align","middle");
+                }
+                inject_resource(img_filename);
+            });
+            $(tmp_obj).find("a").each(function () {
+                var linkText = $(this).text(),
+                    linkRef = $(this).attr("href");
+                if("bword://" != linkRef.substring(0,8)) {
+                    console.log(linkRef)
+                    console.log(linkText)
+                    $(this).replaceWith(linkText);
+                } else {
+                    linkRef = linkRef.substring(8).replace(/'/g, "\\'")
+                        .replace(/^ /g, "");
+                    $(this).attr("href","javascript:void(0)")
+                            .attr("ng-click", "show_entry('" + linkRef + "')");
+                }
+            });
+            return $(tmp_obj).html();
+        }
         function render_pango_content(pango_markup) {
             var tmp_obj = $("<div/>").html(pango_markup.replace(/\n/g,"<br>"));
             $(tmp_obj).find(":not("
@@ -237,66 +284,93 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                         $(replacement).css("text-decoration", "line-through");
                     else if(name == "rise" && value != "0") sup = true;
                 });
-                if(sup) replacement = $("<sup/>").append(replacement);
-                $(this).replaceWith(replacement).html($(this).html());
+                if(sup) {
+                    $(this).replaceWith(
+                        $(replacement).html($(this).html())
+                    );
+                } else { 
+                    $(this).replaceWith(
+                        $("<sup/>").append(
+                            $(replacement).html($(this).html())
+                        )
+                    );
+                }
             });
             $(tmp_obj).find("big").each(function () {
-                $(this).replaceWith($("<span/>")).html($(this).html());
-            });
-            $(tmp_obj).find("s").each(function () {
-                $(this).replaceWith($("<del/>")).html($(this).html());
+                $(this).replaceWith(
+                    $("<span/>").html($(this).html())
+                );
             });
             $(tmp_obj).find("tt").each(function () {
-                $(this).replaceWith($("<code/>")).html($(this).html());
+                $(this).replaceWith(
+                    $("<code/>").html($(this).html())
+                );
             });
-            $(tmp_obj).find("b").each(function () {
-                $(this).replaceWith($("<code/>")).html($(this).html());
+            $(tmp_obj).find("s").each(function () {
+                $(this).replaceWith(
+                    $("<del/>").html($(this).html())
+                );
             });
-            return $(tmp_obj).html();
+            return render_html_content($(tmp_obj).html());
         }
-        function render_html_content(html_markup) {
-            var tmp_obj = $("<div />").html(html_markup);
+        function render_xdxf_content(xdxf_markup) {
+            var tmp_obj = $("<div />").html(xdxf_markup);
             $(tmp_obj).find(":not("
-                + "p, font, span, div, table, tr, td, tbody, strong, "
-                + "br, i, a, b, u, img, sup, sub, ul, ol, li, "
-                + "center, left, right, em, dd, dt, blockquote"
+                + "k, pos, abr, c, kref, ex, "
+                + "big, small, i, sup, sub, b, tt, blockquote"
             + ")").each(function () {
-                console.log("Html code injection: " + this.tagName);
+                console.log("XDXF code injection: " + this.tagName);
                 if($(this).children().length == 0)
                     $(this).replaceWith($(this).text());
                 else $(this).children().unwrap();
             });
-            $(tmp_obj).find("center, left, right").each(function () {
+            $(tmp_obj).find("k").each(function () {
                 $(this).replaceWith(
-                    $("<p />").html($(this).html())
-                    .css("text-align",this.tagName)
+                    $("<dt/>").html($(this).html())
                 );
             });
-            $(tmp_obj).find("img").each(function () {
-                var elImg = this,
-                    img_filename = $(elImg).attr("src")
-                        .replace(/^\x1E/, '').replace(/\x1F$/, '');
-                $(elImg).attr("src", 
-                    "{{resources[" + did + "]['" + img_filename + "']}}");
-                if($(elImg).attr("align") == "middle") {
-                    $(elImg).removeAttr("align")
-                        .css("vertical-align","middle");
-                }
-                inject_resource(img_filename);
+            $(tmp_obj).find("pos").each(function () {
+                $(this).replaceWith(
+                    $("<p/>").append(
+                        $("<i/>").html($(this).html())
+                    )
+                );
+                ;
             });
-            $(tmp_obj).find("a").each(function () {
-                var linkText = $(this).text(),
-                    linkRef = $(this).attr("href");
-                if("bword://" != linkRef.substring(0,8)) {
-                    $(this).replaceWith(linkText);
-                } else {
-                    linkRef = linkRef.substring(8).replace(/'/g, "\\'")
-                        .replace(/^ /g, "");
-                    $(this).attr("href","javascript:void(0)")
-                            .attr("ng-click", "show_entry('" + linkRef + "')");
-                }
+            $(tmp_obj).find("big").each(function () {
+                $(this).replaceWith(
+                    $("<span/>").html($(this).html())
+                );
             });
-            return $(tmp_obj).html();
+            $(tmp_obj).find("tt").each(function () {
+                $(this).replaceWith(
+                    $("<code/>").html($(this).html())
+                );
+            });
+            $(tmp_obj).find("abr").each(function () {
+                $(this).replaceWith(
+                    $("<abbr/>").html($(this).html())
+                );
+            });
+            $(tmp_obj).find("c").each(function () {
+                $(this).replaceWith(
+                    $("<span/>").html($(this).html())
+                    .css("color",$(this).attr("c"))
+                );
+            });
+            $(tmp_obj).find("kref").each(function () {
+                $(this).replaceWith(
+                    $("<a/>").html($(this).html())
+                    .attr("href","bword://"+$(this).text().trim())
+                );
+            });
+            $(tmp_obj).find("ex").each(function () {
+                $(this).replaceWith(
+                    $("<span/>").html($(this).html())
+                    .css("color","#4682B4")
+                );
+            });
+            return render_html_content($(tmp_obj).html());
         }
         function render_resource_content(res) {
             var result = [], aRes = res.split("\n");
@@ -313,23 +387,28 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             });
             return result.join("<br />\n");
         }
+        function render_plain_content(plain_text) {
+            return $("<div />").text(plain_text).html()
+        }
         if("g" == d.type)
             return render_pango_content(d.content);
         else if("h" == d.type)
             return render_html_content(d.content);
+        else if("x" == d.type)
+            return render_xdxf_content(d.content);
         else if("w" == d.type)
             return render_html_content(wiki2html(d.content));
-        else if("m" == d.type)
-            return d.content;
-        else if("t" == d.type)
-            return "Pronunciation: /"+d.content+"/";
-        else if("y" == d.type)
-            return "YinBiao/KANA: "+d.content;
         else if("r" == d.type)
             return render_resource_content(d.content);
+        else if("m" == d.type)
+            return render_plain_content(d.content);
+        else if("t" == d.type)
+            return render_plain_content("Pronunciation: /"+d.content+"/");
+        else if("y" == d.type)
+            return render_plain_content("YinBiao/KANA: "+d.content);
         
-        console.log("Type not supported: " + d.type); // at least: "xkWPX"
-        return d.content;
+        console.log("Type not supported: " + d.type); // at least: "kWPX"
+        return render_plain_content(d.content);
     };
 }])
 .controller("settingsCtrl", ["$scope", "ngDialog", "dictWorker",
