@@ -128,10 +128,9 @@
                     return cmp_func(term, word);
                 }
                 function binarySearch(mode, arr) {
-                    var miIndex = 0;
-                    var maIndex = arr.length - 1;
-                    var currIndex;
-                    var currCmp;
+                    var miIndex = 0,
+                        maIndex = arr.length - 1,
+                        currIndex, currCmp = -1;
                     
                     while (miIndex <= maIndex) {
                         currIndex = (miIndex + maIndex) / 2 | 0;
@@ -142,6 +141,12 @@
                         } else if (currCmp == 1) {
                             maIndex = currIndex - 1;
                         } else {
+                            while(currCmp == 0 && currIndex > 0) {
+                                currIndex--;
+                                if(mode == "max") currCmp = cmp_func(arr[currIndex], word);
+                                else currCmp = cmp_func(getTermFromObj(arr[currIndex]), word);
+                                currIndex -= currCmp;
+                            }
                             if(mode == "max") maIndex = currIndex;
                             else miIndex = currIndex;
                             break;
