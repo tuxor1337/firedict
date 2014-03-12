@@ -259,7 +259,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             $(tmp_obj).find(":not("
                 + "p, font, span, div, table, tr, td, tbody, strong, "
                 + "br, i, a, b, u, img, sup, sub, ul, ol, li, "
-                + "center, left, right, em, dd, dt"
+                + "center, left, right, em, dd, dt, blockquote"
             + ")").each(function () {
                 console.log("Html code injection: " + this.tagName);
                 if($(this).children().length == 0)

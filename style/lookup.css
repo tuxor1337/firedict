@@ -36,6 +36,14 @@ section[data-type="output"] div.text p.content li {
     margin:0 0 0 2rem; padding:0;
 }
 
+section[data-type="output"] div.text p.content blockquote p {
+    margin:0.4rem 0 0; padding:0;
+}
+
+section[data-type="output"] div.text p.content blockquote {
+    margin:0.2rem 0.7rem; padding:0; font-style:italic;
+}
+
 section[data-type="output"] div.text h3.term {
     font-size:0.9rem; font-weight:normal;
     margin:0; padding:0.1rem 0.2rem;
