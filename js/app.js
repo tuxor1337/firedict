@@ -274,7 +274,7 @@ angular.module("FireDict", [
                 if(!this.result) add_subdir(0);
                 else {
                     var fname = this.result.name;
-                    if(null != fname.match(/^dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
+                    if(null != fname.match(/^\/sdcard\/dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
                         var path = split_path(fname)[0];
                         result.push(path);
                     }
