@@ -274,7 +274,9 @@ angular.module("FireDict", [
                 if(!this.result) add_subdir(0);
                 else {
                     var fname = this.result.name;
-                    if(null != fname.match(/^dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
+                    // The "/sdcard/" prefix is optional in order for this to
+                    // work on physical devices as well as the FF OS Simulator.
+                    if(null != fname.match(/^(\/sdcard\/)?dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
                         var path = split_path(fname)[0];
                         result.push(path);
                     }
