@@ -192,7 +192,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 + "p, font, span, div, table, tr, td, tbody, strong, "
                 + "br, i, a, b, u, img, sup, sub, ul, ol, li, abbr, "
                 + "center, left, right, em, dd, dt, blockquote, small, "
-                + "code, del"
+                + "code, del, h1, h2, h3, h4, h5, h6"
             + ")").each(function () {
                 console.log("Html code injection: " + this.tagName);
                 if($(this).children().length == 0)
@@ -221,8 +221,6 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 var linkText = $(this).text(),
                     linkRef = $(this).attr("href");
                 if("bword://" != linkRef.substring(0,8)) {
-                    console.log(linkRef)
-                    console.log(linkText)
                     $(this).replaceWith(linkText);
                 } else {
                     linkRef = linkRef.substring(8).replace(/'/g, "\\'")
@@ -409,6 +407,9 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         
         console.log("Type not supported: " + d.type); // at least: "kWPX"
         return render_plain_content(d.content);
+    };
+    $scope.termOrderFn = function (entry) {
+        return entry.term.replace(/\(([0-9])\)$/g, '(0$1)');
     };
 }])
 .controller("settingsCtrl", ["$scope", "ngDialog", "dictWorker",
