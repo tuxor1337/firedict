@@ -13,35 +13,50 @@ section[data-type="output"] div.text h2.dictname {
     background-color:#000;
 }
 
-section[data-type="output"] div.text p.content {
+section[data-type="output"] div.text div.content {
     padding: 0.5rem 0.4rem; margin:0;
 }
 
-section[data-type="output"] div.text p.content ol,
-section[data-type="output"] div.text p.content ul,
-section[data-type="output"] div.text p.content dl,
-section[data-type="output"] div.text p.content dt,
-section[data-type="output"] div.text p.content dd {
+section[data-type="output"] div.text div.content ol,
+section[data-type="output"] div.text div.content ul,
+section[data-type="output"] div.text div.content dl,
+section[data-type="output"] div.text div.content dt,
+section[data-type="output"] div.text div.content dd {
     margin:0; padding:0;
 }
 
-section[data-type="output"] div.text p.content dt {
+section[data-type="output"] div.text div.content dt {
     color: #8B4513; margin-bottom:0.2rem;
 }
-section[data-type="output"] div.text p.content a {
+section[data-type="output"] div.text div.content a {
     color: #0044AA;
 }
 
-section[data-type="output"] div.text p.content li {
+section[data-type="output"] div.text div.content li {
     margin:0 0 0 2rem; padding:0;
 }
 
-section[data-type="output"] div.text p.content blockquote p {
-    margin:0.4rem 0 0; padding:0;
+section[data-type="output"] div.text div.content p {
+    margin: 0 0 0.3rem; padding: 0;
 }
 
-section[data-type="output"] div.text p.content blockquote {
+section[data-type="output"] div.text div.content h1,
+section[data-type="output"] div.text div.content h2,
+section[data-type="output"] div.text div.content h3,
+section[data-type="output"] div.text div.content h4,
+section[data-type="output"] div.text div.content h5,
+section[data-type="output"] div.text div.content h6 {
+    font-weight: bold; font-size:1.1rem;
+    padding:0; margin: 0.3rem 0;
+}
+
+section[data-type="output"] div.text div.content blockquote p {
+    margin-top:0.2rem; padding:0; color:#000;
+}
+
+section[data-type="output"] div.text div.content blockquote {
     margin:0.2rem 0.7rem; padding:0; font-style:italic;
+    color:#00006E;
 }
 
 section[data-type="output"] div.text h3.term {
