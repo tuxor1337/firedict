@@ -65,8 +65,7 @@ section[role="dialog"] div.colorpicker input::-moz-range-track {
 }
 
 section[role="dialog"] div.colorpicker input::-moz-range-thumb {
-    height:1.4rem; width:1.4rem; border-radius:0.2rem; border:0;
-    background-image: #fff;
+    height:1.4rem; width:1.4rem; border-radius:0.2rem; border:0; background: #fff;
 }
 
 section[role="dialog"] div.colorpicker div {
