@@ -187,7 +187,7 @@
             this.init = function (path, rank) {
                 var full_term_list = [];
                 
-                function binaryInsert(arr, newElement, start) {
+                function binaryInsert(arr, newElement) {
                     var minIndex = 0,
                         maxIndex = arr.length - 1,
                         currentIndex,
@@ -213,37 +213,69 @@
                 return indexedDB.create()
                 .then(function (db) {
                     oDB = db;
+                    
+                    var wordcount = parseInt(oStarDict.keyword("wordcount")),
+                        synwordcount = parseInt(oStarDict.keyword("synwordcount")),
+                        short_name = oStarDict.keyword("bookname");
+                    if(short_name.length > 10)
+                        short_name = short_name.substring(0,10) + "...";
+                    
+                    console.log("Wordcount for dictionary `"
+                            + short_name + "`: " + wordcount);
+                    console.log("Synwordcount for dictionary `"
+                            + short_name + "`: " + synwordcount);
+                    
                     var wid = 0, raw_index = oStarDict.index({
+                        "count": CHUNKSIZE,
                         "include_offset": true,
                         "include_dictpos": false
                     });
-                    raw_index.forEach(function (idx) {
-                        aIndex.push(idx.offset);
-                        if(aIndex.length % CHUNKSIZE == 0)
-                            query("progress", {
-                                status: 10*aIndex.length/raw_index.length,
-                                total: 100,
-                                text: oStarDict.keyword("bookname")
-                            });
-                        binaryInsert(full_term_list, [idx.term, 0, wid++]);
-                    });
+                    while(raw_index.length > 0) {
+                        query("progress", {
+                            status: 90*full_term_list.length/(wordcount+synwordcount),
+                            total: 100,
+                            text: oStarDict.keyword("bookname")
+                        });
+                        raw_index.forEach(function (idx) {
+                            aIndex.push(idx.offset);
+                            binaryInsert(full_term_list, [idx.term, 0, wid++]);
+                        });
+                        raw_index = oStarDict.index({
+                            "start_offset": raw_index[raw_index.length-1].offset,
+                            "count": CHUNKSIZE+1,
+                            "include_offset": true,
+                            "include_dictpos": false
+                        });
+                        raw_index.splice(0, 1);
+                    }
                     delete raw_index;
                     delete wid;
                     
-                    var raw_synlist = oStarDict.synonyms({
-                        "include_offset": true,
-                        "include_wid": false
-                    });
-                    raw_synlist.forEach(function (syn) {
-                        if(full_term_list.length % (CHUNKSIZE*3) == 0)
+                    if(synwordcount + wordcount <= 150000) {
+                        var raw_synlist = oStarDict.synonyms({
+                            "count": CHUNKSIZE,
+                            "include_offset": true,
+                            "include_wid": false
+                        });
+                        while(raw_synlist.length > 0) {
                             query("progress", {
-                                status: 90*full_term_list.length/(aIndex.length+raw_synlist.length),
+                                status: 90*full_term_list.length/(wordcount+synwordcount),
                                 total: 100,
                                 text: oStarDict.keyword("bookname")
                             });
-                        binaryInsert(full_term_list, [syn.term, 1, syn.offset]);
-                    });
-                    delete raw_synlist;
+                            raw_synlist.forEach(function (syn) {
+                                binaryInsert(full_term_list, [syn.term, 1, syn.offset]);
+                            });
+                            raw_synlist = oStarDict.synonyms({
+                                "start_offset": raw_synlist[raw_synlist.length-1].offset,
+                                "count": CHUNKSIZE+1,
+                                "include_offset": true,
+                                "include_wid": false
+                            });
+                            raw_synlist.splice(0,1);
+                        }
+                        delete raw_synlist;
+                    } else console.log("Skipping synonyms to prevent OOM.");
                     
                     for(var i = 0; i < full_term_list.length; i++) {
                         var term = full_term_list[i];
