@@ -109,12 +109,14 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             if(val == $scope.search_term) {
                 dictWorker.query("lookup", $scope.search_term)
                 .then(function (matches) {
-                    $scope.matches = matches;
-                    $scope.idle = false;
-                    if(!$scope.$$phase) { $scope.$apply(); }
+                    if($scope.search_term == val) {
+                        $scope.matches = matches;
+                        $scope.idle = false;
+                        if(!$scope.$$phase) { $scope.$apply(); }
+                    }
                 });
             }
-        }, 400);
+        }, 600);
     };
     $scope.show_entry = function(matchObj) {
         $scope.showingEntry = true;
