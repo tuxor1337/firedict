@@ -242,7 +242,7 @@ angular.module("FireDict", [
             function add_subdir(n) {
                 if(result.length <= n) obj.reply(result);
                 else {
-                    var req = sdcard.enumerate(result[n]);
+                    var req = sdcard.enumerate(result[n].replace(/^\/sdcard\//g,""));
                     result[n] = { "path": result[n], "files": [] };
                     req.onsuccess = function () {
                         if(!this.result) add_subdir(n+1);
