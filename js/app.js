@@ -242,7 +242,7 @@ angular.module("FireDict", [
             function add_subdir(n) {
                 if(result.length <= n) obj.reply(result);
                 else {
-                    var req = sdcard.enumerate(result[n].replace(/^\/sdcard\//g,""));
+                    var req = sdcard.enumerate(result[n]);
                     result[n] = { "path": result[n], "files": [] };
                     req.onsuccess = function () {
                         if(!this.result) add_subdir(n+1);
@@ -269,14 +269,18 @@ angular.module("FireDict", [
                     path.substring(pos_dot+1),
                 ];
             }
-                
+            
+            var path_prefix = null;
             request.onsuccess = function () {
                 if(!this.result) add_subdir(0);
                 else {
                     var fname = this.result.name;
-                    // The "/sdcard/" prefix is optional in order for this to
-                    // work on physical devices as well as the FF OS Simulator.
-                    if(null != fname.match(/^(\/sdcard\/)?dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
+                    if(path_prefix === null) {
+                        var pos = fname.indexOf("dictdata");
+                        path_prefix = fname.substring(0, pos);
+                    }
+                    fname = fname.substring(path_prefix.length);
+                    if(null != fname.match(/^dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
                         var path = split_path(fname)[0];
                         result.push(path);
                     }
