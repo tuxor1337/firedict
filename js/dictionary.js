@@ -173,7 +173,7 @@
                             result = [];
                             
                         if(currIdx < list.length && cmp(list[currIdx]) != 0) {
-                                resolve(result); return;
+                            resolve(result); return;
                         }
                         if(currIdx + 20  < CHUNKSIZE) {
                             process_range(list.slice(currIdx, currIdx + 20));
@@ -186,7 +186,7 @@
             
             this.init = function (path, rank) {
                 var wordcount = parseInt(oStarDict.keyword("wordcount")),
-                    synwordcount = parseInt(oStarDict.keyword("synwordcount")),
+                    synwordcount = parseInt(oStarDict.keyword("synwordcount") ? oStarDict.keyword("synwordcount") : 0),
                     short_name = oStarDict.keyword("bookname");
                 if(short_name.length > 10)
                     short_name = short_name.substring(0,10) + "...";
@@ -321,7 +321,7 @@
                     });
                 });
             };
-              
+            
             this.meta = function (dict) {
                 if(typeof dict !== "undefined") {
                     meta_info = dict; save_meta();
