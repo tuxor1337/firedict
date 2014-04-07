@@ -9,6 +9,25 @@
         return result;
     }
     
+    function strcasecmp(a, b) {
+        var a = a.toLowerCase(), b = b.toLowerCase();
+        if (a > b) return 1;
+        else if (a == b) return 0;
+        return -1;
+    }
+    
+    function strcmp(a, b) {
+        if (a > b) return 1;
+        else if (a == b) return 0;
+        return -1;
+    }
+    
+    function stardictcmp(a, b) {
+        var cmp = strcasecmp(a, b);
+        if(cmp == 0) return strcmp(a, b);
+        else return cmp;
+    }
+    
     var indexedDB = (function () {
         var cls = function (version) {
             var did = version;
@@ -72,12 +91,7 @@
             var meta_info = {},          
                 oStarDict = new StarDict(files), oDB,
                 aIndex = [], aChunks = [],
-                cmp_func = cmp_fct || function (a,b) {
-                    a = a.toLowerCase(), b = b.toLowerCase();
-                    if(a > b) return 1;
-                    if(a < b) return -1;
-                    return 0;
-                },
+                cmp_func = cmp_fct || stardictcmp,
                 that = this;
             
             function save_meta() {
@@ -171,7 +185,6 @@
                     oDB.get_range(offset, CHUNKSIZE).then(function (list) {
                         var currIdx = binarySearch("min", list),
                             result = [];
-                            
                         if(currIdx < list.length && cmp(list[currIdx]) != 0) {
                             resolve(result); return;
                         }
@@ -191,95 +204,67 @@
                 if(short_name.length > 10)
                     short_name = short_name.substring(0,10) + "...";
                 
-                function binaryInsert(arr, newElement) {
-                    var minIndex = 0,
-                        maxIndex = arr.length - 1,
-                        currentIndex,
-                        currentCmp;
-                    
-                    while (minIndex <= maxIndex) {
-                        currentIndex = (minIndex + maxIndex) / 2 | 0;
-                        currentCmp = cmp_func(arr[currentIndex][0], newElement[0]);
-                        
-                        if (currentCmp == -1) {
-                            minIndex = currentIndex + 1;
-                        } else if (currentCmp == 1) {
-                            maxIndex = currentIndex - 1;
-                        } else {
-                            minIndex = currentIndex;
-                            break;
-                        }
-                    }
-                    arr.splice(minIndex, 0, newElement);
-                    return minIndex;
-                }
+                
                 
                 return indexedDB.create()
                 .then(function (db) {
                     oDB = db;
                     
-                    var full_term_list = [];
+                    var full_term_list = [],
+                        iter = oStarDict.iterable();
+                        
+                    function binaryInsert(data, term) {
+                        var minIndex = 0,
+                            maxIndex = full_term_list.length - 1,
+                            currentIndex,
+                            currentCmp;
+                        
+                        while (minIndex <= maxIndex) {
+                            currentIndex = (minIndex + maxIndex) / 2 | 0;
+                            currentCmp = cmp_func(
+                                iter.term(full_term_list[currentIndex]), term
+                            );
+                            
+                            if (currentCmp == -1) {
+                                minIndex = currentIndex + 1;
+                            } else if (currentCmp == 1) {
+                                maxIndex = currentIndex - 1;
+                            } else {
+                                minIndex = currentIndex;
+                                break;
+                            }
+                        }
+                        full_term_list.splice(minIndex, 0, data);
+                        return minIndex;
+                    }
                     
                     console.log("Wordcount for dictionary `"
                             + short_name + "`: " + wordcount);
                     console.log("Synwordcount for dictionary `"
                             + short_name + "`: " + synwordcount);
                     
-                    if(true) {
-                        var wid = 0, raw_index = oStarDict.index({
-                            "count": CHUNKSIZE,
-                            "include_offset": true,
-                            "include_dictpos": false
-                        });
-                        while(raw_index.length > 0) {
+                    
+                    
+                    for(var curr = iter.next(); curr != null; curr = iter.next()) {
+                        if(curr.type == 0) {
+                            curr.wid = aIndex.length;
+                            aIndex.push(curr.offset);
+                        }
+                        binaryInsert(curr, iter.term(curr));
+                        if(full_term_list.length % CHUNKSIZE == 0)
                             query("progress", {
                                 status: 90*full_term_list.length/(wordcount+synwordcount),
                                 total: 100,
                                 text: oStarDict.keyword("bookname")
                             });
-                            raw_index.forEach(function (idx) {
-                                aIndex.push(idx.offset);
-                                binaryInsert(full_term_list, [idx.term, 0, wid++]);
-                            });
-                            raw_index = oStarDict.index({
-                                "start_offset": raw_index[raw_index.length-1].offset,
-                                "count": CHUNKSIZE+1,
-                                "include_offset": true,
-                                "include_dictpos": false
-                            });
-                            raw_index.splice(0, 1);
-                        }
                     }
                     
-                    if(synwordcount + wordcount <= 150000) {
-                        var raw_synlist = oStarDict.synonyms({
-                            "count": CHUNKSIZE,
-                            "include_offset": true,
-                            "include_wid": false
-                        });
-                        while(raw_synlist.length > 0) {
-                            query("progress", {
-                                status: 90*full_term_list.length/(wordcount+synwordcount),
-                                total: 100,
-                                text: oStarDict.keyword("bookname")
-                            });
-                            raw_synlist.forEach(function (syn) {
-                                binaryInsert(full_term_list, [syn.term, 1, syn.offset]);
-                            });
-                            raw_synlist = oStarDict.synonyms({
-                                "start_offset": raw_synlist[raw_synlist.length-1].offset,
-                                "count": CHUNKSIZE+1,
-                                "include_offset": true,
-                                "include_wid": false
-                            });
-                            raw_synlist.splice(0,1);
-                        }
-                    } else console.log("Skipping synonyms to prevent OOM.");
-                    
                     for(var i = 0; i < full_term_list.length; i++) {
-                        var term = full_term_list[i];
-                        if(i % CHUNKSIZE == 0) aChunks.push(term[0]);
-                        full_term_list[i] = { type: term[1], id: term[2] };
+                        var obj = full_term_list[i],
+                            tmp_id = obj.offset;
+                        if(obj.type == 0) tmp_id = obj.wid;
+                        if(i % CHUNKSIZE == 0) aChunks.push(iter.term(obj));
+                        full_term_list[i] = { type: obj.type, id: tmp_id };
                     }
                     
                     return oDB.store_terms(full_term_list);
