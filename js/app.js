@@ -1,4 +1,109 @@
 "use strict";
+    
+var stardict_strcmp = (function () {
+    var CHARCODE_A_CAPITAL = "A".charCodeAt(0),
+        CHARCODE_Z_CAPITAL = "Z".charCodeAt(0),
+        CHARCODE_A_SMALL = "a".charCodeAt(0);
+        
+    function isAsciiUpper(c) {
+        return c.charCodeAt(0) >= CHARCODE_A_CAPITAL
+            && c.charCodeAt(0) <= CHARCODE_Z_CAPITAL;
+    }
+    
+    function asciiLower(c) {
+        if(isAsciiUpper(c))
+            return String.fromCharCode(
+                CHARCODE_A_SMALL + c.charCodeAt(0) - CHARCODE_A_CAPITAL
+            );
+        else return c;
+    }
+    
+    function ascii_strcasecmp(s1, s2) {
+        var commonLen = Math.min(s1.length, s2.length)
+        for(var i = 0; i < commonLen; i++) {
+            var c1 = asciiLower(s1[i]).charCodeAt(0),
+                c2 = asciiLower(s2[i]).charCodeAt(0);
+            if(c1 != c2) return c1 - c2;
+        }
+        return s1.length - s2.length;
+    }
+    
+    function strcmp(s1, s2) {
+        var commonLen = Math.min(s1.length, s2.length)
+        for(var i = 0; i < commonLen; i++) {
+            var c1 = s1.charCodeAt(i),
+                c2 = s2.charCodeAt(i);
+            if(c1 != c2) return c1 - c2;
+        }
+        return s1.length - s2.length
+    }
+    
+    return function (s1, s2) {
+        var cmp = ascii_strcasecmp(s1, s2);
+        if(cmp == 0) return strcmp(s1, s2);
+        else return cmp;
+    };
+})();
+
+var iterFactory = function(view, mode) {
+    function getUintAt(arr, offs) {
+        if(offs < 0) offs = arr.length + offs;
+        out = 0;
+        for (var j = offs; j < offs+4; j++) {
+                out <<= 8;
+                out |= arr[j] & 0xff;
+        }
+        return out;
+    }
+    
+    var readUTF8String = (function () {
+        var decoder = new TextDecoder("utf-8");
+        return function (bytes) {
+            return decoder.decode(bytes);
+        };
+    })();
+
+    return new function () {
+        var currOffset = 0;
+    
+        function getEOS(offset) {
+            for(var i = offset; i < view.length; i++) {
+                if(view[i] == 0) return i;
+            }
+            return -1;
+        }
+        
+        this.data = function (offset) {
+            if(mode == "synonyms")
+                return getUintAt(view, getEOS(offset)+1);
+            else return [
+                getUintAt(view, getEOS(offset)+1),
+                getUintAt(view, getEOS(offset)+5)
+            ];
+        };
+        
+        this.term = function (offset) {
+            return readUTF8String(
+                view.subarray(offset, getEOS(offset))
+            );
+        };
+        
+        this.next = function () {
+            var j = currOffset, result = null,
+                datalen = (mode == "synonyms") ? 4 : 8;
+            
+            for( ; currOffset < view.length; currOffset++) {
+                if(view[currOffset] == 0) {
+                    result = j; currOffset += datalen + 1;
+                    break;
+                }
+            }
+            return result;
+        };
+        
+        this.view = view;
+    };
+};
 
 angular.module("FireDict", [
     "ngRoute", "ngSanitize", "ngTouch",
@@ -61,15 +166,16 @@ angular.module("FireDict", [
             if(!$rootScope.$$phase) { $rootScope.$apply(); }
         });
         dictWorker.addListener("progress", function (obj) {
-            var value = [];
-            if(obj.data.hasOwnProperty("total"))
-                value = [obj.data.status, obj.data.total];
+            var data = obj.data,
+                value = [];
+            if(data.hasOwnProperty("total"))
+                value = [data.status, data.total];
             if(ngDialog.type() == "progress") {
-                ngDialog.update(value, obj.data.text);
+                ngDialog.update(value, data.text);
             } else {
                 ngDialog.open({
                     type: "progress",
-                    text: obj.data.text,
+                    text: data.text,
                     value: value
                 });
             }
@@ -152,7 +258,57 @@ angular.module("FireDict", [
             } else if(action == "store_terms") {
                 var did = data.did, chunksize = data.chunksize,
                     idb_ostore = "dict" + did,
-                    data = data.data;
+                    data = data.data, wordcount = data["wordcount"];
+                    
+                var aIndex = [], aChunks = [], full_term_list = [],
+                    cmp_func = stardict_strcmp,
+                    merge_sorted_iters = function (iter1, iter2) {
+                        var curr1 = iter1.next(), curr2 = iter2.next(),
+                            currentCmp, currentTerm;
+                        
+                        function add_el(offset, type) {
+                            var id = (type == 0) ? aIndex.length : offset;
+                            if(type == 0) aIndex.push(offset);
+                            if(full_term_list.length % chunksize == 0) {
+                                if(type == 0) currentTerm = iter1.term(offset);
+                                else currentTerm = iter2.term(offset);
+                                aChunks.push(currentTerm);
+                            }
+                            full_term_list.push({ "type": type, "id": id });
+                        }
+                        
+                        while(curr1 != null && curr2 != null) {
+                            currentCmp = cmp_func(iter1.term(curr1), iter2.term(curr2));
+                            
+                            if(currentCmp <= 0) {
+                                add_el(curr1, 0);
+                                curr1 = iter1.next();
+                            } else {
+                                add_el(curr2, 1);
+                                curr2 = iter2.next();
+                            }
+                            
+                            if(full_term_list.length % chunksize == 0)
+                                ngDialog.update([
+                                    30*full_term_list.length/wordcount, 100
+                                ]);
+                        }
+                        while(curr1 != null) {
+                            add_el(curr1, 0); curr1 = iter1.next();
+                        }
+                        while(curr2 != null) {
+                            add_el(curr2, 1); curr2 = iter2.next();
+                        }
+                    };
+                
+                merge_sorted_iters(
+                    iterFactory(data["viewIdx"], "index"),
+                    iterFactory(data["viewSyn"], "synonyms")
+                );
+                
+                data = full_term_list;
+                ngDialog.update([30, 100]);
+                
                 var store = indexedDB_handle.transaction(idb_ostore, "readwrite")
                                             .objectStore(idb_ostore),
                     i = 0, totalwordcount = data.length;
@@ -164,7 +320,7 @@ angular.module("FireDict", [
                                 i += 1;
                                 if(i % 7 == 0)
                                     ngDialog.update([
-                                        90+10*i*chunksize/totalwordcount,
+                                        30+70*i*chunksize/totalwordcount,
                                         100
                                     ]);
                                 data = data.slice(chunksize);
@@ -173,15 +329,18 @@ angular.module("FireDict", [
                         });
                     },
                     function () { return data.length > 0; },
-                    obj.reply
+                    function () {
+                        idb_ostore = "idx" + did;
+                        indexedDB_handle.transaction(idb_ostore, "readwrite")
+                            .objectStore(idb_ostore).add(aIndex, 0)
+                            .onsuccess = function () {
+                            obj.reply({
+                                "index": aIndex,
+                                "chunks": aChunks
+                            });
+                        };
+                    }
                 );
-            } else if(action == "store_idx") {
-                var did = data.did,
-                    idb_ostore = "idx" + did,
-                    data = data.data;
-                indexedDB_handle.transaction(idb_ostore, "readwrite")
-                    .objectStore(idb_ostore).add(data,0)
-                    .onsuccess = function () { obj.reply(); };
             } else if(action == "restore_idx") {
                 var did = data.did,
                     idb_ostore = "idx" + did,
