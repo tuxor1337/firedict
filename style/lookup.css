@@ -82,7 +82,8 @@ section[data-type="list"] ul.matches a {
   outline: none;
 }
 
-section[data-type="list"] ul.matches a:hover {
+section[data-type="list"] ul.matches a:hover,
+section[data-type="list"] ul.matches a:active {
     background-color: #fff7df;
 }
 

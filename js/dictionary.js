@@ -1,8 +1,5 @@
 (function (GLOBAL) {
-    var CHUNKSIZE = 2531,
-        CHARCODE_A_CAPITAL = "A".charCodeAt(0),
-        CHARCODE_Z_CAPITAL = "Z".charCodeAt(0),
-        CHARCODE_A_SMALL = "a".charCodeAt(0);
+    var CHUNKSIZE = 2531;
     
     function random_color() {
         var min = 0x33, max = 0xbb, result = "#";
@@ -12,44 +9,50 @@
         return result;
     }
     
-    function isAsciiUpper(c) {
-        return c.charCodeAt(0) >= CHARCODE_A_CAPITAL
-            && c.charCodeAt(0) <= CHARCODE_Z_CAPITAL;
-    }
-    
-    function asciiLower(c) {
-        if(isAsciiUpper(c))
-            return String.fromCharCode(
-                CHARCODE_A_SMALL + c.charCodeAt(0) - CHARCODE_A_CAPITAL
-            );
-        else return c;
-    }
-    
-    function ascii_strcasecmp(s1, s2) {
-        var commonLen = Math.min(s1.length, s2.length)
-        for(var i = 0; i < commonLen; i++) {
-            var c1 = asciiLower(s1[i]).charCodeAt(0),
-                c2 = asciiLower(s2[i]).charCodeAt(0);
-            if(c1 != c2) return c1 - c2;
+    var stardict_strcmp = (function () {
+        var CHARCODE_A_CAPITAL = "A".charCodeAt(0),
+            CHARCODE_Z_CAPITAL = "Z".charCodeAt(0),
+            CHARCODE_A_SMALL = "a".charCodeAt(0);
+            
+        function isAsciiUpper(c) {
+            return c.charCodeAt(0) >= CHARCODE_A_CAPITAL
+                && c.charCodeAt(0) <= CHARCODE_Z_CAPITAL;
         }
-        return s1.length - s2.length;
-    }
-    
-    function strcmp(s1, s2) {
-        var commonLen = Math.min(s1.length, s2.length)
-        for(var i = 0; i < commonLen; i++) {
-            var c1 = s1.charCodeAt(i),
-                c2 = s2.charCodeAt(i);
-            if(c1 != c2) return c1 - c2;
+        
+        function asciiLower(c) {
+            if(isAsciiUpper(c))
+                return String.fromCharCode(
+                    CHARCODE_A_SMALL + c.charCodeAt(0) - CHARCODE_A_CAPITAL
+                );
+            else return c;
         }
-        return s1.length - s2.length
-    }
-    
-    function stardict_strcmp(s1, s2) {
-        var cmp = ascii_strcasecmp(s1, s2);
-        if(cmp == 0) return strcmp(s1, s2);
-        else return cmp;
-    }
+        
+        function ascii_strcasecmp(s1, s2) {
+            var commonLen = Math.min(s1.length, s2.length)
+            for(var i = 0; i < commonLen; i++) {
+                var c1 = asciiLower(s1[i]).charCodeAt(0),
+                    c2 = asciiLower(s2[i]).charCodeAt(0);
+                if(c1 != c2) return c1 - c2;
+            }
+            return s1.length - s2.length;
+        }
+        
+        function strcmp(s1, s2) {
+            var commonLen = Math.min(s1.length, s2.length)
+            for(var i = 0; i < commonLen; i++) {
+                var c1 = s1.charCodeAt(i),
+                    c2 = s2.charCodeAt(i);
+                if(c1 != c2) return c1 - c2;
+            }
+            return s1.length - s2.length
+        }
+        
+        return function (s1, s2) {
+            var cmp = ascii_strcasecmp(s1, s2);
+            if(cmp == 0) return strcmp(s1, s2);
+            else return cmp;
+        };
+    })();
     
     var indexedDB = (function () {
         var cls = function (version) {
@@ -66,8 +69,8 @@
                 });
             }
             
-            this.store_terms = function(terms) {
-                return do_action("store_terms", terms);
+            this.store_terms = function(data) {
+                return do_action("store_terms", data);
             };
             
             this.store_idx = function (index) {
@@ -232,70 +235,27 @@
                 .then(function (db) {
                     oDB = db;
                     
-                    var full_term_list = [],
-                        iterIdx = oStarDict.iterable(),
-                        iterSyn = oStarDict.iterable("synonyms");
-                        
-                    function merge_sorted_iters(iter1, iter2) {
-                        var curr1 = iter1.next(), curr2 = iter2.next(),
-                            currentCmp, currentTerm;
-                        
-                        function add_el(offset, type) {
-                            var id = (type == 0) ? aIndex.length : offset;
-                            if(type == 0) aIndex.push(offset);
-                            if(full_term_list.length % CHUNKSIZE == 0) {
-                                if(type == 0) currentTerm = iter1.term(offset);
-                                else currentTerm = iter2.term(offset);
-                                aChunks.push(currentTerm);
-                            }
-                            full_term_list.push({ "type": type, "id": id });
-                        }
-                        
-                        while(curr1 != null && curr2 != null) {
-                            currentCmp = cmp_func(iter1.term(curr1), iter2.term(curr2));
-                            
-                            if(currentCmp <= 0) {
-                                add_el(curr1, 0);
-                                curr1 = iter1.next();
-                            } else {
-                                add_el(curr2, 1);
-                                curr2 = iter2.next();
-                            }
-                            
-                            if(full_term_list.length % CHUNKSIZE == 0)
-                                query("progress", {
-                                    status: 90*full_term_list.length/(wordcount+synwordcount),
-                                    total: 100,
-                                    text: oStarDict.keyword("bookname")
-                                        + ": " + full_term_list.length
-                                        + " words"
-                                });
-                        }
-                        while(curr1 != null) {
-                            add_el(curr1, 0); curr1 = iter1.next();
-                        }
-                        while(curr2 != null) {
-                            add_el(curr2, 1); curr2 = iter2.next();
-                        }
-                    }
-                    
                     console.log("Wordcount for dictionary `"
                             + short_name + "`: " + wordcount);
                     console.log("Synwordcount for dictionary `"
                             + short_name + "`: " + synwordcount);
-                        
-                    merge_sorted_iters(iterIdx, iterSyn);
+                    
+                    var iterIdx = oStarDict.iterable(),
+                        iterSyn = oStarDict.iterable("synonyms");
                     
                     query("progress", {
-                        status: 90,
-                        total: 100,
+                        status: 0, total: 100,
                         text: oStarDict.keyword("bookname")
-                            + ": " + full_term_list.length
-                            + " words"
                     });
                     
-                    return oDB.store_terms(full_term_list);
-                }).then(function () {
+                    return oDB.store_terms({
+                        "viewIdx": iterIdx.view,
+                        "viewSyn": iterSyn.view,
+                        "wordcount": wordcount+synwordcount
+                    });
+                }).then(function (data) {
+                    aIndex = data["index"];
+                    aChunks = data["chunks"];
                     meta_info = {
                         "path": path,
                         "version": oDB.version(),
@@ -305,8 +265,6 @@
                         "size": wordcount + synwordcount,
                         "active": true
                     };
-                    return oDB.store_idx(aIndex);
-                }).then(function () {
                     return save_meta();
                 });
             };
