@@ -162,9 +162,10 @@
             
             this.lookup = function (word, fuzzy) {
                 if(typeof fuzzy === "undefined") fuzzy = false;
-                function cmp(obj) {
-                    var term = getTermFromObj(obj);
-                    if(fuzzy) term = term.substr(0, word.length);
+                if(fuzzy) word = word.toLowerCase();
+                function cmp(term) {
+                    if(term.hasOwnProperty("type")) term = getTermFromObj(term);
+                    if(fuzzy) term = term.substr(0, word.length).toLowerCase();
                     return cmp_func(term, word);
                 }
                 function binarySearch(mode, arr) {
@@ -174,8 +175,7 @@
                     
                     while (miIndex <= maIndex) {
                         currIndex = (miIndex + maIndex) / 2 | 0;
-                        if(mode == "max") currCmp = cmp_func(arr[currIndex], word);
-                        else currCmp = cmp_func(getTermFromObj(arr[currIndex]), word);
+                        currCmp = cmp(arr[currIndex]);
                         if (currCmp < 0) {
                             miIndex = currIndex + 1;
                         } else if (currCmp > 0) {
@@ -183,13 +183,13 @@
                         } else {
                             while(currCmp == 0 && currIndex > 0) {
                                 currIndex--;
-                                if(mode == "max") currCmp = cmp_func(arr[currIndex], word);
-                                else currCmp = cmp_func(getTermFromObj(arr[currIndex]), word);
-                                if(currCmp > 0) currIndex--;
-                                if(currCmp < 0) currIndex++;
+                                currCmp = cmp(arr[currIndex]);
                             }
                             if(mode == "max") maIndex = currIndex;
-                            else miIndex = currIndex;
+                            else {
+                                miIndex = currIndex;
+                                if(currCmp < 0) miIndex++;
+                            }
                             break;
                         }
                     }

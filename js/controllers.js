@@ -96,7 +96,27 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         $scope.entries = [];
         $scope.resources = {};
         
-        $scope.lookup = function () {
+        $scope.lookup = function (val) {
+            if(val == $scope.search_term) {
+                $scope.idle = true;
+                $scope.matches = [];
+                dictWorker.query("lookup", $scope.search_term)
+                .then(function (matches) {
+                    if($scope.search_term == val) {
+                        $scope.matches = matches;
+                        $scope.idle = false;
+                        if(!$scope.$$phase) { $scope.$apply(); }
+                    }
+                });
+            }
+        };
+        
+        $scope.lookup_enterpressed = function () {
+            if($scope.showingEntry) return;
+            $scope.lookup($scope.search_term);
+        };
+        
+        $scope.lookup_data_changed = function () {
             var val = $scope.search_term;
             if($scope.showingEntry) return;
             var delay = (function(){
@@ -106,21 +126,9 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 timer = $timeout(callback, ms);
               };
             })();
-            delay(function () {
-                if(val == $scope.search_term) {
-                    $scope.idle = true;
-                    $scope.matches = [];
-                    dictWorker.query("lookup", $scope.search_term)
-                    .then(function (matches) {
-                        if($scope.search_term == val) {
-                            $scope.matches = matches;
-                            $scope.idle = false;
-                            if(!$scope.$$phase) { $scope.$apply(); }
-                        }
-                    });
-                }
-            }, 600);
+            delay(function () { $scope.lookup(val); }, 400);
         };
+        
         $scope.show_entry = function(matchObj) {
             $scope.showingEntry = true;
             $scope.matches = [];
@@ -140,7 +148,10 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             });
         };
         
-        $scope.$watch("[search_term, dictionaries]", $scope.lookup, true);
+        $scope.$watch(
+            "[search_term, dictionaries]",
+            $scope.lookup_data_changed, true
+        );
         
         $scope.back = function () {
             if($scope.showingEntry) {
