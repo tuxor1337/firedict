@@ -1,6 +1,6 @@
 
 var FireDictDirectives = angular.module("FireDictDirectives", [])
-.directive("ngHeader", function () {
+.directive("ngHeader", function ($timeout) {
     return { 
         replace: true,
         transclude: true,
@@ -9,10 +9,25 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             "onFocus": '=focus',
             "searchTerm": '=term',
             "toggleSidebar": '=toggle',
-            "onReindex": '=reindex'
+            "onReindex": '=reindex',
+            "onEnter": '=enter'
         },
         link: function ($scope, $element, $attrs) {
             $scope.type = $attrs.type;
+            $scope.onClear = function (e) {
+                $scope.searchTerm = "";
+                $timeout(function() {
+                  $element.find("form input").focus();
+                });
+            };
+            $element.find("form input").bind("keydown keypress",
+                function (e) {
+                    if(e.which === 13) {
+                        $scope.onEnter(e);
+                        e.preventDefault();
+                    }
+                }
+            );
         },
         templateUrl: "partials/header.html"
     };
