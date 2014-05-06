@@ -160,9 +160,9 @@ aside a.button {
 }
 
 aside a.button.repo {
-  width: 124px;
-  padding-left:78px;
-  border-radius:10px
+  width: 117px;
+  padding-left:85px;
+  border-radius:10px;
   height:54px;
   background: url(../images/github-button.png) no-repeat scroll 0 -2px rgba(0, 0, 0, 0.6);
 }
