@@ -147,7 +147,7 @@ header a.button {
   right: 0;
   top: 0;
   color:transparent;
-  background: transparent url(https://marketplace.cdn.mozilla.net/media/img/mkt/badges/firefox-marketplace_badge-grey_172_60.png?b=ca5b119-536928e5) 0 0 no-repeat;
+  background: transparent url("https://marketplace.cdn.mozilla.net/media/img/mkt/badges/firefox-marketplace_badge-orange_172_60.png?b=ca5b119-536928e5") 0 0 no-repeat;
 }
 
 aside a.button {
