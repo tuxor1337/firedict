@@ -148,6 +148,10 @@ header a.button {
   top: 0;
   background: transparent url(../images/github-button.png) 0 0 no-repeat;
 }
+header a.button.marketplace {
+	background: transparent url(https://marketplace.cdn.mozilla.net/media/img/mkt/badges/firefox-marketplace_badge-grey_172_60.png?b=ca5b119-536928e5) 0 0 no-repeat;
+}
+
 aside a.button {
   width: 138px;
   padding-left: 64px;
