@@ -28,7 +28,7 @@ var transactions = [],
             if(obj.data == "") {
                 obj.reply(dictMan.history());
             } else {
-                dictMan.lookup_fuzzy(obj.data).then(obj.reply);
+                obj.reply(dictMan.lookup_fuzzy(obj.data));
             }
         },
         entry: function (obj) {
@@ -39,13 +39,10 @@ var transactions = [],
                 });
                 obj.reply(entries);
             } else {
-                dictMan.lookup_exact(obj.data)
-                .then(function (matches) {
-                    matches.forEach(function (m) {
-                        entries.push(dictMan.entry(m));
-                    });
-                    obj.reply(entries);
+                dictMan.lookup_exact(obj.data).forEach(function (m) {
+                    entries.push(dictMan.entry(m));
                 });
+                obj.reply(entries);
             }
         },
         clear_history: function (obj) {
