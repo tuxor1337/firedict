@@ -69,24 +69,12 @@
                 });
             }
             
-            this.store_terms = function(data) {
-                return do_action("store_terms", data);
+            this.store_oft = function(data) {
+                return do_action("store_oft", data);
             };
             
-            this.store_idx = function (index) {
-                return do_action("store_idx", index);
-            };
-            
-            this.restore_idx = function () {
-                return do_action("restore_idx");
-            };
-            
-            this.get = function (id) {
-                return do_action("get", id);
-            };
-            
-            this.get_range = function (start, len) {
-                return do_action("get_range", { "start": start, "len": len });
+            this.restore_oft = function () {
+                return do_action("restore_oft");
             };
             
             this.get_meta = function () {
@@ -115,8 +103,8 @@
     var Dictionary = (function () {
         var cls = function(files, cmp_fct) {
             var meta_info = {},          
+                idxOft, synOft,
                 oStarDict = new StarDict(files), oDB,
-                aIndex = [], aChunks = [],
                 cmp_func = cmp_fct || stardict_strcmp,
                 that = this;
             
@@ -130,21 +118,29 @@
                 })[0];
             }
             
-            function getIndexById(wid) {
+            function getIndexAt(offset) {
                 return oStarDict.index({
-                    "start_offset": aIndex[wid]
+                    "start_offset": offset
                 })[0];
             }
             
+            function getIndexById(wid) {
+                var view = new Uint32Array(idxOft);
+                var idx = oStarDict.index({
+                    "start_offset": view[wid]
+                })[0];
+                return idx;
+            }
+            
             function getTermFromObj(obj) {
-                if(obj.type == 0) return getIndexById(obj.id).term;
+                if(obj.type == 0) return getIndexAt(obj.id).term;
                 else return getSynonymAt(obj.id).term;
             }
             
             function decodeObj(obj) {
                 var idx, term, result = [];
                 if(obj.type == 0) {
-                    idx = getIndexById(obj.id);
+                    idx = getIndexAt(obj.id);
                     term = idx.term;
                 } else {
                     var syn = getSynonymAt(obj.id);
@@ -163,19 +159,20 @@
             this.lookup = function (word, fuzzy) {
                 if(typeof fuzzy === "undefined") fuzzy = false;
                 if(fuzzy) word = word.toLowerCase();
-                function cmp(term) {
-                    if(term.hasOwnProperty("type")) term = getTermFromObj(term);
+                
+                function cmp(id, type) {
+                    var term = getTermFromObj({ "type": type, "id": id });
                     if(fuzzy) term = term.substr(0, word.length).toLowerCase();
                     return cmp_func(term, word);
                 }
-                function binarySearch(mode, arr) {
+                function binarySearch(arr, type) {
                     var miIndex = 0,
                         maIndex = arr.length - 1,
                         currIndex, currCmp = -1;
-                    
+                        
                     while (miIndex <= maIndex) {
                         currIndex = (miIndex + maIndex) / 2 | 0;
-                        currCmp = cmp(arr[currIndex]);
+                        currCmp = cmp(arr[currIndex], type);
                         if (currCmp < 0) {
                             miIndex = currIndex + 1;
                         } else if (currCmp > 0) {
@@ -183,45 +180,35 @@
                         } else {
                             while(currCmp == 0 && currIndex > 0) {
                                 currIndex--;
-                                currCmp = cmp(arr[currIndex]);
+                                currCmp = cmp(arr[currIndex], type);
                             }
-                            if(mode == "max") maIndex = currIndex;
-                            else {
-                                miIndex = currIndex;
-                                if(currCmp < 0) miIndex++;
-                            }
+                            miIndex = currIndex;
+                            if(currCmp < 0) miIndex++;
                             break;
                         }
                     }
-                    if(mode == "max") return Math.max(maIndex,0);
-                    else return miIndex;
+                    return miIndex;
                 }
                 
-                return new Promise(function (resolve, reject) {
-                    function process_range(range) {
-                        var result = [];
-                        for(var r = 0; r < range.length; r++) {
-                            if(cmp(range[r]) != 0) break;
-                            else result.push(decodeObj(range[r]));
-                        }
-                        resolve(result);
+                var result = [];
+                
+                [0,1].forEach(function (type) {
+                    var buf = (type == 1) ? synOft : idxOft,
+                        view = new Uint32Array(buf),
+                        match = binarySearch(view, type);
+                    while(match < view.length
+                        && result.length < (type+1)*20
+                        && cmp(view[match], type) == 0) {
+                        result.push(
+                            decodeObj({ "type": type, "id": view[match++] })
+                        );
                     }
-                    
-                    if(!meta_info.active) { resolve([]); return; }
-                    var offset = binarySearch("max", aChunks) * CHUNKSIZE;
-                    oDB.get_range(offset, CHUNKSIZE).then(function (list) {
-                        var currIdx = binarySearch("min", list),
-                            result = [];
-                        if(currIdx < list.length && cmp(list[currIdx]) != 0) {
-                            resolve(result); return;
-                        }
-                        if(currIdx + 20  < CHUNKSIZE) {
-                            process_range(list.slice(currIdx, currIdx + 20));
-                        } else {
-                            oDB.get_range(offset + currIdx, 20).then(process_range);
-                        }
-                    });
                 });
+                
+                result.sort(function (a,b) {
+                    return cmp_func(a[0],b[0]);
+                });
+                return result.slice(0,20);
             };
             
             this.init = function (path, rank) {
@@ -240,22 +227,18 @@
                     console.log("Synwordcount for dictionary `"
                             + short_name + "`: " + synwordcount);
                     
-                    var iterIdx = oStarDict.iterable(),
-                        iterSyn = oStarDict.iterable("synonyms");
+                    idxOft = oStarDict.oft();
+                    synOft = oStarDict.oft("synonyms");
                     
                     query("progress", {
-                        status: 0, total: 100,
                         text: oStarDict.keyword("bookname")
                     });
                     
-                    return oDB.store_terms({
-                        "viewIdx": iterIdx.view,
-                        "viewSyn": iterSyn.view,
-                        "wordcount": wordcount+synwordcount
+                    return oDB.store_oft({
+                        "idxOft": idxOft,
+                        "synOft": synOft
                     });
-                }).then(function (data) {
-                    aIndex = data["index"];
-                    aChunks = data["chunks"];
+                }).then(function () {
                     meta_info = {
                         "path": path,
                         "version": oDB.version(),
@@ -274,20 +257,11 @@
                 return new Promise(function (resolve, reject) {
                     oDB.get_meta().then(function (meta) {
                         meta_info = meta;
-                        return oDB.restore_idx();
-                    }).then(function (idx) {
-                        aIndex = idx;
-                        var i = 0;
-                        function recSyn() {
-                            if(i < meta_info.size)
-                                oDB.get(i).then(function (obj) {
-                                    aChunks.push(getTermFromObj(obj));
-                                    i += CHUNKSIZE;
-                                    recSyn();
-                                });
-                            else resolve();
-                        }
-                        recSyn();
+                        return oDB.restore_oft();
+                    }).then(function (data) {
+                        idxOft = data.idxOft;
+                        synOft = data.synOft;
+                        resolve();
                     });
                 });
             };

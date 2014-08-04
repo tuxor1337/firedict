@@ -177,7 +177,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
         $scope.render_term = function (term) {
             var result = "";
-            if($scope.search_term == term) result += "<b>" + $scope.search_term + "</b>";
+            if($scope.search_term == term && $scope.search_term != "")
+                result += "<b>" + term + "</b>";
             else result += term + " (Synonym: <b>" + $scope.search_term + "</b>)";
             return result;
         };
@@ -193,12 +194,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                             console.log($scope.dictById(did).alias +
                                 ": File " + name + " not found.");
                         else {
-                            var reader = new FileReader();
-                            reader.onload = function (e) {
-                                $scope.resources[did][name] = e.target.result;
-                                if(!$scope.$$phase) { $scope.$apply(); }
-                            };
-                            reader.readAsDataURL(blob);
+                            $scope.resources[did][name] = window.URL.createObjectURL(blob);
+                            if(!$scope.$$phase) { $scope.$apply(); }
                         }
                     });
                 }

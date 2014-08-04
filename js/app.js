@@ -1,109 +1,4 @@
 "use strict";
-    
-var stardict_strcmp = (function () {
-    var CHARCODE_A_CAPITAL = "A".charCodeAt(0),
-        CHARCODE_Z_CAPITAL = "Z".charCodeAt(0),
-        CHARCODE_A_SMALL = "a".charCodeAt(0);
-        
-    function isAsciiUpper(c) {
-        return c.charCodeAt(0) >= CHARCODE_A_CAPITAL
-            && c.charCodeAt(0) <= CHARCODE_Z_CAPITAL;
-    }
-    
-    function asciiLower(c) {
-        if(isAsciiUpper(c))
-            return String.fromCharCode(
-                CHARCODE_A_SMALL + c.charCodeAt(0) - CHARCODE_A_CAPITAL
-            );
-        else return c;
-    }
-    
-    function ascii_strcasecmp(s1, s2) {
-        var commonLen = Math.min(s1.length, s2.length)
-        for(var i = 0; i < commonLen; i++) {
-            var c1 = asciiLower(s1[i]).charCodeAt(0),
-                c2 = asciiLower(s2[i]).charCodeAt(0);
-            if(c1 != c2) return c1 - c2;
-        }
-        return s1.length - s2.length;
-    }
-    
-    function strcmp(s1, s2) {
-        var commonLen = Math.min(s1.length, s2.length)
-        for(var i = 0; i < commonLen; i++) {
-            var c1 = s1.charCodeAt(i),
-                c2 = s2.charCodeAt(i);
-            if(c1 != c2) return c1 - c2;
-        }
-        return s1.length - s2.length
-    }
-    
-    return function (s1, s2) {
-        var cmp = ascii_strcasecmp(s1, s2);
-        if(cmp == 0) return strcmp(s1, s2);
-        else return cmp;
-    };
-})();
-
-var iterFactory = function(view, mode) {
-    function getUintAt(arr, offs) {
-        if(offs < 0) offs = arr.length + offs;
-        out = 0;
-        for (var j = offs; j < offs+4; j++) {
-                out <<= 8;
-                out |= arr[j] & 0xff;
-        }
-        return out;
-    }
-    
-    var readUTF8String = (function () {
-        var decoder = new TextDecoder("utf-8");
-        return function (bytes) {
-            return decoder.decode(bytes);
-        };
-    })();
-
-    return new function () {
-        var currOffset = 0;
-    
-        function getEOS(offset) {
-            for(var i = offset; i < view.length; i++) {
-                if(view[i] == 0) return i;
-            }
-            return -1;
-        }
-        
-        this.data = function (offset) {
-            if(mode == "synonyms")
-                return getUintAt(view, getEOS(offset)+1);
-            else return [
-                getUintAt(view, getEOS(offset)+1),
-                getUintAt(view, getEOS(offset)+5)
-            ];
-        };
-        
-        this.term = function (offset) {
-            return readUTF8String(
-                view.subarray(offset, getEOS(offset))
-            );
-        };
-        
-        this.next = function () {
-            var j = currOffset, result = null,
-                datalen = (mode == "synonyms") ? 4 : 8;
-            
-            for( ; currOffset < view.length; currOffset++) {
-                if(view[currOffset] == 0) {
-                    result = j; currOffset += datalen + 1;
-                    break;
-                }
-            }
-            return result;
-        };
-        
-        this.view = view;
-    };
-};
 
 angular.module("FireDict", [
     "ngRoute", "ngSanitize", "ngTouch",
@@ -221,7 +116,6 @@ angular.module("FireDict", [
                         obj.reply(version);
                     },
                     function (db) {
-                        db.createObjectStore("idx"+version);
                         db.createObjectStore("dict"+version);
                     },
                     version
@@ -255,141 +149,35 @@ angular.module("FireDict", [
                     .onsuccess = function (event) {
                         obj.reply(event.target.result);
                 };
-            } else if(action == "store_terms") {
+            } else if(action == "store_oft") {
                 var did = data.did, chunksize = data.chunksize,
                     idb_ostore = "dict" + did,
-                    data = data.data, wordcount = data["wordcount"];
-                    
-                var aIndex = [], aChunks = [], full_term_list = [],
-                    cmp_func = stardict_strcmp,
-                    merge_sorted_iters = function (iter1, iter2) {
-                        var curr1 = iter1.next(), curr2 = iter2.next(),
-                            currentCmp, currentTerm;
-                        
-                        function add_el(offset, type) {
-                            var id = (type == 0) ? aIndex.length : offset;
-                            if(type == 0) aIndex.push(offset);
-                            if(full_term_list.length % chunksize == 0) {
-                                if(type == 0) currentTerm = iter1.term(offset);
-                                else currentTerm = iter2.term(offset);
-                                aChunks.push(currentTerm);
-                            }
-                            full_term_list.push({ "type": type, "id": id });
-                        }
-                        
-                        while(curr1 != null && curr2 != null) {
-                            currentCmp = cmp_func(iter1.term(curr1), iter2.term(curr2));
-                            
-                            if(currentCmp <= 0) {
-                                add_el(curr1, 0);
-                                curr1 = iter1.next();
-                            } else {
-                                add_el(curr2, 1);
-                                curr2 = iter2.next();
-                            }
-                            
-                            if(full_term_list.length % chunksize == 0)
-                                ngDialog.update([
-                                    30*full_term_list.length/wordcount, 100
-                                ]);
-                        }
-                        while(curr1 != null) {
-                            add_el(curr1, 0); curr1 = iter1.next();
-                        }
-                        while(curr2 != null) {
-                            add_el(curr2, 1); curr2 = iter2.next();
-                        }
-                    };
-                
-                merge_sorted_iters(
-                    iterFactory(data["viewIdx"], "index"),
-                    iterFactory(data["viewSyn"], "synonyms")
-                );
-                
-                data = full_term_list;
-                ngDialog.update([30, 100]);
+                    data = data.data;
                 
                 var store = indexedDB_handle.transaction(idb_ostore, "readwrite")
-                                            .objectStore(idb_ostore),
-                    i = 0, totalwordcount = data.length;
-                do_async_rec(
-                    function () {
-                        return new Promise(function (resolve, reject) {
-                            store.add(data.slice(0, chunksize), i)
-                                .onsuccess = function () {
-                                i += 1;
-                                if(i % 7 == 0)
-                                    ngDialog.update([
-                                        30+70*i*chunksize/totalwordcount,
-                                        100
-                                    ]);
-                                data = data.slice(chunksize);
-                                resolve();
-                            };
-                        });
-                    },
-                    function () { return data.length > 0; },
-                    function () {
-                        idb_ostore = "idx" + did;
-                        indexedDB_handle.transaction(idb_ostore, "readwrite")
-                            .objectStore(idb_ostore).add(aIndex, 0)
-                            .onsuccess = function () {
-                            obj.reply({
-                                "index": aIndex,
-                                "chunks": aChunks
-                            });
-                        };
-                    }
-                );
-            } else if(action == "restore_idx") {
-                var did = data.did,
-                    idb_ostore = "idx" + did,
-                    data = data.data;
-                indexedDB_handle.transaction(idb_ostore)
-                    .objectStore(idb_ostore).get(0)
-                    .onsuccess = function (event) {
-                        obj.reply(event.target.result);
+                                            .objectStore(idb_ostore);
+                store.add(data.idxOft, 0)
+                .onsuccess = function () {
+                    store.add(data.synOft, 1)
+                    .onsuccess = function () {
+                        obj.reply();
+                    };
                 };
-            } else if(action == "get_range") {
-                var did = data.did, chunksize = data.chunksize,
-                    idb_ostore = "dict" + did,
-                    data = data.data,
-                    size = $rootScope.dictById(did).size;
-                data.len = Math.min(data.len, size - data.start);
-                var result = [], len, start = data.start,
-                    offset = start / chunksize | 0;
-                do_async_rec(
-                    function () {
-                        return new Promise(function (resolve, reject) {
-                            indexedDB_handle.transaction(idb_ostore)
-                                .objectStore(idb_ostore).get(offset)
-                                .onsuccess = function (evt) {
-                                var res = evt.target.result,
-                                    chunk_a = start%chunksize,
-                                    chunk_b = chunk_a + len;
-                                result = result.concat(res.slice(chunk_a, chunk_b));
-                                offset += 1; start = 0;
-                                resolve();
-                            };
-                        });
-                    },
-                    function () { 
-                        len = data.len - result.length;
-                        return len > 0;
-                    },
-                    function () { obj.reply(result); }
-                );
-            } else if(action == "get") {
-                var did = data.did, chunksize = data.chunksize,
-                    idb_ostore = "dict" + did,
-                    data = data.data;
-                var offset = data / chunksize | 0,
-                    idx = data%chunksize;
-                indexedDB_handle.transaction(idb_ostore)
-                    .objectStore(idb_ostore).get(offset)
-                    .onsuccess = function(evt) {
-                        var ret = evt.target.result[idx];
-                        obj.reply(ret);
+            } else if(action == "restore_oft") {
+                var did = data.did,
+                    idb_ostore = "dict" + did;
+                    
+                var store = indexedDB_handle.transaction(idb_ostore)
+                    .objectStore(idb_ostore),
+                    result = {};
+                store.get(0)
+                .onsuccess = function (event) {
+                    result.idxOft = event.target.result;
+                    store.get(1)
+                    .onsuccess = function (event) {
+                        result.synOft = event.target.result;
+                        obj.reply(result);
+                    };
                 };
             }
         });

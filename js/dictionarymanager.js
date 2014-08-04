@@ -174,25 +174,16 @@
                     }
                 }
                 
-                return new Promise(function (resolve, reject) {
-                    function rec_lookup(d) {
-                        if(d < aDicts.length) {
-                            aDicts[d].lookup(term, true)
-                            .then(function (tmp) {
-                                add_matches(tmp);
-                                rec_lookup(d+1);
-                            });
-                        } else {
-                            resolve(matches.sort(function (a,b) {
-                                a = a.term.toLowerCase();
-                                b = b.term.toLowerCase();
-                                if(a > b) return 1;
-                                if(a < b) return -1;
-                                return 0;
-                            }));
-                        }
-                    }
-                    rec_lookup(0);
+                for(d = 0; d < aDicts.length; d++) {
+                    add_matches(aDicts[d].lookup(term, true));
+                }
+                
+                return matches.sort(function (a,b) {
+                    a = a.term.toLowerCase();
+                    b = b.term.toLowerCase();
+                    if(a > b) return 1;
+                    if(a < b) return -1;
+                    return 0;
                 });
             };
             
@@ -202,17 +193,15 @@
                 aDicts.forEach(function (dict) {
                     result.push(dict.lookup(term));
                 });
-                return Promise.all(result).then(function (arr) {
-                    var tmp = [].concat.apply([], arr),
-                        u = {}, a = [];
-                    for(var i = 0, l = tmp.length; i < l; ++i){
-                        var teststr = tmp[i][2] + "_" + tmp[i][1].dictpos[0];
-                        if(u.hasOwnProperty(teststr)) continue;
-                        a.push(tmp[i]);
-                        u[teststr] = 1;
-                    }
-                    return a;
-                });
+                var tmp = [].concat.apply([], result),
+                    u = {}, a = [];
+                for(var i = 0, l = tmp.length; i < l; ++i){
+                    var teststr = tmp[i][2] + "_" + tmp[i][1].dictpos[0];
+                    if(u.hasOwnProperty(teststr)) continue;
+                    a.push(tmp[i]);
+                    u[teststr] = 1;
+                }
+                return a;
             };
             
             this.entry = function (decodedObj) {
