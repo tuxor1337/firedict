@@ -9,7 +9,6 @@
     }
   },
   "launch_path": "/index.html",
-  "origin": "app://tovotu.de",
   "type": "privileged",
   "icons": {
     "60": "/icon-60.png",
