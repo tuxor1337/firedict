@@ -88,8 +88,20 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
     }
 ])
-.controller("lookupCtrl", ["$scope", "$timeout", "dictWorker", "ngDialog",
-    function ($scope, $timeout, dictWorker, ngDialog) {
+.controller("lookupCtrl", ["$scope", "$rootScope", "$timeout", "dictWorker", "ngDialog",
+    function ($scope, $rootScope, $timeout, dictWorker, ngDialog) {
+        function escapeHtml(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+        
         $scope.showingEntry = false;
         $scope.idle = false;
         $scope.matches = [];
@@ -100,6 +112,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             if(val == $scope.search_term) {
                 $scope.idle = true;
                 $scope.matches = [];
+                $rootScope.search_term = $scope.search_term;
                 dictWorker.query("lookup", $scope.search_term)
                 .then(function (matches) {
                     if($scope.search_term == val) {
@@ -126,14 +139,13 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 timer = $timeout(callback, ms);
               };
             })();
-            delay(function () { $scope.lookup(val); }, 400);
+            delay(function () { $scope.lookup(val); }, 600);
         };
         
         $scope.show_entry = function(matchObj) {
-            $scope.showingEntry = true;
+            $scope.idle = true;
             $scope.matches = [];
             $scope.entries = [];
-            $scope.idle = true;
             if(!$scope.$$phase) { $scope.$apply(); }
             var entr = matchObj, term = matchObj;
             if(matchObj instanceof Object) {
@@ -143,6 +155,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             $scope.search_term = term;
             dictWorker.query("entry", entr)
             .then(function (entries) {
+                $scope.showingEntry = true;
                 $scope.entries = entries;
                 if(!$scope.$$phase) { $scope.$apply(); }
             });
@@ -176,6 +189,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             return result;
         };
         $scope.render_term = function (term) {
+            term = escapeHtml(term);
             var result = "";
             if($scope.search_term == term && $scope.search_term != "")
                 result += "<b>" + term + "</b>";

@@ -76,6 +76,9 @@ angular.module("FireDict", [
             }
             if(!$rootScope.$$phase) { $rootScope.$apply(); }
         });
+        dictWorker.addListener("lookup_continue", function (obj) {
+            obj.reply(obj.data.term == $rootScope.search_term);
+        });
         dictWorker.addListener("indexedDB", function (obj) {
             var action = obj.data.action, data = obj.data.data;
             function do_async_rec(work, check, terminate) {
@@ -129,7 +132,6 @@ angular.module("FireDict", [
                         obj.reply();
                     },
                     function (db) {
-                        db.deleteObjectStore("idx"+data);
                         db.deleteObjectStore("dict"+data);
                     },
                     version

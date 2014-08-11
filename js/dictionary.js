@@ -178,13 +178,8 @@
                         } else if (currCmp > 0) {
                             maIndex = currIndex - 1;
                         } else {
-                            while(currCmp == 0 && currIndex > 0) {
-                                currIndex--;
-                                currCmp = cmp(arr[currIndex], type);
-                            }
-                            miIndex = currIndex;
-                            if(currCmp < 0) miIndex++;
-                            break;
+                            if(maIndex == miIndex) break;
+                            else maIndex = currIndex;
                         }
                     }
                     return miIndex;
@@ -222,10 +217,8 @@
                 .then(function (db) {
                     oDB = db;
                     
-                    console.log("Wordcount for dictionary `"
-                            + short_name + "`: " + wordcount);
-                    console.log("Synwordcount for dictionary `"
-                            + short_name + "`: " + synwordcount);
+                    console.log("(syn)wordcount for dictionary `"
+                            + short_name + "`: " + wordcount + " (" + synwordcount + ")");
                     
                     idxOft = oStarDict.oft();
                     synOft = oStarDict.oft("synonyms");
