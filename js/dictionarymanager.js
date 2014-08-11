@@ -159,6 +159,8 @@
             this.lookup_fuzzy = function (term) {
                 if(!ready) return [];
                 
+                console.log("DictionaryManager: lookup_fuzzy(" + term + ")");
+                
                 var matches = [];
                 function add_matches(raw_matches) {
                     while(raw_matches.length > 0) {
@@ -174,16 +176,39 @@
                     }
                 }
                 
-                for(d = 0; d < aDicts.length; d++) {
-                    add_matches(aDicts[d].lookup(term, true));
-                }
-                
-                return matches.sort(function (a,b) {
-                    a = a.term.toLowerCase();
-                    b = b.term.toLowerCase();
-                    if(a > b) return 1;
-                    if(a < b) return -1;
-                    return 0;
+                return new Promise(function (resolve, reject) {
+                    function continue_lookup(d) {
+                        if(d < aDicts.length) {
+                            query("lookup_continue", { term: term })
+                            .then(function (bool) {
+                                if(!bool)
+                                    console.log("lookup_fuzzy("
+                                        + term + ") request canceled");
+                                else {
+                                    if(aDicts[d].meta().active) {
+                                        var short_name = aDicts[d].meta().alias;
+                                        if(short_name.length > 10)
+                                            short_name = short_name.substring(0,10) + "..."
+                                        console.log("lookup_fuzzy(" + term + ") in `"
+                                            + short_name + "`");
+                                        
+                                        add_matches(aDicts[d].lookup(term, true));
+                                    }
+                                    continue_lookup(d+1);
+                                }
+                            });
+                        } else {
+                            resolve(matches.sort(function (a,b) {
+                                a = a.term.toLowerCase();
+                                b = b.term.toLowerCase();
+                                if(a > b) return 1;
+                                if(a < b) return -1;
+                                return 0;
+                            }));
+                        }
+                    }
+                    
+                    continue_lookup(0);
                 });
             };
             
@@ -207,6 +232,13 @@
             this.entry = function (decodedObj) {
                 if(!ready) return [];
                 oHistoryManager.add(decodedObj);
+                
+                var short_name = dict_by_id(decodedObj[2]).meta().alias;
+                if(short_name.length > 10)
+                    short_name = short_name.substring(0,10) + "..."
+                console.log("loading entry " + decodedObj[1].term
+                    + " from `" + short_name + "`");
+                
                 return {
                     term: decodedObj[1].term,
                     data: dict_by_id(decodedObj[2]).entry(decodedObj),

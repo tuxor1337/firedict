@@ -28,7 +28,10 @@ var transactions = [],
             if(obj.data == "") {
                 obj.reply(dictMan.history());
             } else {
-                obj.reply(dictMan.lookup_fuzzy(obj.data));
+                dictMan.lookup_fuzzy(obj.data)
+                .then(function (matches) {
+                    obj.reply(matches);
+                });
             }
         },
         entry: function (obj) {
