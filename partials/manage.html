@@ -1,27 +1,29 @@
 <div class="partial-container">
     <div data-ng-header="" data-type="manage" data-toggle="toggleSidebar"
-         data-reindex="reindex">{{title}}</div>
+         data-reindex="reindex" data-text="{{title}}"></div>
     <div role="main">
         <section data-type="list">
             <ul class="manage" data-ng-sortable="" data-move-fn="dictMoveAfter">
                 <li data-ng-if="dictionaries.length == 0" class="notfound">
-                    <h2>No dictionaries found</h2>
-                    <p>
-                        Unfortunately, scanning your memory card's <i>dictdata</i>
+                    <h2 data-l10n-id="no-dictionaries-found">
+                        No dictionaries found
+                    </h2>
+                    <p data-l10n-id="scan-unsuccessful">
+                        Unfortunately, scanning your memory card's *dictdata*
                         directory for dictionaries was not successful.
                     </p>
-                    <p>
+                    <p data-l10n-id="make-sure-everythings-okay">
                         Please make sure you inserted the (right) memory card and
-                        place your dictionaries in a directory named <i>dictdata</i>
+                        place your dictionaries in a directory named *dictdata*
                         directly at your memory card's root.
                     </p>
-                    <p>
-                        Furthermore, make sure your dictionary is in proper <i>StarDict</i>
+                    <p data-l10n-id="proper-stardict-format">
+                        Furthermore, make sure your dictionary is in proper *StarDict*
                         format, i.e. containing at least one file of each of the
                         following types/file endings: idx, ifo, dict.
                     </p>
-                    <p>
-                    Examplary directory structure:
+                    <p data-l10n-id="examplary-dir-structure">
+                        Examplary directory structure:
                     </p>
                     <ul>
                         <li>dictdata/testDict/mydict.dict</li>
@@ -31,9 +33,9 @@
                         <li>dictdata/testdict2/a2ndDict.idx</li>
                         <li>dictdata/testdict2/a2ndDict.ifo</li>
                     </ul>
-                    <p>
+                    <p data-l10n-id="files-may-be-compressed">
                         Note that files may be compressed, i.e. having an additional
-                        <i>dz</i> at the end.
+                        *dz* at the end.
                     </p>
                 </li>
                 <li draggable="" data-ng-repeat="dict in dictionaries | orderBy:'rank'"
@@ -43,8 +45,14 @@
                          data-ng-click="toggleActive(dict)">{{dict.version}}</div>
                     <p data-ng-click="select(dict)">{{dict.alias}}</p>
                     <div class="buttons">
-                        <button data-ng-click="setColor(dict)">Color...</button>
-                        <button data-ng-click="rename(dict)">Rename...</button>
+                        <button data-ng-click="setColor(dict)" 
+                                data-l10n-id="color-dots">
+                            Color...
+                        </button>
+                        <button data-ng-click="rename(dict)"
+                                data-l10n-id="rename-dots">
+                            Rename...
+                        </button>
                     </div>
                 </li>
             </ul>

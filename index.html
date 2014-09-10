@@ -15,22 +15,42 @@
         <link rel="stylesheet" type="text/css" href="style/dialog.css" />
         <link rel="stylesheet" type="text/css" href="style/settings.css" />
         
-        <script src="js/lib/wiki2html.js" type="text/javascript"></script>
-        <script src="js/lib/jquery.min.js" type="text/javascript"></script>
-        <script src="js/lib/promise.js" type="text/javascript"></script>
-        <script src="js/lib/angular.min.js" type="text/javascript"></script>
-        <script src="js/lib/angular-route.min.js" type="text/javascript"></script>
-        <script src="js/lib/angular-sanitize.min.js" type="text/javascript"></script>
-        <script src="js/lib/angular-touch.min.js" type="text/javascript"></script>
-        <script src="js/directives.js" type="text/javascript"></script>
-        <script src="js/controllers.js" type="text/javascript"></script>
-        <script src="js/app.js" type="text/javascript"></script>
+        <link rel="resource" type="application/l10n" href="locales/locales.ini" />
+        
+        <script type="application/javascript" src="js/lib/l10n.js"></script>
+        <script type="application/javascript" src="js/lib/wiki2html.js"></script>
+        <script type="application/javascript" src="js/lib/jquery.min.js"></script>
+        <script type="application/javascript" src="js/lib/promise.js"></script>
+        <script type="application/javascript" src="js/lib/angular.min.js"></script>
+        <script type="application/javascript" src="js/lib/angular-route.min.js"></script>
+        <script type="application/javascript" src="js/lib/angular-sanitize.min.js"></script>
+        <script type="application/javascript" src="js/lib/angular-touch.min.js"></script>
+        <script type="application/javascript" src="js/directives.js"></script>
+        <script type="application/javascript" src="js/controllers.js"></script>
+        <script type="application/javascript" src="js/app.js"></script>
     </head>
     <body data-ng-app="FireDict" data-ng-csp>
         <div data-ng-drawer title="FireDict">
-            <li data-ng-repeat="item in menuitems">
-                <a data-ng-href="#/{{item.ref}}" data-ng-click="toggleSidebar()">
-                    {{item.label}}
+            <li>
+                <a data-ng-href="#/lookup"
+                   data-ng-click="toggleSidebar()"
+                   data-l10n-id="lookup-words">
+                    Lookup Words
+                </a>
+                <a data-ng-href="#/manage"
+                   data-ng-click="toggleSidebar()"
+                   data-l10n-id="manage-dicts">
+                    Manage Dictionaries
+                </a>
+                <a data-ng-href="#/settings"
+                   data-ng-click="toggleSidebar()"
+                   data-l10n-id="settings">
+                    Settings
+                </a>
+                <a data-ng-href="#/about"
+                   data-ng-click="toggleSidebar()"
+                   data-l10n-id="about">
+                    About
                 </a>
             </li>
         </div>

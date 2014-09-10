@@ -32,12 +32,6 @@ angular.module("FireDict", [
 .run(["$rootScope", "dictWorker", "ngDialog",
     function ($rootScope, dictWorker, ngDialog) {
         $rootScope.search_term = "";
-        $rootScope.menuitems = [
-            { ref: "lookup", label: "Lookup Words" },
-            { ref: "manage", label: "Manage Dictionaries" },
-            { ref: "settings", label: "Settings" },
-            { ref: "about", label: "About" }
-        ];
         $rootScope.drawerOpen = false;
         $rootScope.toggleSidebar = function () {
             if($rootScope.drawerOpen) $rootScope.drawerOpen = false;

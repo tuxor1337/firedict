@@ -109,10 +109,11 @@ section[data-type="sidebar"] > nav > ul > li > a {
   border:0; outline:none;
   text-decoration: none;
   color: #fff;
-  font-size: 1.6rem;
+  font-size: 1.3rem;
+  font-weight: bold;
   line-height: 4.35rem;
   border-bottom: 0.1rem solid #596068;
-  text-indent: 3rem;
+  text-indent: 1.8rem;
   padding-right: 0.8rem;
   width: 100%;
   -moz-box-sizing: border-box;

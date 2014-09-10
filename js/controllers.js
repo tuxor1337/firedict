@@ -1,7 +1,7 @@
 
 var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirectives"])
-.controller("manageCtrl", ["$scope", "ngDialog", "dictWorker",
-    function ($scope, ngDialog, dictWorker) {
+.controller("manageCtrl", ["$scope", "ngDialog", "dictWorker", "l10nPhrases",
+    function ($scope, ngDialog, dictWorker, l10nPhrases) {
         function RGBToHex(aRGB){
             var r = aRGB[0], g = aRGB[1], b = aRGB[2],
                 bin = r << 16 | g << 8 | b;
@@ -18,7 +18,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             return [r,g,b];
         }
 
-        $scope.title = "Manage Dictionaries";
+        $scope.title = "manage-dicts";
         $scope.selected = -1;
         $scope.select = function (dict) {
             if($scope.selected == dict.version)
@@ -38,7 +38,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         $scope.rename = function (dict) {
             ngDialog.open({
                 type: "prompt",
-                text: "Type in a new alias for this dictionary:",
+                text: l10nPhrases.get("type-new-alias"),
                 value: dict.alias,
                 callbk: function (alias) {
                     if(alias !== null) dict.alias = alias;
@@ -48,7 +48,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         $scope.setColor = function (dict) {
             ngDialog.open({
                 type: "color",
-                text: "Choose a color for this dictionary:",
+                text: l10nPhrases.get("choose-color"),
                 value: hexToRGB(dict.color),
                 callbk: function (color) {
                     if(color !== null) dict.color = RGBToHex(color);
@@ -88,8 +88,9 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
     }
 ])
-.controller("lookupCtrl", ["$scope", "$rootScope", "$timeout", "dictWorker", "ngDialog",
-    function ($scope, $rootScope, $timeout, dictWorker, ngDialog) {
+.controller("lookupCtrl", ["$scope", "$rootScope", "$timeout", "dictWorker",
+    "ngDialog", "l10nPhrases", function ($scope, $rootScope, $timeout,
+    dictWorker, ngDialog, l10nPhrases) {
         function escapeHtml(text) {
             var map = {
                 '&': '&amp;',
@@ -196,7 +197,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             var result = "";
             if($scope.search_term == term && $scope.search_term != "")
                 result += "<b>" + term + "</b>";
-            else result += term + " (Synonym: <b>" + $scope.search_term + "</b>)";
+            else result += term + " (" + l10nPhrases.get("synonym") + ": <b>" + $scope.search_term + "</b>)";
             return result;
         };
         $scope.render_content = function (d, did) {
@@ -444,17 +445,17 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
     }
 ])
-.controller("settingsCtrl", ["$scope", "ngDialog", "dictWorker",
-    function ($scope, ngDialog, dictWorker) {
-        $scope.title = "Settings";
+.controller("settingsCtrl", ["$scope", "ngDialog", "dictWorker", "l10nPhrases",
+    function ($scope, ngDialog, dictWorker, l10nPhrases) {
+        $scope.title = "settings";
         $scope.settings = [
             {
-                name: "Clear history",
+                name: l10nPhrases.get("clear-history"),
                 onclick: function () {
                     ngDialog.open({
-                        text: "Do you really want to clear the history?",
-                        success: "Yes, I'm sure",
-                        cancel: "No, forget it...",
+                        text: l10nPhrases.get("really-clear-history"),
+                        success: l10nPhrases.get("yes-sure"),
+                        cancel: l10nPhrases.get("no-forget-it"),
                         callbk: function (result) {
                             if(result === true) {
                                 dictWorker.query("clear_history");
@@ -467,8 +468,5 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
     }
 ])
 .controller("aboutCtrl", function ($scope) {
-    $scope.title = "About FireDict";
-    $scope.description = "<p>Open source offline dictionary webapp for StarDict dictionaries hosted on GitHub</p>"
-        + "<p>http://tuxor1337.github.io/firedict/</p>"
-        + "<p>Scans for dictionaries in your sdcard's \"dictdata\" directory.</p>";
+    $scope.title = "about";
 });
