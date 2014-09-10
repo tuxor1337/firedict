@@ -18,9 +18,37 @@ importScripts("dictionarymanager.js");
 
 dictMan = new DictionaryManager();
 
+function cacheManager() {
+    var cache = [];
+    
+    this.add = function (key, did, data) {
+        for(var h = 0; h < cache.length; h++) {
+            if(cache[h].key == key && cache[h].did == did) return;
+        }
+        cache.push({ "key": key, "did": did, "data": data });
+        cache = cache.slice(-30);
+    };
+    
+    this.get = function (key, did) { 
+        for(var h = 0; h < cache.length; h++) {
+            if(cache[h].key == key && cache[h].did == did)
+                return cache[h].data;
+        }
+        return null;
+    }
+    
+    this.clear = function () { cache = []; };
+}
+
 var transactions = [],
+    caches = {
+        "entries": new cacheManager(),
+        "lookup": new cacheManager()
+    };
     queryableFunctions = {
         init: function (obj) {
+            caches["entries"].clear();
+            caches["lookup"].clear();
             dictMan = new DictionaryManager();
             dictMan.init();
         },
@@ -28,22 +56,45 @@ var transactions = [],
             if(obj.data == "") {
                 obj.reply(dictMan.history());
             } else {
-                dictMan.lookup_fuzzy(obj.data)
-                .then(function (matches) {
-                    obj.reply(matches);
-                });
+                var cached_matches = caches["lookup"].get(obj.data,-1);
+                if(null != cached_matches) obj.reply(cached_matches);
+                else {
+                    dictMan.lookup_fuzzy(obj.data)
+                    .then(function (matches) {
+                        obj.reply(matches);
+                        caches["lookup"].add(obj.data, -1, matches)
+                    });
+                }
             }
         },
         entry: function (obj) {
+            function get_entry(d) {
+                var cached_entry = caches["entries"].get(d[1].dictpos[0], d[2]);
+                if(null == cached_entry) {
+                    cached_entry = dictMan.entry(d);
+                    caches["entries"].add(d[1].dictpos[0], d[2], cached_entry);
+                }
+                return cached_entry;
+            }
+            
+            function lookup_exact(term) {
+                var cached_matches = caches["lookup"].get(term, -2);
+                if(null == cached_matches) {
+                    cached_matches = dictMan.lookup_exact(term);
+                    caches["lookup"].add(term, -2, cached_matches);
+                }
+                return cached_matches;
+            }
+            
             var entries = [];
             if(obj.data instanceof Object) {
                 obj.data.forEach(function (d) {
-                    entries.push(dictMan.entry(d));
+                    entries.push(get_entry(d));
                 });
                 obj.reply(entries);
             } else {
-                dictMan.lookup_exact(obj.data).forEach(function (m) {
-                    entries.push(dictMan.entry(m));
+                lookup_exact(obj.data).forEach(function (m) {
+                    entries.push(get_entry(m));
                 });
                 obj.reply(entries);
             }
@@ -53,6 +104,8 @@ var transactions = [],
         },
         edit_dictionaries: function (obj) {
             obj.data.forEach(dictMan.edit);
+            caches["entries"].clear();
+            caches["lookup"].clear();
         },
         resource: function (obj) {
             obj.reply(dictMan.resource(obj.data.did, obj.data.name));
