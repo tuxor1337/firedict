@@ -1,6 +1,14 @@
 <div class="partial-container">
-    <div data-ng-header="" data-toggle="toggleSidebar">{{title}}</div>
+    <div data-ng-header="" data-toggle="toggleSidebar" data-text="{{title}}"></div>
     <div role="main">
-        <section data-type="output" data-ng-bind-html="description"></section>
+        <section data-type="output">
+            <p data-l10n-id="about-descr1">
+                Open source offline dictionary webapp for StarDict dictionaries hosted on GitHub
+            </p>
+            <p>http://tuxor1337.github.io/firedict/</p>
+            <p data-l10n-id="about-descr2">
+                Scans for dictionaries in your sdcard's "dictdata" directory.
+            </p>
+        </section>
     </div>
 </div>

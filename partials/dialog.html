@@ -6,7 +6,9 @@
             <input type="range" data-ng-model="modal.result[0]" min="0" max="255" class="red" /><br />
             <input type="range" data-ng-model="modal.result[1]" min="0" max="255" class="green" /><br />
             <input type="range" data-ng-model="modal.result[2]" min="0" max="255" class="blue" /><br />
-            <div data-ng-style="{'background-color':'rgb('+modal.result[0]+','+modal.result[1]+','+modal.result[2]+')'}">Preview</div>
+            <div data-ng-style="{'background-color':'rgb('+modal.result[0]+','+modal.result[1]+','+modal.result[2]+')'}">
+                <span data-l10n-id="preview">Preview</span>
+            </div>
         </div>
         <progress data-ng-if="modal.type == 'progress' &amp;&amp; modal.result.length &gt;= 2" 
                   value="{{modal.result[0]}}"

@@ -3,14 +3,14 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
 .directive("ngHeader", function ($timeout) {
     return { 
         replace: true,
-        transclude: true,
         restrict: "A",
         scope: {
             "onFocus": '=focus',
             "searchTerm": '=term',
             "toggleSidebar": '=toggle',
             "onReindex": '=reindex',
-            "onEnter": '=enter'
+            "onEnter": '=enter',
+            "text": '@text'
         },
         link: function ($scope, $element, $attrs) {
             $scope.type = $attrs.type;
@@ -194,13 +194,13 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         templateUrl: "partials/dialog.html"
     };
 })
-.factory("ngDialog", ["$document", "$compile", "$rootScope",
-    function ($document, $compile, $rootScope) {
+.factory("ngDialog", ["$document", "$compile", "$rootScope", "l10nPhrases",
+    function ($document, $compile, $rootScope, l10nPhrases) {
         var defaults = {
               type: "confirm",
               text: "Default text",
-              success: 'OK',
-              cancel: 'Cancel',
+              success: l10nPhrases.get('ok'),
+              cancel: l10nPhrases.get('cancel'),
               value: null,
               callbk: null
             },
@@ -255,6 +255,15 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         };
     }
 ])
+.factory("l10nPhrases", function () {
+    return {
+        get: function (key) {
+            if(navigator.mozL10n.readyState == "complete")
+                return navigator.mozL10n.get(key);
+            else return key;
+        }
+    };
+})
 .factory("dictWorker", function () {
     var oWorker = new Worker("js/worker.js"),
         oListeners = { 
