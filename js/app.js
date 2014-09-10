@@ -184,30 +184,9 @@ angular.module("FireDict", [
             }
         });
         dictWorker.addListener("scan_dictdata", function (obj) {
-            var sdcard = navigator.getDeviceStorage("sdcard"),
-                request = sdcard.enumerate("dictdata"),
-                result = [];
-                
-            function add_subdir(n) {
-                if(result.length <= n) obj.reply(result);
-                else {
-                    var req = sdcard.enumerate(result[n]);
-                    result[n] = { "path": result[n], "files": [] };
-                    req.onsuccess = function () {
-                        if(!this.result) add_subdir(n+1);
-                        else {
-                            result[n].files.push(this.result);
-                            this.continue();
-                        }
-                    };
-                    req.onerror = function () { 
-                        console.log("Error while scanning '" + result[n].path
-                            + "': (" + request.error.name
-                            + ") " + request.error.message);
-                        add_subdir(n+1); 
-                    };
-                }
-            }
+            var sdcard_areas = navigator.getDeviceStorages("sdcard"),
+                filelist = [],
+                subdirs = [];
             
             function split_path(path) {
                 var pos_slash = path.lastIndexOf('/'),
@@ -219,29 +198,60 @@ angular.module("FireDict", [
                 ];
             }
             
-            var path_prefix = null;
-            request.onsuccess = function () {
-                if(!this.result) add_subdir(0);
-                else {
-                    var fname = this.result.name;
-                    if(path_prefix === null) {
-                        var pos = fname.indexOf("dictdata");
-                        path_prefix = fname.substring(0, pos);
+            function cat_paths(p1, p2) {
+                if(p1 == "") return p2;
+                if(p2 == "") return p1;
+                p1 = p1.replace(/\/+$/, "");
+                p2 = p2.prelace(/^\/+/, "");
+                return p1 + "/" + p2;
+            }
+            
+            (function scan_area(n) {
+                if(n < sdcard_areas.length) {
+                    var sdcard = sdcard_areas[n],
+                        request = sdcard.enumerate("dictdata"),
+                        path_prefix = null;
+                        
+                    request.onsuccess = function () {
+                        if(!this.result) scan_area(n+1);
+                        else {
+                            var fname = this.result.name;
+                            if(path_prefix === null) {
+                                var pos = fname.indexOf("dictdata");
+                                path_prefix = fname.substring(0, pos);
+                            }
+                            fname = fname.substring(path_prefix.length);
+                            if(null != fname.match(/^dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
+                                var path = split_path(fname)[0];
+                                subdirs.push({
+                                    "path": path,
+                                    "prefix": path_prefix,
+                                    "files": []
+                                });
+                            }
+                            filelist.push(this.result);
+                            this.continue();
+                        }
+                    };
+                    
+                    request.onerror = function () {
+                        console.log("Error while scanning sdcard: ("
+                            + request.error.name + ") " + request.error.message);
+                        console.log("Path prefix of current storage: "
+                            + path_prefix);
+                        scan_area(n+1);
+                    };
+                } else {
+                    for(var i = 0; i < subdirs.length; i++) {
+                        var test = cat_paths(subdirs[i].prefix, subdirs[i].path);
+                        filelist.forEach(function (f) {
+                            if(f.name.substring(0,test.length) == test)
+                                subdirs[i].files.push(f);
+                        });
                     }
-                    fname = fname.substring(path_prefix.length);
-                    if(null != fname.match(/^dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
-                        var path = split_path(fname)[0];
-                        result.push(path);
-                    }
-                    this.continue();
+                    obj.reply(subdirs);
                 }
-            };
-                
-            request.onerror = function () {
-                console.log("Error while scanning sdcard: (" + request.error.name
-                    + ") " + request.error.message);
-                obj.reply(result);
-            };
+            })(0);
         });
         
         var indexedDB_handle, dbName = "FireDictDB";
