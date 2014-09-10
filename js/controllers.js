@@ -131,7 +131,9 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         
         $scope.lookup_data_changed = function () {
             var val = $scope.search_term,
-                milliseconds = 1500 - 250*Math.min(val.length,4);
+                milliseconds = 800 - 150*Math.min(val.length,4);
+            $scope.idle = true;
+            $scope.matches = [];
             if($scope.showingEntry) return;
             var delay = (function(){
               var timer = 0;
