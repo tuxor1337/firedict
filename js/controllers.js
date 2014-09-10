@@ -130,7 +130,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
         
         $scope.lookup_data_changed = function () {
-            var val = $scope.search_term;
+            var val = $scope.search_term,
+                milliseconds = 1500 - 250*Math.min(val.length,4);
             if($scope.showingEntry) return;
             var delay = (function(){
               var timer = 0;
@@ -139,7 +140,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 timer = $timeout(callback, ms);
               };
             })();
-            delay(function () { $scope.lookup(val); }, 600);
+            delay(function () { $scope.lookup(val); }, milliseconds);
         };
         
         $scope.show_entry = function(matchObj) {
