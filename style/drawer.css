@@ -22,7 +22,9 @@
 section[data-type="sidebar"] {
   position: absolute;
   width: 80%;
-  background: url(images/drawer-pattern.png) repeat;
+  background-image: url(../icon-60.png), url(images/drawer-pattern.png);
+  background-repeat: no-repeat, repeat;
+  background-position: 10px -4px, top left;
   height: 100%;
   top: 0;
   left: 0;
@@ -33,7 +35,7 @@ section[data-type="sidebar"] {
 section[data-type="sidebar"] > header {
   position: relative;
   z-index: 10;
-  height: 4rem;
+  height: 45px;
   color: #fff;
   background: url(images/drawer-header.png) repeat-x left bottom / 100% auto;
 }
@@ -50,15 +52,17 @@ section[data-type="sidebar"] > header:after {
 }
 
 section[data-type="sidebar"] > header h1 {
-  font-size: 1.9rem;
-  line-height: 3.8rem;
+  font-size: 21px;
+  line-height: 3.9rem;
   text-align: left;
   white-space: nowrap;
   text-overflow: ellipsis;
   display: block;
   overflow: hidden;
-  margin: 0 0 0 3rem;
-  height: 100%
+  margin: 0 0 0 0;
+  height: 100%;
+  padding: 0 0 0 81px;
+  color:#999;
 }
 
 section[data-type="sidebar"] > header h1 em {
