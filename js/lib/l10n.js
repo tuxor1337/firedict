@@ -1774,6 +1774,25 @@
       } else if (key === 'innerHTML') {
         // XXX: to be removed once bug 994357 lands
         element.innerHTML = attr;
+/* My personal modification: Start */
+      } else if (key === 'markdown') {
+        // Function escapeHtml() from
+        // https://github.com/janl/mustache.js/blob/master/mustache.js#L55
+        var entityMap = {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': '&quot;',
+                "'": '&#39;',
+                "/": '&#x2F;'
+            },
+            escapeHtml = function (string) {
+                return String(string).replace(/[&<>"'\/]/g, function (s) {
+                        return entityMap[s];
+                });
+            };
+        element.innerHTML = escapeHtml(attr).replace(/\*([^\*]*)\*/g,"<i>$1</i>");
+/* My personal modification: End */
       } else {
         element.setAttribute(key, attr);
       }
@@ -1785,7 +1804,7 @@
   function setTextContent(element, text) {
     // standard case: no element children
     if (!element.firstElementChild) {
-      element.textContent = text;
+      element.textContent = text; 
       return;
     }
 
