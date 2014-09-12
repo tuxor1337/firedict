@@ -58,11 +58,37 @@
         
         this.get = function () { return cache.concat().reverse(); }
     }
+
+    function cacheManager() {
+        var cache = [];
+        
+        this.add = function (key, did, data) {
+            for(var h = 0; h < cache.length; h++) {
+                if(cache[h].key == key && cache[h].did == did) return;
+            }
+            cache.push({ "key": key, "did": did, "data": data });
+            cache = cache.slice(-30);
+        };
+        
+        this.get = function (key, did) { 
+            for(var h = 0; h < cache.length; h++) {
+                if(cache[h].key == key && cache[h].did == did)
+                    return cache[h].data;
+            }
+            return null;
+        }
+        
+        this.clear = function () { cache = []; };
+    }
     
     var DictionaryManager = (function () {
         var cls = function () {
             var aDicts = [], ready = false;
-                oHistoryManager = new historyManager();
+                oHistoryManager = new historyManager(),
+                oCaches = {
+                    "entries": new cacheManager(),
+                    "lookup": new cacheManager()
+                };
     
             function dict_by_id(version) {
                 var result = null;
@@ -75,6 +101,8 @@
             this.init = function () {
                 var dictdata_dirs = [];
                 oHistoryManager.load();
+                oCaches["entries"].clear();
+                oCaches["lookup"].clear();
                 
                 function add_dictionary(n) {
                     if(n < dictdata_dirs.length) {
@@ -192,7 +220,12 @@
                                         console.log("lookup_fuzzy(" + term + ") in `"
                                             + short_name + "`");
                                         
-                                        add_matches(aDicts[d].lookup(term, true));
+                                        var cached_matches = oCaches["lookup"].get(term,d);
+                                        if(null == cached_matches) {
+                                            cached_matches = aDicts[d].lookup(term, true);
+                                            oCaches["lookup"].add(term, d, cached_matches)
+                                        }
+                                        add_matches(cached_matches);
                                     }
                                     continue_lookup(d+1);
                                 }
@@ -215,9 +248,14 @@
             this.lookup_exact = function (term) {
                 if(!ready) return [];
                 var result = [];
-                aDicts.forEach(function (dict) {
-                    result.push(dict.lookup(term));
-                });
+                for(var d = 0; d < aDicts.length; d++) {
+                    var cached_matches = oCaches["lookup"].get(term, -d-1);
+                    if(null == cached_matches) {
+                        cached_matches = aDicts[d].lookup(term);
+                        oCaches["lookup"].add(term, -d-1, cached_matches);
+                    }
+                    result.push(cached_matches);
+                };
                 var tmp = [].concat.apply([], result),
                     u = {}, a = [];
                 for(var i = 0, l = tmp.length; i < l; ++i){
@@ -239,9 +277,16 @@
                 console.log("loading entry " + decodedObj[1].term
                     + " from `" + short_name + "`");
                 
+                var cached_entry = oCaches["entries"]
+                        .get(decodedObj[1].dictpos[0], decodedObj[2]);
+                if(null == cached_entry) {
+                    cached_entry = dict_by_id(decodedObj[2]).entry(decodedObj);
+                    oCaches["entries"].add(decodedObj[1].dictpos[0], decodedObj[2], cached_entry);
+                }
+                
                 return {
                     term: decodedObj[1].term,
-                    data: dict_by_id(decodedObj[2]).entry(decodedObj),
+                    data: cached_entry,
                     did: decodedObj[2]
                 };
             };
@@ -253,6 +298,8 @@
             
             this.edit = function (dict) {
                 if(!ready) return false;
+                oCaches["entries"].clear();
+                oCaches["lookup"].clear();
                 dict_by_id(dict.version).meta(dict);
             };
             
