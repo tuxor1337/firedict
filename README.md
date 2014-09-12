@@ -3,11 +3,6 @@ firedict
 
 A simple offline dictionary software for Firefox OS
 
-There are still major problems with the way dictionaries are stored internally.
-Last modifications brought a slight improvement in performance.
-But still, the UI doesn't feel smooth enough (word lookup should be significantly
-faster).
-
 ![screenshot0](https://raw.github.com/tuxor1337/firedict/master/screen0.png "drawer") # 
 ![screenshot1](https://raw.github.com/tuxor1337/firedict/master/screen1.png "list of matches")
 
