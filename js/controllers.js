@@ -145,7 +145,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             if($scope.showingEntry) return;
             var delay = (function(){
               var timer = 0;
-              return function(callback, ms){
+              return function(callback, ms) {
                 clearTimeout (timer);
                 timer = $timeout(callback, ms);
               };
