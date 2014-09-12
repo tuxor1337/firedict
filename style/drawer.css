@@ -102,7 +102,7 @@ section[data-type="sidebar"] > nav > ul > li {
 }
 
 section[data-type="sidebar"] > nav > ul > li:active {
-  background: #00ABCC;
+  background: rgba(0,171,204,0.4);
 }
 
 section[data-type="sidebar"] > nav > ul > li.chosen {

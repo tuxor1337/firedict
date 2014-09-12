@@ -184,6 +184,21 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         );
     };
 }])
+.directive('ngMozL10n', function () {
+    return {
+        restrict: "A",
+        compile: function () {
+            return function (scope, element, attrs) {
+                attrs.$observe('ngMozL10n', function () {
+                    element.attr('data-l10n-id', attrs.ngMozL10n);
+                    navigator.mozL10n.once(function () {
+                        navigator.mozL10n.localize(element[0], attrs.ngMozL10n);
+                    });
+                });
+            };
+        }
+    };
+})
 .directive("ngDialog", function () {
     return { 
         replace: true,
@@ -194,15 +209,21 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         templateUrl: "partials/dialog.html"
     };
 })
-.factory("ngDialog", ["$document", "$compile", "$rootScope", "l10nPhrases",
-    function ($document, $compile, $rootScope, l10nPhrases) {
+.factory("ngDialog", ["$document", "$compile", "$rootScope",
+    function ($document, $compile, $rootScope) {
         var defaults = {
               type: "confirm",
               text: "Default text",
-              success: l10nPhrases.get('ok'),
-              cancel: l10nPhrases.get('cancel'),
+              success: 'OK',
+              cancel:'Cancel',
+              l20n: null,
               value: null,
               callbk: null
+            },
+            defaults_l20n = {
+              text: "",
+              success: "",
+              cancel: ""
             },
             body = $document.find("body"), 
             modalEl = angular.element('<div ng:dialog data="modal"></div>'),
@@ -214,12 +235,15 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
                 options.value = [];
             options = angular.extend({}, defaults, options);
             if(options.type == "confirm") options.value = true;
+            if(options.l20n instanceof Object)
+                options.l20n = angular.extend({}, defaults_l20n, options.l20n);
             $scope.modal = {
                 visible: false,
                 result: options.value,
                 type: options.type,
                 text: options.text,
                 success: options.success,
+                l20n: options.l20n,
                 cancel: options.cancel,
                 callbk: function (result) {
                     var callFn = options.callbk || closeFn;
@@ -255,15 +279,6 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         };
     }
 ])
-.factory("l10nPhrases", function () {
-    return {
-        get: function (key) {
-            if(navigator.mozL10n.readyState == "complete")
-                return navigator.mozL10n.get(key);
-            else return key;
-        }
-    };
-})
 .factory("dictWorker", function () {
     var oWorker = new Worker("js/worker.js"),
         oListeners = { 

@@ -1339,7 +1339,6 @@
   };
 
   // Public API
-
   navigator.mozL10n = {
     ctx: new Context(),
     get: function get(id, ctxdata) {

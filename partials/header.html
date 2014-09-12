@@ -3,12 +3,12 @@
         <span class="icon icon-menu">show/hide sidebar</span>
     </a>
     <form role="search" data-ng-show="type == 'lookup'">
-        <input type="text" data-l10n-id="lookup-dots" placeholder="Lookup..."
+        <input type="text" data-ng-moz-l10n="lookup-dots" placeholder="Lookup..."
                data-ng-model="searchTerm" data-ng-focus="onFocus()" />
         <button data-ng-click="onClear()">Clear</button>
     </form>
     <menu type="toolbar" data-ng-if="type == 'manage'">
         <a data-ng-click="onReindex()"><span class="icon icon-reindex">reindex</span></a>
     </menu>
-    <h1 data-l10n-id="{{text}}"></h1>
+    <h1 data-ng-moz-l10n="{{text}}"></h1>
 </header>

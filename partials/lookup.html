@@ -6,7 +6,7 @@
         <section data-type="list" data-ng-if="!showingEntry">
             <ul class="matches">
                 <li data-ng-show="!matches.length &amp;&amp; !idle">
-                    <p data-l10n-id="no-matches">No matches!</p>
+                    <p data-ng-moz-l10n="no-matches">No matches!</p>
                 </li>
                 <li data-ng-show="idle" class="idle"></li>
                 <li data-ng-repeat="match in matches">
