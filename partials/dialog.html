@@ -1,13 +1,13 @@
 <section role="dialog" data-ng-show="modal.visible">
     <div class="main">
-        <p>{{modal.text}}</p>
+        <p data-ng-moz-l10n="{{modal.l20n.text}}">{{modal.text}}</p>
         <input type="text" data-ng-if="modal.type == 'prompt'" data-ng-model="modal.result" />
         <div ng-if="modal.type == 'color'" class="colorpicker">
             <input type="range" data-ng-model="modal.result[0]" min="0" max="255" class="red" /><br />
             <input type="range" data-ng-model="modal.result[1]" min="0" max="255" class="green" /><br />
             <input type="range" data-ng-model="modal.result[2]" min="0" max="255" class="blue" /><br />
             <div data-ng-style="{'background-color':'rgb('+modal.result[0]+','+modal.result[1]+','+modal.result[2]+')'}">
-                <span data-l10n-id="preview">Preview</span>
+                <span data-ng-moz-l10n="preview">Preview</span>
             </div>
         </div>
         <progress data-ng-if="modal.type == 'progress' &amp;&amp; modal.result.length &gt;= 2" 
@@ -16,7 +16,9 @@
         <progress data-ng-if="modal.type == 'progress' &amp;&amp; modal.result.length &lt; 2"></progress>
     </div>
     <div data-ng-if="modal.type != 'progress'" class="buttons">
-        <button data-ng-click="modal.callbk(modal.result)">{{modal.success}}</button>
-        <button data-ng-click="modal.callbk(null)" class="cancel">{{modal.cancel}}</button>
+        <button data-ng-click="modal.callbk(modal.result)"
+                data-ng-moz-l10n="{{modal.l20n.success}}">{{modal.success}}</button>
+        <button data-ng-click="modal.callbk(null)" class="cancel"
+                data-ng-moz-l10n="{{modal.l20n.cancel}}">{{modal.cancel}}</button>
     </div>
 </section>

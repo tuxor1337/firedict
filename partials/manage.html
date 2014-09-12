@@ -5,24 +5,24 @@
         <section data-type="list">
             <ul class="manage" data-ng-sortable="" data-move-fn="dictMoveAfter">
                 <li data-ng-if="dictionaries.length == 0" class="notfound">
-                    <h2 data-l10n-id="no-dictionaries-found">
+                    <h2 data-ng-moz-l10n="no-dictionaries-found">
                         No dictionaries found
                     </h2>
-                    <p data-l10n-id="scan-unsuccessful">
+                    <p data-ng-moz-l10n="scan-unsuccessful">
                         Unfortunately, scanning your memory card's *dictdata*
                         directory for dictionaries was not successful.
                     </p>
-                    <p data-l10n-id="make-sure-everythings-okay">
+                    <p data-ng-moz-l10n="make-sure-everythings-okay">
                         Please make sure you inserted the (right) memory card and
                         place your dictionaries in a directory named *dictdata*
                         directly at your memory card's root.
                     </p>
-                    <p data-l10n-id="proper-stardict-format">
+                    <p data-ng-moz-l10n="proper-stardict-format">
                         Furthermore, make sure your dictionary is in proper *StarDict*
                         format, i.e. containing at least one file of each of the
                         following types/file endings: idx, ifo, dict.
                     </p>
-                    <p data-l10n-id="examplary-dir-structure">
+                    <p data-ng-moz-l10n="examplary-dir-structure">
                         Examplary directory structure:
                     </p>
                     <ul>
@@ -33,7 +33,7 @@
                         <li>dictdata/testdict2/a2ndDict.idx</li>
                         <li>dictdata/testdict2/a2ndDict.ifo</li>
                     </ul>
-                    <p data-l10n-id="files-may-be-compressed">
+                    <p data-ng-moz-l10n="files-may-be-compressed">
                         Note that files may be compressed, i.e. having an additional
                         *dz* at the end.
                     </p>
@@ -46,11 +46,11 @@
                     <p data-ng-click="select(dict)">{{dict.alias}}</p>
                     <div class="buttons">
                         <button data-ng-click="setColor(dict)" 
-                                data-l10n-id="color-dots">
+                                data-ng-moz-l10n="color-dots">
                             Color...
                         </button>
                         <button data-ng-click="rename(dict)"
-                                data-l10n-id="rename-dots">
+                                data-ng-moz-l10n="rename-dots">
                             Rename...
                         </button>
                     </div>
