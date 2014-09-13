@@ -1,3 +1,9 @@
+/**
+ * This file is part of FireDict.
+ * (c) 2013-2014 https://github.com/tuxor1337/firedict
+ * License: GPLv3
+ */
+ 
 "use strict";
 
 angular.module("FireDict", [

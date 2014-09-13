@@ -1,4 +1,9 @@
-
+/**
+ * This file is part of FireDict.
+ * (c) 2013-2014 https://github.com/tuxor1337/firedict
+ * License: GPLv3
+ */
+ 
 var FireDictDirectives = angular.module("FireDictDirectives", [])
 .directive("ngHeader", function ($timeout) {
     return { 

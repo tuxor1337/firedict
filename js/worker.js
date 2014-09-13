@@ -1,4 +1,9 @@
-
+/**
+ * This file is part of FireDict.
+ * (c) 2013-2014 https://github.com/tuxor1337/firedict
+ * License: GPLv3
+ */
+ 
 var console = {
     log: function (str) {
         postMessage(str);
@@ -8,7 +13,7 @@ var console = {
     }
 };
 
-importScripts("lib/promise.js");
+importScripts("lib/promise.min.js");
 importScripts("lib/inflate.js");
 importScripts("lib/dictzip_sync.js");
 importScripts("lib/stardict_sync.js");

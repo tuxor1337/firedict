@@ -14,7 +14,7 @@ icon-%.png: icon-scalable.svg icon-scalable-detail.svg
 	fi
 	
 package.zip: $(ICONS)
-	zip package.zip -r js partials style index.html manifest.webapp $(ICONS)
+	zip package.zip -r js partials style locales COPYING index.html manifest.webapp $(ICONS)
 	
 clean:
 	rm -rf package.zip $(ICONS)
