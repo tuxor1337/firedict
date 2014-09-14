@@ -15,7 +15,7 @@ var console = {
     }
 };
 
-importScripts("lib/promise.js");
+importScripts("lib/promise.min.js");
 
 function random_color() {
     var min = 0x33, max = 0xbb, result = "#";
@@ -28,9 +28,31 @@ function random_color() {
 var transactions = [],
     queryableFunctions = {
         init: function (obj) {
-            var result = [];
-            for(var i = 0; i < 10; i++) {
-                result.push({ alias: "Testbuch"+i, version: 2*i, rank: i, color: random_color(), active: true });
+            var result = [],
+                testnames = [
+                    "WAHRIG.digital - Deutsches Wörterbuch",
+                    "Dictionnaires de l’Académie française : 8ème édition ",
+                    "Georges: Kleines deutsch-lateinisches Handwörterbuch (1910)",
+                    "Georges: Ausführliches lateinisch-deutsches Handwörterbuch (1913-1918)",
+                    "Online Etymology Dictionary, ©Douglas Harper/etymonline.com",
+                    "Folkets lexikon En-Sv, ©folkets-lexikon.csc.kth.se",
+                    "Folkets lexikon Sv-En, ©folkets-lexikon.csc.kth.se",
+                    "Pape: Handwörterbuch der griechischen Sprache (1914)",
+                    "XMLittré, ©littre.org",
+                    "Gran Diccionario de la Lengua Española LAROUSSE",
+                    "Handwörterbuch Deutsch-Englisch",
+                    "Handwörterbuch Englisch-Deutsch",
+                    "PONS Universelles Wörterbuch Deutsch-Spanisch",
+                    "PONS Universelles Wörterbuch Deutsch-Französisch",
+                    "PONS Universelles Wörterbuch Deutsch-Italienisch",
+                    "PONS Universelles Wörterbuch Spanisch-Deutsch",
+                    "PONS Universelles Wörterbuch Französisch-Deutsch",
+                    "PONS Universelles Wörterbuch Italienisch-Deutsch",
+                    "SOED",
+                    "CIA World Factbook 2005"
+                ];
+            for(var i = 0; i < testnames.length; i++) {
+                result.push({ alias: testnames[i], version: 2*i, rank: i, color: random_color(), active: true });
             }
             query("init_ready", result);
         },
