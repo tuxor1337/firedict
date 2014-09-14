@@ -29,7 +29,7 @@
                 <div data-ng-repeat="entry in entries | filter:{ did: dict.version }:true | orderBy:termOrderFn">
                     <h3 class="term"
                         data-ng-style="{'background-color':dict.color}"
-                        data-ng-bind-html="render_term(entry.term)"></h3>
+                        data-ng-render-term="{{entry.term}}"></h3>
                     <div class="content"
                        data-ng-repeat="dt in entry.data"
                        data-compile="render_content(dt, dict.version)"></div>

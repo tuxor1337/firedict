@@ -6,6 +6,18 @@
  
 "use strict";
 
+function escapeHtml(text) {
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+        
 angular.module("FireDict", [
     "ngRoute", "ngSanitize", "ngTouch",
     "FireDictControllers", "FireDictDirectives"
@@ -77,7 +89,8 @@ angular.module("FireDict", [
             if(!$rootScope.$$phase) { $rootScope.$apply(); }
         });
         dictWorker.addListener("lookup_continue", function (obj) {
-            obj.reply(obj.data.term == $rootScope.search_term);
+            obj.reply(obj.data.term == $rootScope.search_term
+                      && $rootScope.showingEntry === false);
         });
         dictWorker.addListener("indexedDB", function (obj) {
             var action = obj.data.action, data = obj.data.data;
