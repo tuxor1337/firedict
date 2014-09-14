@@ -103,19 +103,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
 ])
 .controller("lookupCtrl", ["$scope", "$rootScope", "$timeout", "dictWorker",
     "ngDialog", function ($scope, $rootScope, $timeout, dictWorker, ngDialog) {
-        function escapeHtml(text) {
-            var map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-        }
         
-        $scope.showingEntry = false;
+        $rootScope.showingEntry = false;
         $scope.idle = false;
         $scope.matches = [];
         $scope.entries = [];
@@ -138,7 +127,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
         
         $scope.lookup_enterpressed = function () {
-            if($scope.showingEntry) return;
+            if($rootScope.showingEntry) return;
             $scope.lookup($scope.search_term);
         };
         
@@ -147,7 +136,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 milliseconds = 800 - 150*Math.min(val.length,4);
             $scope.idle = true;
             $scope.matches = [];
-            if($scope.showingEntry) return;
+            if($rootScope.showingEntry) return;
             var delay = (function(){
               var timer = 0;
               return function(callback, ms) {
@@ -171,7 +160,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             $scope.search_term = term;
             dictWorker.query("entry", entr)
             .then(function (entries) {
-                $scope.showingEntry = true;
+                $rootScope.showingEntry = true;
                 $scope.entries = entries;
                 if(!$scope.$$phase) { $scope.$apply(); }
             });
@@ -183,8 +172,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         );
         
         $scope.back = function () {
-            if($scope.showingEntry) {
-                $scope.showingEntry = false;
+            if($rootScope.showingEntry) {
+                $rootScope.showingEntry = false;
                 $scope.lookup($scope.search_term);
             }
         };
@@ -202,14 +191,6 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             $scope.entries.forEach(function (e) {
                 if(e.did == dict.version) result = true;
             });
-            return result;
-        };
-        $scope.render_term = function (term) {
-            term = escapeHtml(term);
-            var result = "";
-            if($scope.search_term == term && $scope.search_term != "")
-                result += "<b>" + term + "</b>";
-            else result += term + ' (<span data-ng-moz-l10n="synonym">Synonym</span>: <b>' + $scope.search_term + "</b>)";
             return result;
         };
         $scope.render_content = function (d, did) {

@@ -204,6 +204,22 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         }
     };
 })
+.directive('ngRenderTerm', function ($compile) {
+    return {
+        restrict: "A",
+        link: function (scope, element, attrs) {
+            var term = escapeHtml(attrs.ngRenderTerm),
+                result = "";
+            if(scope.search_term == term && scope.search_term != "")
+                result += "<b>" + term + "</b>";
+            else result += term + " ("
+                        + '<span data-ng-moz-l10n="synonym">Synonym</span>:'
+                        + " <b>" + scope.search_term + "</b>)";
+            element.html(result);
+            $compile(element.contents())(scope);
+        }
+    };
+})
 .directive("ngDialog", function () {
     return { 
         replace: true,
