@@ -46,7 +46,7 @@ var transactions = [];
                 obj.reply(entries);
             } else {
                 dictMan.lookup_exact(obj.data).forEach(function (m) {
-                    entries.push(dictMan.entry(d));
+                    entries.push(dictMan.entry(m));
                 });
                 obj.reply(entries);
             }
