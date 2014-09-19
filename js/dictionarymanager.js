@@ -68,10 +68,7 @@
         var cache = [];
         
         this.add = function (key, did, data) {
-            for(var h = 0; h < cache.length; h++) {
-                if(cache[h].key == key && cache[h].did == did) return;
-            }
-            cache.push({ "key": key, "did": did, "data": data });
+            cache.push({ "key": key, "did": did, "data": data.concat() });
             cache = cache.slice(-30);
         };
         
@@ -221,15 +218,18 @@
                                     if(aDicts[d].meta().active) {
                                         var short_name = aDicts[d].meta().alias;
                                         if(short_name.length > 10)
-                                            short_name = short_name.substring(0,10) + "..."
+                                            short_name = short_name.substring(0,10) + "...";
                                         console.log("lookup_fuzzy(" + term + ") in `"
                                             + short_name + "`");
                                         
                                         var cached_matches = oCaches["lookup"].get(term,d);
-                                        if(null == cached_matches) {
+                                        if(null === cached_matches) {
                                             cached_matches = aDicts[d].lookup(term, true);
-                                            oCaches["lookup"].add(term, d, cached_matches)
+                                            oCaches["lookup"].add(term, d, cached_matches);
+                                        } else {
+                                            console.log("...from cache...");
                                         }
+                                        console.log("... " + cached_matches.length + " matches");
                                         add_matches(cached_matches);
                                     }
                                     continue_lookup(d+1);
@@ -263,7 +263,7 @@
                 };
                 var tmp = [].concat.apply([], result),
                     u = {}, a = [];
-                for(var i = 0, l = tmp.length; i < l; ++i){
+                for(var i = 0; i < tmp.length; i++){
                     var teststr = tmp[i][2] + "_" + tmp[i][1].dictpos[0];
                     if(u.hasOwnProperty(teststr)) continue;
                     a.push(tmp[i]);
@@ -287,6 +287,8 @@
                 if(null == cached_entry) {
                     cached_entry = dict_by_id(decodedObj[2]).entry(decodedObj);
                     oCaches["entries"].add(decodedObj[1].dictpos[0], decodedObj[2], cached_entry);
+                } else {
+                    console.log("...from cache...");
                 }
                 
                 return {
