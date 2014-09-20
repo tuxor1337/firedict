@@ -254,12 +254,14 @@
                 if(!ready) return [];
                 var result = [];
                 for(var d = 0; d < aDicts.length; d++) {
-                    var cached_matches = oCaches["lookup"].get(term, -d-1);
-                    if(null == cached_matches) {
-                        cached_matches = aDicts[d].lookup(term);
-                        oCaches["lookup"].add(term, -d-1, cached_matches);
+                    if(aDicts[d].meta().active) {
+                        var cached_matches = oCaches["lookup"].get(term, -d-1);
+                        if(null == cached_matches) {
+                            cached_matches = aDicts[d].lookup(term);
+                            oCaches["lookup"].add(term, -d-1, cached_matches);
+                        }
+                        result.push(cached_matches);
                     }
-                    result.push(cached_matches);
                 };
                 var tmp = [].concat.apply([], result),
                     u = {}, a = [];
