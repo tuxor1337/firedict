@@ -75,7 +75,7 @@
         this.get = function (key, did) { 
             for(var h = 0; h < cache.length; h++) {
                 if(cache[h].key == key && cache[h].did == did)
-                    return cache[h].data;
+                    return cache[h].data.concat();
             }
             return null;
         }
