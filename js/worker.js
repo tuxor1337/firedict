@@ -21,9 +21,8 @@ importScripts("lib/stardict_sync.js");
 importScripts("dictionary.js");
 importScripts("dictionarymanager.js"); 
 
-dictMan = new DictionaryManager();
-
-var transactions = [];
+var dictMan = new DictionaryManager(),
+    transactions = [],
     queryableFunctions = {
         init: function (obj) {
             dictMan = new DictionaryManager();
