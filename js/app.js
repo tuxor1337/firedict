@@ -215,7 +215,7 @@ angular.module("FireDict", [
                 if(p1 == "") return p2;
                 if(p2 == "") return p1;
                 p1 = p1.replace(/\/+$/, "");
-                p2 = p2.prelace(/^\/+/, "");
+                p2 = p2.replace(/^\/+/, "");
                 return p1 + "/" + p2;
             }
             
