@@ -235,7 +235,7 @@ angular.module("FireDict", [
                             }
                             fname = fname.substring(path_prefix.length);
                             if(null != fname.match(/^dictdata\/[^\/]+\/[^\/]+\.ifo$/)) {
-                                var path = split_path(fname)[0];
+                                var path = split_path(fname)[0] + "/";
                                 subdirs.push({
                                     "path": path,
                                     "prefix": path_prefix,
