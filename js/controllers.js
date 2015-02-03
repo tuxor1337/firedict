@@ -230,6 +230,23 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                         .css("text-align",this.tagName)
                     );
                 });
+                $(tmp_obj).find("font").each(function () {
+                    var replacement = $("<span />").html($(this).html());
+                    if($(this).attr("color")) {
+                       replacement.css("color",$(this).attr("color"));
+                    }
+                    if($(this).attr("size")) {
+                        var fontsize = $(this).attr("size");
+                        if("+-".indexOf(fontsize.charAt(0)) >= 0)
+                            fontsize = parseInt(fontsize.trim("+")) + 2;
+                        else fontsize = parseInt(fontsize);
+                        fontsize = Math.min(7,Math.max(fontsize,1))-1;
+                        replacement.css("font-size",Array("0.8","1","1.3","1.5","2","2.7","4")[fontsize]+"em");
+                    }
+                    if($(this).attr("face"))
+                       replacement.css("font-family",$(this).attr("face"));
+                    $(this).replaceWith(replacement);
+                });
                 $(tmp_obj).find("img").each(function () {
                     var elImg = this,
                         img_filename = $(elImg).attr("src")
