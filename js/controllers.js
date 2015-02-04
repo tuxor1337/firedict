@@ -428,7 +428,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 return result.join("<br />\n");
             }
             function render_plain_content(plain_text) {
-                return $("<div />").text(plain_text).html()
+                var div = $("<div />").text(plain_text);
+                return $(div).html().replace(/(\r\n|\n\r|\r|\n)/g, "<br>");
             }
             if("g" == d.type)
                 return render_pango_content(d.content);
