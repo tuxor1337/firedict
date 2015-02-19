@@ -217,7 +217,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                     + "p, font, span, div, table, tr, td, tbody, strong, "
                     + "br, i, a, b, u, img, sup, sub, ul, ol, li, abbr, "
                     + "center, left, right, em, dd, dt, blockquote, small, "
-                    + "code, del, h1, h2, h3, h4, h5, h6"
+                    + "code, del, h1, h2, h3, h4, h5, h6, hr"
                 + ")").each(function () {
                     console.log("Html code injection: " + this.tagName);
                     if($(this).children().length == 0)
@@ -482,4 +482,15 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
 ])
 .controller("aboutCtrl", function ($scope) {
     $scope.title = "about";
+    $scope.manifest = {
+      "name": "FireDict",
+      "description": "",
+      "version": "",
+      "developer": { "url": "https://github.com/tuxor1337" }
+    }
+    var request = navigator.mozApps.getSelf();
+    request.onsuccess = function() {
+        $scope.manifest = request.result.manifest;
+        if(!$scope.$$phase) { $scope.$apply(); }
+    };
 });
