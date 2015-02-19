@@ -1,0 +1,44 @@
+span.tovotu {
+    font-weight:bold;
+    font-style:italic;
+    color:#000;
+}
+
+span.tovotu b {
+    color: #C31C18;
+}
+
+#main-content.dictionaries {
+    width:100%;
+}
+
+table {
+    border-collapse:collapse;
+    border:0;
+    margin: 1rem 0;
+}
+table td:first-child {
+    font-weight:bold;
+}
+table td:last-child, table th:last-child {
+    text-align:right;
+}
+table td {
+    border:0;
+    border-bottom: 1px #ddd solid;
+    padding: 0.3rem 0.1rem;
+    text-align:left;
+}
+
+table th {
+    font-size:1.1rem;
+    font-weight:bold;
+    border-width: 0 0 1px 0;
+    border-style:solid;
+    text-align:left;
+    padding: 0 0.4rem 0.2rem 0;
+}
+
+table small {
+    font-size: 0.8rem;
+}
