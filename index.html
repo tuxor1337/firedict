@@ -30,7 +30,6 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h1>
 <div id="gallery1" class="gallery_div gallery_preview">
     <a href="#" class="gallery_close">&nbsp;</a>
     <div class="gallery_tr">
@@ -58,8 +57,7 @@ var img_list = [
 var gall = new img_gallery("gallery1",img_list);
 gall.set_i(0);
 //--></script>
-
-<a name="firedict" class="anchor" href="#firedict"><span class="octicon octicon-link"></span></a>FireDict...</h1>
+<h1>FireDict...</h1>
 
 <p>...is a simple offline dictionary software for Firefox OS with support for the
 StarDict format. It scans for dictionaries in your sdcard's <i>dictdata</i> directory.</p>
@@ -69,12 +67,16 @@ the overall user experience. You can look up words in several dictionaries
 at the same time. Each dictionary is given a color. Entries in the lookup
 view are then flagged according to the color of the respective dictionary.</p>
 
+<p>Dictionaries that you can use with FireDict can be found in many places on
+the web. For your convenience, I compiled a small selection of freely available
+dictionaries <a href="http://tuxor1337.github.io/firedict/dictionaries.html">here</a>.</p>
+
 <p>FireDict is a privileged app and needs the following permissions:</p>
 
 <ul>
     <li><i>device-storage:sdcard (readonly)</i> - FireDict will scan your sdcard's
     <i>dictdata</i> directory and access the files stored there.</li>
-    <li><i>storage</i> - FireDict builds a word index for each dictionary 
+    <li><i>storage</i> - FireDict builds a word index for each dictionary
     and stores it in an IndexedDB. The index's size might exceed several
     megabytes.</li>
 </ul>
@@ -106,6 +108,6 @@ long and word lookup is sometimes a bit laggy.</p>
       </div>
     </div>
 
-  
+
   </body>
 </html>
