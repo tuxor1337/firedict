@@ -1,6 +1,6 @@
 
 [data-type="list"] ul.manage > li {
-    padding:0.5rem;
+    padding:0.5rem 40px 0.5rem 28px;
     height: auto;
     position:relative;
     min-height:40px;
@@ -16,19 +16,19 @@
 }
 
 [data-type="list"] ul.manage > li > p {
-    font-weight: bold;
-    margin-left:2.7rem;
+    white-space: normal;
+    line-height:1.5rem;
+    padding: 0;
 }
 
 [data-type="list"] ul.manage > li div.buttons {
-    margin: 0 0.5rem 0.5rem 3.5rem;
-    display:none;
+    margin: 0.3rem 0; display:none;
 }
 
 [data-type="list"] ul.manage > li div.buttons button {
     border-radius: 0.2rem;
-    background-image: linear-gradient(to top, #ddd, #fff);
-    border: 1px solid #ccc;
+    background-image: linear-gradient(to top, #eee, #fff);
+    border: 1px solid #ddd;
     padding:0.3rem 0.1rem;
     margin:0; width:46%;
     -moz-box-sizing:border-box;
@@ -39,12 +39,26 @@
 
 [data-type="list"] ul.manage > li div.color {
     font-size:0; line-height:0;
-    width:32px; height:32px; float:left;
-    border: 0.3rem #000 solid;
-    border-radius:0.5rem;
+    width:20px; height:20px;
+    position:absolute;
+    top: 50%; right: 5px;
+    margin-top:-14px;
+    border: 4px #000 solid;
+    border-radius:7px;
     background-image: url(images/checkmark.png);
     background-position: center;
     background-repeat: no-repeat;
+}
+
+[data-type="list"] ul.manage > li div.handle {
+    position:absolute;
+    top: 50%; left: 6px;
+    margin-top: -16px;
+    width:12px; height:32px;
+    border-radius:0.3rem;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url(images/draghandle.png);
 }
 
 [data-type="list"] ul.manage > li div.color.light {
@@ -58,12 +72,9 @@
     box-shadow: 0 0 10px 6px #999;
 }
 
-[data-type="list"] ul.manage > li.sorting div.color {
-    background-image: url(images/draghandle.png);
-}
-
-[data-type="list"] ul.manage > li.sorting div.color.light {
+[data-type="list"] ul.manage > li.sorting div.handle {
     background-image: url(images/draghandle-light.png);
+    background-color:#000;
 }
 
 [data-type="list"] ul.manage > li.selected {
