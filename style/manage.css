@@ -1,6 +1,6 @@
 
 [data-type="list"] ul.manage > li {
-    padding:0.5rem 40px 0.5rem 28px;
+    padding:0.4rem 40px 0.4rem 28px;
     height: auto;
     position:relative;
     min-height:40px;
@@ -17,7 +17,7 @@
 
 [data-type="list"] ul.manage > li > p {
     white-space: normal;
-    line-height:1.5rem;
+    line-height:1.3rem;
     padding: 0;
 }
 

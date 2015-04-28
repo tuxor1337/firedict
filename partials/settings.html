@@ -8,6 +8,11 @@
                        data-ng-click="stg.onclick()">
                         <p data-ng-moz-l10n="{{stg.name}}"></p>
                     </a>
+                    <a data-ng-if="stg.type == 'value'"
+                       data-ng-click="stg.onclick()">
+                        <div class="value">{{stg.value()}}</div>
+                        <p data-ng-moz-l10n="{{stg.name}}"></p>
+                    </a>
                     <div data-ng-if="stg.type == 'toggle'">
                         <label class="pack-switch">
                             <input type="checkbox"

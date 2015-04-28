@@ -7,22 +7,6 @@
 var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirectives"])
 .controller("manageCtrl", ["$scope", "ngDialog", "dictWorker",
     function ($scope, ngDialog, dictWorker) {
-        function RGBToHex(aRGB){
-            var r = aRGB[0], g = aRGB[1], b = aRGB[2],
-                bin = r << 16 | g << 8 | b;
-            return (function(h){
-                    return "#" + new Array(7-h.length).join("0")+h
-            })(bin.toString(16).toUpperCase())
-        }
-
-        function hexToRGB(hex) {
-            hex = parseInt(hex.substring(1), 16);
-            var r = hex >> 16,
-                g = hex >> 8 & 0xFF,
-                b = hex & 0xFF;
-            return [r,g,b];
-        }
-
         $scope.title = "manage-dicts";
         $scope.selected = -1;
         $scope.select = function (dict) {
@@ -451,6 +435,9 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             console.log("Type not supported: " + d.type); // at least: "kWPX"
             return render_plain_content(d.content);
         };
+        $scope.content_fontsize = function () {
+            return localStorage.getItem("settings-fontsize")+"rem";
+        };
         $scope.termOrderFn = function (entry) {
             return entry.term.replace(/\(([0-9])\)$/g, '(0$1)');
         };
@@ -474,6 +461,29 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                             if(result === true) {
                                 dictWorker.query("clear_history");
                             }
+                        }
+                    });
+                }
+            },
+            {
+                type: "value",
+                name: "settings-fontsize",
+                value: function () {
+                    return localStorage.getItem("settings-fontsize");
+                },
+                onclick: function () {
+                    ngDialog.open({
+                        type: "fontsize",
+                        l20n: {
+                            text: "dialog-set-fontsize",
+                            success: "ok",
+                            cancel: "cancel"
+                        },
+                        value: parseFloat(localStorage.getItem("settings-fontsize"))*100,
+                        range: [75,105],
+                        callbk: function (value) {
+                            if(value !== null)
+                                localStorage.setItem("settings-fontsize", value/100.0);
                         }
                     });
                 }

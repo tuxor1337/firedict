@@ -9,7 +9,7 @@ section[role="dialog"] {
 section[role="dialog"] div.main {
     position:absolute;
     margin:auto 0;
-    bottom:9rem;
+    bottom:6.3rem;
     width:100%;
     font-weight:bold;
 }
@@ -21,8 +21,9 @@ section[role="dialog"] div.main p {
 
 section[role="dialog"] div.main input[type=text] {
     border:1px #444 solid;
-    font-size:1.4rem;
-    padding:0.5rem;
+    font-size:1.1rem;
+    padding:0.4rem;
+    width: 88%;
     background-color: rgba(180,180,180,0.8);
 }
 
@@ -31,14 +32,14 @@ section[role="dialog"] div.buttons {
     bottom:0; left:0;
     width:100%;
     -moz-box-sizing:border-box;
-    padding:1rem 0.5rem;
+    padding:0.7rem 0.5rem;
     border-top: 1px #444 solid;
     background-color: rgba(0,0,0,0.5);
 }
 
 section[role="dialog"] div.buttons button {
     width:45%; border-radius: 0.2rem;
-    margin: 0.4rem 1.2%; padding:0.7rem 0;
+    margin: 0.3rem 1.2%; padding:0.4rem 0;
     background-image: linear-gradient(to top, #ccc, #eee);
     border: 1px solid #ccc;
 }
@@ -48,36 +49,46 @@ section[role="dialog"] div.buttons button.cancel {
     border-color:#800; color:#fff;
 }
 
-section[role="dialog"] div.colorpicker input:first-of-type { margin-top:2rem; }
-section[role="dialog"] div.colorpicker input {
+section[role="dialog"] div.numpicker input:first-of-type { margin-top:2rem; }
+section[role="dialog"] div.numpicker input {
     border: 0; border-radius:0; outline:none;
     background:transparent;
     border-radius:0;
-    width:80%;height:3rem;
+    width:80%;height:2.25rem;
 }
 
-section[role="dialog"] div.colorpicker input.red::-moz-range-track { background:#f00; }
-section[role="dialog"] div.colorpicker input.green::-moz-range-track { background:#0f0; }
-section[role="dialog"] div.colorpicker input.blue::-moz-range-track { background:#00f; }
-    
-section[role="dialog"] div.colorpicker input::-moz-range-track {
+section[role="dialog"] div.numpicker input.red::-moz-range-track { background:#f00; }
+section[role="dialog"] div.numpicker input.green::-moz-range-track { background:#0f0; }
+section[role="dialog"] div.numpicker input.blue::-moz-range-track { background:#00f; }
+
+section[role="dialog"] div.numpicker input::-moz-range-track {
     border: 0; border-radius:0; outline:none; height:1px;
 }
 
-section[role="dialog"] div.colorpicker input::-moz-range-thumb {
-    height:1.4rem; width:1.4rem; border-radius:0.2rem; border:0; background: #fff;
+section[role="dialog"] div.numpicker input::-moz-range-thumb {
+    height:1.2rem; width:1.2rem; border-radius:0.15rem; border:0; background: #fff;
 }
 
-section[role="dialog"] div.colorpicker div {
-    width:70%; height:3rem; margin: 2rem auto;
-    text-align:center; line-height:3rem;
-    font-size:1.3rem; letter-spacing:0.2rem;
+section[role="dialog"] div.numpicker div {
+    margin: 1.2rem auto; text-align:center;
+}
+
+section[role="dialog"] div.numpicker.fontpicker div {
+    padding: 0.4rem 0.5rem;
+    height:8rem; text-align:left;
+    width:80%; font-weight:normal;
+    background-color: #fff; color: #000;
+}
+
+section[role="dialog"] div.numpicker.colorpicker div {
+    font-size:1.1rem; letter-spacing:0.15rem; line-height:2.25rem;
+    width:70%; height:2.25rem;
 }
 
 /* Progress */
 section[role="dialog"] progress[value] {
    border:none;
-   width:80%; height:0.6rem;
+   width:80%; height:0.7rem;
    background: #fff;
 }
 
