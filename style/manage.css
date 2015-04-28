@@ -94,9 +94,9 @@
 }
 
 [data-type="list"] ul.manage > li.notfound ul {
-    list-style:none; margin:0.6rem 0;
-    padding: 0 0 0 0.5rem;
-    font-family:Courier, monospace; font-size:1.05rem;
+    list-style:none; margin:0.4rem 0;
+    padding: 0 0 0 0.2rem;
+    font-family:Courier, monospace; font-size:0.85rem;
 }
 
 [data-type="list"] ul.manage > li.notfound ul li {
@@ -115,11 +115,8 @@
 [data-type="list"] ul.manage > li.notfound p {
     text-align:justify;
     padding: 0;
-    margin: 0.6rem 0 0 0;
-    overflow: visible;
-    text-overflow: clip;
-    line-height: 1.3rem;
+    margin: 0.5rem 0 0 0;
+    line-height: 1.2rem;
     white-space: normal;
-    font-size: 1.1rem;
     font-weight: normal;
 }
