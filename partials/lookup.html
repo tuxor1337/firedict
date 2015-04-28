@@ -21,7 +21,7 @@
                 </li>
             </ul>
         </section>
-        <section data-type="output" data-ng-if="showingEntry">
+        <section data-type="output" data-ng-if="showingEntry" data-ng-style="{'font-size': content_fontsize()}">
             <div data-ng-repeat="dict in dictionaries | filter:entryDictFilter | orderBy: 'rank'"
                  data-ng-style="{'border-color':dictColor(dict)}" class="text">
                 <h2 class="dictname"

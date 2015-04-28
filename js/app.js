@@ -7,25 +7,14 @@
 "use strict";
 
 var DEFAULT_SETTINGS = [
-    ["settings-greyscale", "false"]
+    ["settings-greyscale", "false"],
+    ["settings-fontsize", "1.0"]
 ];
 
 DEFAULT_SETTINGS.forEach(function (el) {
     if(localStorage.getItem(el[0]) === null)
         localStorage.setItem(el[0], el[1]);
 });
-
-function escapeHtml(text) {
-    var map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-
-    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-}
 
 angular.module("FireDict", [
     "ngRoute", "ngSanitize", "ngTouch",
@@ -80,12 +69,9 @@ angular.module("FireDict", [
         };
         $rootScope.dictColor = function (dict) {
             if(localStorage.getItem("settings-greyscale") == "true") {
-                var gr = (((
-                    parseInt(dict.color.substr(1,2), 16)
-                    + parseInt(dict.color.substr(3,2), 16)
-                    + parseInt(dict.color.substr(5,2), 16)
-                ) / 3.0) >> 0).toString(16);
-                return "#" + gr + gr + gr;
+                var aRGB = hexToRGB(dict.color),
+                    gr = ((aRGB[0]+aRGB[1]+aRGB[2])/3.0)>>0;
+                return RGBToHex([gr,gr,gr]);
             }
             return dict.color;
         }

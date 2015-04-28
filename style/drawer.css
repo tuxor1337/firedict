@@ -62,7 +62,7 @@ section[data-type="sidebar"] > header:after {
 
 section[data-type="sidebar"] > header h1 {
   font-size: 21px;
-  line-height: 3.9rem;
+  line-height: 45px;
   text-align: left;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -72,12 +72,6 @@ section[data-type="sidebar"] > header h1 {
   height: 100%;
   padding: 0 0 0 81px;
   color:#999;
-}
-
-section[data-type="sidebar"] > header h1 em {
-  font-weight: bold;
-  font-size: 1.5rem;
-  line-height: 1em;
 }
 
 section[data-type="sidebar"]:after {
@@ -122,11 +116,10 @@ section[data-type="sidebar"] > nav > ul > li > a {
   border:0; outline:none;
   text-decoration: none;
   color: #fff;
-  font-size: 1.3rem;
-  font-weight: bold;
-  line-height: 4.35rem;
+  font-size: 1.1rem;
+  line-height: 3.2rem;
   border-bottom: 0.1rem solid #596068;
-  text-indent: 1.8rem;
+  text-indent: 1.5rem;
   padding-right: 0.8rem;
   width: 100%;
   -moz-box-sizing: border-box;

@@ -3,10 +3,10 @@
  * (c) 2013-2014 https://github.com/tuxor1337/firedict
  * License: GPLv3
  */
- 
+
 var FireDictDirectives = angular.module("FireDictDirectives", [])
 .directive("ngHeader", function ($timeout) {
-    return { 
+    return {
         replace: true,
         restrict: "A",
         scope: {
@@ -38,7 +38,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
     };
 })
 .directive("ngDrawer", function () {
-    return { 
+    return {
         replace: true,
         transclude: true,
         restrict: "A",
@@ -75,13 +75,13 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         compile: function () {
             return function ($scope, $element, $attr) {
                 var handle, startY, currIndex = -1, dragover = null;
-                    
+
                 var moveAfter = $scope.$eval($attr.moveFn);
-                
+
                 function touchY(evt) {
                     return evt.originalEvent.changedTouches[0].pageY;
                 }
-                
+
                 function getNext(curr, last) {
                     $(curr).siblings().css("transition", "border 0.5s");
                     var currRect = curr.getBoundingClientRect(),
@@ -118,13 +118,13 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
                     }
                     return next;
                 }
-                
+
                 function parentMiddleDistY(el) {
                     var parentRect = $(el).parent()[0].getBoundingClientRect(),
                         currRect = el.getBoundingClientRect();
                     return 0.5*(currRect.bottom + currRect.top) - parentRect.top;
                 }
-                
+
                 function isContained(curr, testEl) {
                     var currRect = curr.getBoundingClientRect(),
                         testRect = testEl.getBoundingClientRect(),
@@ -140,19 +140,19 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
                         && currMiddleY <= testRect.bottom + 0.5*testEl.clientHeight)
                         || (currRect.bottom > parentRect.bottom && isLast(curr, testEl));
                 }
-                
+
                 function isFirst(curr, testEl) {
                     return $(testEl).index() == 0
                         || ($(testEl).index() == 1 && $(curr).index() == 0);
                 }
-                
+
                 function isLast(curr, testEl) {
                     var len = $(testEl).siblings().length,
                         result = $(testEl).index() == len
                         || ($(testEl).index() == len-1 && $(curr).index() == len);
                     return result;
                 }
-                
+
                 $element
                 .on("touchstart", "li[draggable]", function (e) {
                     if($(this).siblings().length > 0) {
@@ -243,7 +243,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
     };
 })
 .directive("ngDialog", function () {
-    return { 
+    return {
         replace: true,
         restrict: "A",
         scope: {
@@ -259,6 +259,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
               text: "Default text",
               success: 'OK',
               cancel:'Cancel',
+              range: null,
               l20n: null,
               value: null,
               callbk: null
@@ -268,11 +269,11 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
               success: "",
               cancel: ""
             },
-            body = $document.find("body"), 
+            body = $document.find("body"),
             modalEl = angular.element('<div ng:dialog data="modal"></div>'),
             closeFn = function () { set_opts(defaults); },
             $scope = $rootScope.$new();
-            
+
         function set_opts(options) {
             if(options.type == "progress" && typeof options.value === "undefined")
                 options.value = [];
@@ -283,6 +284,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             $scope.modal = {
                 visible: false,
                 result: options.value,
+                range: options.range,
                 type: options.type,
                 text: options.text,
                 success: options.success,
@@ -296,12 +298,12 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             };
             if(!$scope.$$phase) { $scope.$apply(); }
         }
-        
+
         $scope.$modalClose = closeFn;
         set_opts(defaults);
         $compile(modalEl)($scope);
         body.append(modalEl);
-        
+
         return {
             update: function (res, text) {
                 $scope.modal.result = res;
@@ -324,14 +326,14 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
 ])
 .factory("dictWorker", function () {
     var oWorker = new Worker("js/worker.js"),
-        oListeners = { 
+        oListeners = {
             reply: function (obj) {
                 transactions[obj.tid](obj.data);
                 delete transactions[obj.tid];
             }
         },
         transactions = [];
-    
+
     oWorker.onmessage = function (oEvent) {
         if (oEvent.data instanceof Object
             && oEvent.data.hasOwnProperty("vo42t30")
@@ -351,12 +353,12 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             });
         } else console.log("Wk: " + oEvent.data);
     };
-    
+
     oWorker.onerror = function (e) {
             e.preventDefault();
             console.error("Wk: " + e.filename + "(" + e.lineno + "): " + e.message);
     };
-    
+
     return {
         query: function () {
             if (arguments.length < 1) {
