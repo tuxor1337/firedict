@@ -13,7 +13,7 @@
                     <a data-ng-click="show_entry(match)">
                         <p>
                             <span data-ng-repeat="dict in dictionaries | filter:matchDictFilter(match) | orderBy: 'rank'"
-                                  data-ng-style="{'background-color':dict.color}"
+                                  data-ng-style="{'background-color':dictColor(dict)}"
                                   class="marker"></span>
                             {{match.term}}
                         </p>
@@ -23,12 +23,12 @@
         </section>
         <section data-type="output" data-ng-if="showingEntry">
             <div data-ng-repeat="dict in dictionaries | filter:entryDictFilter | orderBy: 'rank'"
-                 data-ng-style="{'border-color':dict.color}" class="text">
+                 data-ng-style="{'border-color':dictColor(dict)}" class="text">
                 <h2 class="dictname"
-                    data-ng-style="{'background-color':dict.color}">{{dict.alias}}</h2>
+                    data-ng-style="{'background-color':dictColor(dict)}">{{dict.alias}}</h2>
                 <div data-ng-repeat="entry in entries | filter:{ did: dict.version }:true | orderBy:termOrderFn">
                     <h3 class="term"
-                        data-ng-style="{'background-color':dict.color}"
+                        data-ng-style="{'background-color':dictColor(dict)}"
                         data-ng-render-term="{{entry.term}}"></h3>
                     <div class="content"
                        data-ng-repeat="dt in entry.data"

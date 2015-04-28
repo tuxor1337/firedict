@@ -3,8 +3,17 @@
  * (c) 2013-2014 https://github.com/tuxor1337/firedict
  * License: GPLv3
  */
- 
+
 "use strict";
+
+var DEFAULT_SETTINGS = [
+    ["settings-greyscale", "false"]
+];
+
+DEFAULT_SETTINGS.forEach(function (el) {
+    if(localStorage.getItem(el[0]) === null)
+        localStorage.setItem(el[0], el[1]);
+});
 
 function escapeHtml(text) {
     var map = {
@@ -14,10 +23,10 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    
+
     return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
-        
+
 angular.module("FireDict", [
     "ngRoute", "ngSanitize", "ngTouch",
     "FireDictControllers", "FireDictDirectives"
@@ -58,7 +67,7 @@ angular.module("FireDict", [
             if($event.currentTarget.getAttribute("id") !== "mainArea")
                 $event.stopPropagation();
         };
-        
+
         $rootScope.dictionaries = [];
         $rootScope.$watch("dictionaries", function (val) {
             dictWorker.query("edit_dictionaries", val);
@@ -69,7 +78,18 @@ angular.module("FireDict", [
                     return $rootScope.dictionaries[d];
             }
         };
-        
+        $rootScope.dictColor = function (dict) {
+            if(localStorage.getItem("settings-greyscale") == "true") {
+                var gr = (((
+                    parseInt(dict.color.substr(1,2), 16)
+                    + parseInt(dict.color.substr(3,2), 16)
+                    + parseInt(dict.color.substr(5,2), 16)
+                ) / 3.0) >> 0).toString(16);
+                return "#" + gr + gr + gr;
+            }
+            return dict.color;
+        }
+
         dictWorker.addListener("init_ready", function (obj) {
             ngDialog.close();
             $rootScope.dictionaries = obj.data;
@@ -103,7 +123,7 @@ angular.module("FireDict", [
                     do_async_rec(work, check, terminate);
                 });
             }
-            
+
             if(action == "get_dictionaries") {
                 var aDicts = [];
                 indexedDB_handle.transaction("dictionaries")
@@ -171,7 +191,7 @@ angular.module("FireDict", [
                 var did = data.did, chunksize = data.chunksize,
                     idb_ostore = "dict" + did,
                     data = data.data;
-                
+
                 var store = indexedDB_handle.transaction(idb_ostore, "readwrite")
                                             .objectStore(idb_ostore);
                 store.add(data.idxOft, 0)
@@ -184,7 +204,7 @@ angular.module("FireDict", [
             } else if(action == "restore_oft") {
                 var did = data.did,
                     idb_ostore = "dict" + did;
-                    
+
                 var store = indexedDB_handle.transaction(idb_ostore)
                     .objectStore(idb_ostore),
                     result = {};
@@ -203,7 +223,7 @@ angular.module("FireDict", [
             var sdcard_areas = navigator.getDeviceStorages("sdcard"),
                 filelist = [],
                 subdirs = [];
-            
+
             function split_path(path) {
                 var pos_slash = path.lastIndexOf('/'),
                     pos_dot = path.lastIndexOf('.');
@@ -213,7 +233,7 @@ angular.module("FireDict", [
                     path.substring(pos_dot+1),
                 ];
             }
-            
+
             function cat_paths(p1, p2) {
                 if(p1 == "") return p2;
                 if(p2 == "") return p1;
@@ -221,13 +241,13 @@ angular.module("FireDict", [
                 p2 = p2.replace(/^\/+/, "");
                 return p1 + "/" + p2;
             }
-            
+
             (function scan_area(n) {
                 if(n < sdcard_areas.length) {
                     var sdcard = sdcard_areas[n],
                         request = sdcard.enumerate("dictdata"),
                         path_prefix = null;
-                        
+
                     request.onsuccess = function () {
                         if(!this.result) scan_area(n+1);
                         else {
@@ -249,7 +269,7 @@ angular.module("FireDict", [
                             this.continue();
                         }
                     };
-                    
+
                     request.onerror = function () {
                         console.log("Error while scanning sdcard: ("
                             + request.error.name + ") " + request.error.message);
@@ -269,18 +289,18 @@ angular.module("FireDict", [
                 }
             })(0);
         });
-        
+
         var indexedDB_handle, dbName = "FireDictDB";
         function open_db(successCallbk, upgradeCallbk, version) {
             var request;
             if(!!indexedDB_handle) indexedDB_handle.close();
-            if(typeof version === "undefined") 
+            if(typeof version === "undefined")
                 request = indexedDB.open(dbName);
             else {
                 request = indexedDB.open(dbName, version);
                 console.log("Opening " + dbName + " v" + version);
             }
-            
+
             request.onerror = function (event) {
                throw new Error("Why didn't you allow my web app to use IndexedDB?!");
             };

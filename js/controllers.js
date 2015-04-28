@@ -3,7 +3,7 @@
  * (c) 2013-2014 https://github.com/tuxor1337/firedict
  * License: GPLv3
  */
- 
+
 var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirectives"])
 .controller("manageCtrl", ["$scope", "ngDialog", "dictWorker",
     function ($scope, ngDialog, dictWorker) {
@@ -14,7 +14,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                     return "#" + new Array(7-h.length).join("0")+h
             })(bin.toString(16).toUpperCase())
         }
-        
+
         function hexToRGB(hex) {
             hex = parseInt(hex.substring(1), 16);
             var r = hex >> 16,
@@ -70,7 +70,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
         $scope.reindex = function () {
             dictWorker.query("init");
-        };   
+        };
         $scope.dictMoveAfter = function (selected, target) {
             var aDictSorted = $scope.dictionaries.concat().sort(function (a,b) {
                 if (a.rank < b.rank) return -1;
@@ -103,13 +103,13 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
 ])
 .controller("lookupCtrl", ["$scope", "$rootScope", "$timeout", "dictWorker",
     "ngDialog", function ($scope, $rootScope, $timeout, dictWorker, ngDialog) {
-        
+
         $rootScope.showingEntry = false;
         $scope.idle = false;
         $scope.matches = [];
         $scope.entries = [];
         $scope.resources = {};
-        
+
         $scope.lookup = function (val) {
             if(val == $scope.search_term) {
                 $scope.idle = true;
@@ -125,12 +125,12 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 });
             }
         };
-        
+
         $scope.lookup_enterpressed = function () {
             if($rootScope.showingEntry) return;
             $scope.lookup($scope.search_term);
         };
-        
+
         $scope.lookup_data_changed = function () {
             var val = $scope.search_term,
                 milliseconds = 800 - 150*Math.min(val.length,4);
@@ -146,7 +146,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             })();
             delay(function () { $scope.lookup(val); }, milliseconds);
         };
-        
+
         $scope.show_entry = function(matchObj) {
             $scope.idle = true;
             $scope.matches = [];
@@ -165,12 +165,12 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 if(!$scope.$$phase) { $scope.$apply(); }
             });
         };
-        
+
         $scope.$watch(
             "[search_term, dictionaries]",
             $scope.lookup_data_changed, true
         );
-        
+
         $scope.back = function () {
             if($rootScope.showingEntry) {
                 $rootScope.showingEntry = false;
@@ -251,7 +251,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                     var elImg = this,
                         img_filename = $(elImg).attr("src")
                             .replace(/^\x1E/, '').replace(/\x1F$/, '');
-                    $(elImg).attr("src", 
+                    $(elImg).attr("src",
                         "{{resources[" + did + "]['" + img_filename + "']}}");
                     if($(elImg).attr("align") == "middle") {
                         $(elImg).removeAttr("align")
@@ -328,7 +328,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                         $(this).replaceWith(
                             $(replacement).html($(this).html())
                         );
-                    } else { 
+                    } else {
                         $(this).replaceWith(
                             $("<sup/>").append(
                                 $(replacement).html($(this).html())
@@ -447,7 +447,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 return render_plain_content("Pronunciation: /"+d.content+"/");
             else if("y" == d.type)
                 return render_plain_content("YinBiao/KANA: "+d.content);
-            
+
             console.log("Type not supported: " + d.type); // at least: "kWPX"
             return render_plain_content(d.content);
         };
@@ -461,6 +461,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         $scope.title = "settings";
         $scope.settings = [
             {
+                type: "action",
                 name: "clear-history",
                 onclick: function () {
                     ngDialog.open({
@@ -475,6 +476,18 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                             }
                         }
                     });
+                }
+            },
+            {
+                type: "toggle",
+                name: "settings-greyscale",
+                onclick: function () {
+                    var curr = localStorage.getItem("settings-greyscale"),
+                        newval = (curr == "true")?"false":"true";
+                    localStorage.setItem("settings-greyscale", newval);
+                },
+                checked: function () {
+                    return localStorage.getItem("settings-greyscale") == "true";
                 }
             }
         ];
