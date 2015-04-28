@@ -44,6 +44,28 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         restrict: "A",
         link: function ($scope, $element, $attrs) {
             $scope.title = $attrs.title;
+            $scope.menuitems = [
+                {
+                    "route": "#/lookup",
+                    "l10n": "lookup-words",
+                    "fullname": "Lookup Words"
+                },
+                {
+                    "route": "#/manage",
+                    "l10n": "manage-dicts",
+                    "fullname": "Manage Dictionaries"
+                },
+                {
+                    "route": "#/settings",
+                    "l10n": "settings",
+                    "fullname": "Settings"
+                },
+                {
+                    "route": "#/about",
+                    "l10n": "about",
+                    "fullname": "About"
+                }
+            ];
         },
         templateUrl: "partials/sidebar.html"
     };

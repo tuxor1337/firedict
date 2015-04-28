@@ -31,33 +31,15 @@
     </head>
     <body data-ng-app="FireDict" data-ng-csp>
         <div data-ng-drawer title="FireDict">
-            <li>
-                <a data-ng-href="#/lookup"
-                   data-ng-click="toggleSidebar()"
-                   data-ng-moz-l10n="lookup-words">
-                    Lookup Words
-                </a>
-            </li><li>
-                <a data-ng-href="#/manage"
-                   data-ng-click="toggleSidebar()"
-                   data-ng-moz-l10n="manage-dicts">
-                    Manage Dictionaries
-                </a>
-            </li><li>
-                <a data-ng-href="#/settings"
-                   data-ng-click="toggleSidebar()"
-                   data-ng-moz-l10n="settings">
-                    Settings
-                </a>
-            </li><li>
-                <a data-ng-href="#/about"
-                   data-ng-click="toggleSidebar()"
-                   data-ng-moz-l10n="about">
-                    About
+            <li data-ng-repeat="item in menuitems">
+                <a data-ng-href="{{item.route}}"
+                   data-ng-click="toggleSidebar($event, false)"
+                   data-ng-moz-l10n="{{item.l10n}}">
+                    {{item.fullname}}
                 </a>
             </li>
         </div>
-        <section id="mainArea" data-ng-class="{drawer: drawerOpen}">
+        <section id="mainArea" data-ng-class="{drawer: drawerOpen}" data-ng-click="toggleSidebar($event, false)">
             <div data-ng-view=""></div>
         </section>
     </body>
