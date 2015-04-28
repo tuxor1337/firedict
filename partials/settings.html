@@ -4,7 +4,19 @@
         <section data-type="list">
             <ul>
                 <li class="settings" data-ng-repeat="stg in settings">
-                    <a data-ng-click="stg.onclick()"><p data-ng-moz-l10n="{{stg.name}}"></p></a>
+                    <a data-ng-if="stg.type == 'action'"
+                       data-ng-click="stg.onclick()">
+                        <p data-ng-moz-l10n="{{stg.name}}"></p>
+                    </a>
+                    <div data-ng-if="stg.type == 'toggle'">
+                        <label class="pack-switch">
+                            <input type="checkbox"
+                                data-ng-checked="stg.checked()"
+                                data-ng-click="stg.onclick()" />
+                            <span></span>
+                        </label>
+                        <p data-ng-moz-l10n="{{stg.name}}"></p>
+                    </div>
                 </li>
             </ul>
         </section>

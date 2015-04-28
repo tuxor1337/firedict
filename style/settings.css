@@ -1,8 +1,61 @@
 
 [data-type="list"] li.settings {
     height:auto;
+    position: relative;
 }
-    
+
+[data-type="list"] li.settings p {
+    padding:1.5rem; font-size:1.4rem;
+}
+
+[data-type="list"] li.settings label.pack-switch {
+  display: block;
+  float:right;
+  width: 50px;
+  height: 27px;
+  position: absolute;
+  top:50%; right: 5px;
+  margin-top: -14px;
+  background: none;
+}
+
+[data-type="list"] li.settings label.pack-switch input {
+  margin: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 0;
+}
+
+[data-type="list"] li.settings label.pack-switch input:checked ~ span:after {
+  background-position: center bottom;
+}
+
+[data-type="list"] li.settings label.pack-switch input ~ span:after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 60px;
+  margin: -13px 0 0;
+  height: 27px;
+  pointer-events: none;
+  border-radius: 13px;
+  overflow: hidden;
+  background: #e6e6e6 url(images/switch-background_off.png) no-repeat -32px 0 / 92px 27px;
+  transition: background 0.2s ease;
+}
+
+[data-type="list"] li.settings label.pack-switch input:checked ~ span:after {
+  background: #e6e6e6 url(images/switch-background.png) no-repeat 0 0 / 92px 27px;
+}
+
+[data-type="list"] li.settings label.pack-switch input:disabled ~ span:after {
+  opacity: 0.4;
+}
+
 [data-type="list"] li.settings > a {
   text-decoration: none;
   color: #000;
@@ -13,8 +66,4 @@
 
 [data-type="list"] li.settings > a:hover {
     background-color: #fff7df;
-}
-
-[data-type="list"] li.settings > a p {
-    padding:1.5rem; font-size:1.4rem;
 }
