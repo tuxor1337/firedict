@@ -86,7 +86,7 @@
                 var version = parseInt(indexedDB_handle.version)+1;
                 if(typeof data === "undefined") data = {};
                 return new Promise(function (resolve, reject) {
-                    this.init(
+                    open_db(
                         function () {
                             data.version = version;
                             indexedDB_handle.transaction("dictionaries", "readwrite")
@@ -104,7 +104,7 @@
             this.remove_dictionary = function (data) {
                 var version = parseInt(indexedDB_handle.version)+1;
                 return new Promise(function (resolve, reject) {
-                    this.init(
+                    open_db(
                         function () {
                             indexedDB_handle.transaction("dictionaries", "readwrite")
                                 .objectStore("dictionaries").delete(data);

@@ -60,7 +60,7 @@
         };
     })();
 
-    var indexedDB = (function () {
+    var dictionaryIdb = (function () {
         var cls = function (version) {
             var did = version;
 
@@ -214,7 +214,7 @@
                 if(short_name.length > 10)
                     short_name = short_name.substring(0,10) + "...";
 
-                return indexedDB.create()
+                return dictionaryIdb.create()
                 .then(function (db) {
                     oDB = db;
 
@@ -247,7 +247,7 @@
             };
 
             this.restore = function (version) {
-                oDB = new indexedDB(version);
+                oDB = new dictionaryIdb(version);
                 return new Promise(function (resolve, reject) {
                     oDB.get_meta().then(function (meta) {
                         meta_info = meta;
