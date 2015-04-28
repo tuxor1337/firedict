@@ -1,9 +1,9 @@
 /**
  * This file is part of FireDict.
- * (c) 2013-2014 https://github.com/tuxor1337/firedict
+ * (c) 2013-2015 https://github.com/tuxor1337/firedict
  * License: GPLv3
  */
- 
+
 var console = {
     log: function (str) {
         postMessage(str);
@@ -18,8 +18,9 @@ importScripts("lib/inflate.js");
 importScripts("lib/dictzip_sync.js");
 importScripts("lib/stardict_sync.js");
 
+importScripts("idbwrapper.js");
 importScripts("dictionary.js");
-importScripts("dictionarymanager.js"); 
+importScripts("dictionarymanager.js");
 
 var dictMan = new DictionaryManager(),
     transactions = [],
@@ -82,7 +83,7 @@ var dictMan = new DictionaryManager(),
     };
 
 onmessage = function (oEvent) {
-    if (oEvent.data instanceof Object 
+    if (oEvent.data instanceof Object
         && oEvent.data.hasOwnProperty("bk4e1h0")
         && oEvent.data.hasOwnProperty("df65d4e")
         && oEvent.data.hasOwnProperty("ktp3fm1")) {
