@@ -51,9 +51,12 @@ angular.module("FireDict", [
     function ($rootScope, dictWorker, ngDialog) {
         $rootScope.search_term = "";
         $rootScope.drawerOpen = false;
-        $rootScope.toggleSidebar = function () {
-            if($rootScope.drawerOpen) $rootScope.drawerOpen = false;
-            else $rootScope.drawerOpen = true;
+        $rootScope.toggleSidebar = function ($event, drawerOpen) {
+            if(typeof drawerOpen === "undefined")
+                drawerOpen = !$rootScope.drawerOpen;
+            $rootScope.drawerOpen = drawerOpen;
+            if($event.currentTarget.getAttribute("id") !== "mainArea")
+                $event.stopPropagation();
         };
         
         $rootScope.dictionaries = [];
