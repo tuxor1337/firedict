@@ -1,22 +1,17 @@
 /**
  * This file is part of FireDict.
- * (c) 2013-2014 https://github.com/tuxor1337/firedict
+ * (c) 2013-2015 https://github.com/tuxor1337/firedict
  * License: GPLv3
  */
- 
+
 (function (GLOBAL) {
     var transactions = [];
-    
+
     function historyManager() {
         var cache = [];
-        
-        function put_data(data) {
-            query("indexedDB", {
-                action: "set_history",
-                data: data
-            });
-        }
-        
+
+        function put_data(data) { IdbWrapper.set_history(data); }
+
         this.add = function (decodedObj) {
             var m = decodedObj;
             for(var h = 0; h < cache.length; h++) {
@@ -39,7 +34,7 @@
             cache = cache.slice(-20);
             put_data(cache);
         };
-        
+
         this.clear = function (version) {
             if(typeof version === "undefined") {
                 cache = [];
@@ -55,34 +50,34 @@
             }
             put_data(cache);
         };
-        
+
         this.load = function () {
-            query("indexedDB", { action: "get_history" })
+            IdbWrapper.get_history()
             .then(function (data) { cache = data; });
         };
-        
+
         this.get = function () { return cache.concat().reverse(); }
     }
 
     function cacheManager() {
         var cache = [];
-        
+
         this.add = function (key, did, data) {
             cache.push({ "key": key, "did": did, "data": data.concat() });
             cache = cache.slice(-30);
         };
-        
-        this.get = function (key, did) { 
+
+        this.get = function (key, did) {
             for(var h = 0; h < cache.length; h++) {
                 if(cache[h].key == key && cache[h].did == did)
                     return cache[h].data.concat();
             }
             return null;
         }
-        
+
         this.clear = function () { cache = []; };
     }
-    
+
     var DictionaryManager = (function () {
         var cls = function () {
             var aDicts = [], ready = false;
@@ -91,7 +86,7 @@
                     "entries": new cacheManager(),
                     "lookup": new cacheManager()
                 };
-    
+
             function dict_by_id(version) {
                 var result = null;
                 aDicts.forEach(function (d) {
@@ -99,13 +94,10 @@
                 });
                 return result;
             }
-            
+
             this.init = function () {
                 var dictdata_dirs = [];
-                oHistoryManager.load();
-                oCaches["entries"].clear();
-                oCaches["lookup"].clear();
-                
+
                 function add_dictionary(n) {
                     if(n < dictdata_dirs.length) {
                         try {
@@ -133,7 +125,7 @@
                         query("init_ready", d);
                     }
                 }
-                
+
                 function load_dictionary(n) {
                     if(n < aDicts.length) {
                         var ver = aDicts[n].version;
@@ -143,7 +135,7 @@
                         });
                     } else add_dictionary(0);
                 }
-                
+
                 function remove_zombie(n) {
                     if(n < aDicts.length) {
                         for(var i = 0; i < dictdata_dirs.length; i++) {
@@ -156,16 +148,14 @@
                         }
                         console.log("Zombie: " + aDicts[n].path);
                         oHistoryManager.clear(aDicts[n].version);
-                        query("indexedDB", {
-                            action: "remove_dictionary",
-                            data: aDicts[n].version
-                        }).then(function () {
+                        IdbWrapper.remove_dictionary(aDicts[n].version)
+                        .then(function () {
                             aDicts.splice(n,1);
                             remove_zombie(n);
                         });
                     } else load_dictionary(0);
                 }
-                
+
                 function process_dictdata() {
                     query("scan_dictdata")
                     .then(function (file_list) {
@@ -173,24 +163,30 @@
                         remove_zombie(0);
                     });
                 }
-                
+
                 function get_dictionaries() {
                     query("progress", { text: "Processing dictionaries..." })
-                    query("indexedDB", { action: "get_dictionaries" })
+                    IdbWrapper.get_dictionaries()
                     .then(function (dict_list) {
                         aDicts = dict_list;
                         process_dictdata();
                     });
                 }
-                
-                get_dictionaries();
+
+                IdbWrapper.init()
+                .then(function () {
+                    oHistoryManager.load();
+                    oCaches["entries"].clear();
+                    oCaches["lookup"].clear();
+                    get_dictionaries();
+                });
             };
-            
+
             this.lookup_fuzzy = function (term) {
                 if(!ready) return [];
-                
+
                 console.log("DictionaryManager: lookup_fuzzy(" + term + ")");
-                
+
                 var matches = [];
                 function add_matches(raw_matches) {
                     while(raw_matches.length > 0) {
@@ -201,11 +197,11 @@
                                 m = null; break;
                             } else if(m[0] < matches[i][0]) break;
                         }
-                        if(m != null) 
+                        if(m != null)
                             matches.splice(i, 0, { "term": m[0], "entries": [m]});
                     }
                 }
-                
+
                 return new Promise(function (resolve, reject) {
                     function continue_lookup(d) {
                         if(d < aDicts.length) {
@@ -221,7 +217,7 @@
                                             short_name = short_name.substring(0,10) + "...";
                                         console.log("lookup_fuzzy(" + term + ") in `"
                                             + short_name + "`");
-                                        
+
                                         var cached_matches = oCaches["lookup"].get(term,d);
                                         if(null === cached_matches) {
                                             cached_matches = aDicts[d].lookup(term, true);
@@ -245,11 +241,11 @@
                             }));
                         }
                     }
-                    
+
                     continue_lookup(0);
                 });
             };
-            
+
             this.lookup_exact = function (term) {
                 if(!ready) return [];
                 var result = [];
@@ -273,17 +269,17 @@
                 }
                 return a;
             };
-            
+
             this.entry = function (decodedObj) {
                 if(!ready) return [];
                 oHistoryManager.add(decodedObj);
-                
+
                 var short_name = dict_by_id(decodedObj[2]).meta().alias;
                 if(short_name.length > 10)
                     short_name = short_name.substring(0,10) + "..."
                 console.log("loading entry " + decodedObj[1].term
                     + " from `" + short_name + "`");
-                
+
                 var cached_entry = oCaches["entries"]
                         .get(decodedObj[1].dictpos[0], decodedObj[2]);
                 if(null == cached_entry) {
@@ -292,33 +288,33 @@
                 } else {
                     console.log("...from cache...");
                 }
-                
+
                 return {
                     term: decodedObj[1].term,
                     data: cached_entry,
                     did: decodedObj[2]
                 };
             };
-        
+
             this.resource = function (version, name) {
                 if(!ready) return null;
                 return dict_by_id(version).resource(name);
             };
-            
+
             this.edit = function (dict) {
                 if(!ready) return false;
                 oCaches["entries"].clear();
                 oCaches["lookup"].clear();
                 dict_by_id(dict.version).meta(dict);
             };
-            
+
             this.history = oHistoryManager.get;
-            
+
             this.clear_history = oHistoryManager.clear;
         }
-        
+
         return cls;
     })();
-    
+
     GLOBAL.DictionaryManager = DictionaryManager;
 }(this));
