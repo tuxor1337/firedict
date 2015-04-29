@@ -150,6 +150,12 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             });
         };
 
+        $scope.showPreview = function(bol, evt) {
+            $(evt.currentTarget)
+                .siblings(".expandable")
+                .toggleClass("preview", bol);
+        };
+
         $scope.$watch(
             "[search_term, dictionaries]",
             $scope.lookup_data_changed, true
