@@ -17,6 +17,51 @@ section[data-type="output"] div.text div.content {
     padding: 0.3em 0.4em; margin:0;
 }
 
+section[data-type="output"] div.text .button {
+    position:relative;
+    display:none;
+}
+
+section[data-type="output"] div.text .button div {
+    border: 1px #ccc solid;
+    background-color: #f3f3f3;
+    padding: 0.7rem;
+    text-align:center;
+}
+
+section[data-type="output"] div.text div.content.expandable {
+    overflow:hidden;
+}
+
+section[data-type="output"] div.text .content.expandable ~ .showmore {
+    display:none;
+}
+
+section[data-type="output"] div.text .content.expandable ~ .showless {
+    display:block;
+}
+
+section[data-type="output"] div.text .content.expandable.preview {
+    max-height: 80px;
+}
+
+section[data-type="output"] div.text .showmore { margin-top: -20px; }
+section[data-type="output"] div.text .showmore::before {
+    content: "";
+    display:block;
+    height:20px;
+    background-position: bottom center;
+    background-image: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.2) 10px, transparent 20px);
+}
+
+section[data-type="output"] div.text .content.expandable.preview ~ .showmore {
+    display:block;
+}
+
+section[data-type="output"] div.text .content.expandable.preview ~ .showless {
+    display:none;
+}
+
 section[data-type="output"] div.text div.content ol,
 section[data-type="output"] div.text div.content ul,
 section[data-type="output"] div.text div.content dl,
