@@ -157,7 +157,7 @@
                 }
 
                 function process_dictdata() {
-                    query("scan_dictdata")
+                    DictScanner.scan()
                     .then(function (file_list) {
                         dictdata_dirs = file_list;
                         remove_zombie(0);

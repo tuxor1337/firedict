@@ -185,71 +185,28 @@
             };
         };
 
-        return cls;
+        return new cls();
     })();
 
-    var IdbWrapperCompat = (function () {
-        var cls = function () {
-            this.init = function () {
-                return query("IdbWrapper", { action: "init" });
-            };
+    var IdbWrapperCompat = {};
 
-            this.get_dictionaries = function () {
-                return query("IdbWrapper", { action: "get_dictionaries" });
+    ["init", "get_dictionaries", "get_history"].forEach(function (val) {
+            IdbWrapperCompat[val] = function () {
+                return query("IdbWrapper", { action: val });
             };
+    });
 
-            this.get_history = function () {
-                return query("IdbWrapper", { action: "get_history" });
+    [
+        "add_dictionary", "remove_dictionary", "set_history",
+        "set_meta", "get_meta", "store_oft", "restore_oft"
+    ].forEach(function (val) {
+            IdbWrapperCompat[val] = function (data) {
+                return query("IdbWrapper", { action: val, data: data });
             };
-
-            this.add_dictionary = function (data) {
-                return query("IdbWrapper", {
-                    action: "add_dictionary", data: data
-                });
-            };
-
-            this.remove_dictionary = function (data) {
-                return query("IdbWrapper", {
-                    action: "remove_dictionary", data: data
-                });
-            };
-
-            this.set_history = function (data) {
-                return query("IdbWrapper", {
-                    action: "set_history", data: data
-                });
-            };
-
-            this.set_meta = function (data) {
-                return query("IdbWrapper", {
-                    action: "set_meta", data: data
-                });
-            };
-
-            this.get_meta = function (data) {
-                return query("IdbWrapper", {
-                    action: "get_meta", data: data
-                });
-            };
-
-            this.store_oft = function (data) {
-                return query("IdbWrapper", {
-                    action: "store_oft", data: data
-                });
-            };
-
-            this.restore_oft = function (data) {
-                return query("IdbWrapper", {
-                    action: "restore_oft", data: data
-                });
-            };
-        };
-
-        return cls;
-    })();
+    });
 
     if(!GLOBAL.indexedDB) {
-        GLOBAL.IdbWrapper = new IdbWrapperCompat();
+        GLOBAL.IdbWrapper = IdbWrapperCompat;
         console.log("Using IdbWrapper in compat mode, i.e. calls are redirected to main thread.");
-    } else GLOBAL.IdbWrapper = new IdbWrapper();
+    } else GLOBAL.IdbWrapper = IdbWrapper;
 }(this));

@@ -18,6 +18,7 @@ importScripts("lib/inflate.js");
 importScripts("lib/dictzip_sync.js");
 importScripts("lib/stardict_sync.js");
 
+importScripts("dictscanner.js");
 importScripts("idbwrapper.js");
 importScripts("dictionary.js");
 importScripts("dictionarymanager.js");
