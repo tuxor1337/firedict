@@ -30,9 +30,11 @@
                     <h3 class="term"
                         data-ng-style="{'background-color':dictColor(dict)}"
                         data-ng-render-term="{{entry.term}}"></h3>
-                    <div class="content preview"
-                       data-ng-repeat="dt in entry.data"
-                       data-compile="render_content(dt, dict.version)"></div>
+                    <div class="content preview">
+                        <div data-ng-repeat="dt in entry.data"
+                             data-compile="render_content(dt, dict.version)">
+                       </div>
+                    </div>
                     <div class="button showmore"
                          data-ng-click="showPreview(false, $event)">
                         <div data-ng-moz-l10n="show-more">Show more</div>

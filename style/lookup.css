@@ -13,9 +13,8 @@ section[data-type="output"] div.text h2.dictname {
     background-color:#000;
 }
 
-section[data-type="output"] div.text div.content {
-    padding: 0.3em 0.4em; margin:0;
-}
+section[data-type="output"] div.text div.content { margin:0; }
+section[data-type="output"] div.text div.content div { padding: 0.3em 0.4em; }
 
 section[data-type="output"] div.text .button {
     position:relative;
