@@ -205,8 +205,9 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             },
             function(value) {
                 element.html(value);
-                if(element[0].scrollHeight > 150) {
-                    element.addClass("expandable");
+                var content_div = $(element).parents(".content");
+                if(content_div[0].scrollHeight > 150) {
+                    content_div.addClass("expandable");
                 }
                 $compile(element.contents())(scope);
                 ensureCompileRunsOnce();
