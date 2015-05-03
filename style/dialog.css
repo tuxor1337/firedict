@@ -10,30 +10,31 @@ section[role="dialog"] {
 
 section[role="dialog"] div.main {
     position: absolute;
-    bottom: 6.3rem;
+    top: 3.5rem; bottom: 4rem;
     width: 100%;
 }
 
 section[role="dialog"] div.main > p {
     font-weight: bold;
     max-width: 90%;
-    margin: 0 auto 0.5rem;
+    margin: 0 auto;
+    height: 3.5rem;
 }
 
 section[role="dialog"] div.buttons {
     -moz-box-sizing: border-box;
     position: absolute;
     bottom: 0; left: 0;
-    width: 100%;
-    padding: 0.7rem 0.5rem;
+    width: 100%; height: 4rem;
+    padding: 1rem 0.5rem;
     border-top: 1px #444 solid;
     background-color: rgba(0,0,0,0.5);
 }
 
 section[role="dialog"] div.buttons button {
     -moz-box-sizing: border-box;
-    width: 46%;
-    margin: 0.3rem 1.2%;
+    width: 46%; height: 100%;
+    margin: 0 1.2%;
     padding: 0.4rem 0;
     border: 1px solid #ccc;
     border-radius: 0.2rem;
@@ -54,11 +55,16 @@ section[role="dialog"] input[type=text] {
     background-color: rgba(180,180,180,0.8);
 }
 
-section[role="dialog"] div.numpicker input:first-of-type { margin-top: 2rem; }
+section[role="dialog"] div.numpicker {
+    position: absolute;
+    top: 3.5rem; bottom: 1rem;
+    left: 1rem; right: 1rem;
+}
+
 section[role="dialog"] div.numpicker input {
     border: 0; border-radius: 0; outline: none;
     background: transparent;
-    width: 80%; height: 2.25rem;
+    width: 80%; height: 1.2rem;
 }
 
 section[role="dialog"] div.numpicker input::-moz-range-track {
@@ -77,29 +83,29 @@ section[role="dialog"] div.numpicker input::-moz-range-thumb {
 }
 
 section[role="dialog"] div.numpicker div {
-    margin: 1.2rem auto;
-    text-align: center;
-}
-
-section[role="dialog"] div.numpicker.fontpicker div {
+    -moz-box-sizing: border-box;
+    width: 100%;
+    position: absolute;
+    top: 2.5rem; bottom: 0;
     padding: 0.4rem 0.5rem;
-    height: 8rem; width: 80%;
     text-align: left;
     background-color: #fff; color: #000;
 }
 
+section[role="dialog"] div.numpicker.colorpicker { line-height: 2rem; }
+
 section[role="dialog"] div.numpicker.colorpicker div {
-    width: 70%; height: 2.25rem;
-    line-height: 2.25rem;
-    letter-spacing: 0.15rem;
-    font-size: 1.1rem;
+    top: 6rem;
+    padding: 0 0.3rem;
+    line-height: 1.2rem;
+    color: rgba(50,50,50,0.8);
 }
 
 section[role="dialog"] div.grouppicker {
-    -moz-box-sizing: border-box;
-    max-height: 15rem;
+    position: absolute;
+    top: 3.5rem; bottom: 1rem;
+    left: 1rem; right: 1rem;
     overflow: auto;
-    margin: 1rem;
     box-shadow: inset 0 0 4px 4px #444;
     border: 1px rgba(200,200,200,0.5) solid;
     color: #fff;
