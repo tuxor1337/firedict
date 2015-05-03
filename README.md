@@ -3,7 +3,7 @@ firedict
 
 A simple offline dictionary software for Firefox OS
 
-![screenshot0](https://raw.github.com/tuxor1337/firedict/master/screen0.png "drawer") # 
+![screenshot0](https://raw.github.com/tuxor1337/firedict/master/screen0.png "drawer") #
 ![screenshot1](https://raw.github.com/tuxor1337/firedict/master/screen1.png "list of matches")
 
 ![screenshot2](https://raw.github.com/tuxor1337/firedict/master/screen2.png "displaying an entry") #
@@ -29,13 +29,13 @@ free to send a pull request.
 testing the ui
 --------------
 
-Replace `js/worker.js` by `test/worker.js` in order to get rid of the requirements
-for privileges and permissions. Using the test-worker you can run the app in
+Run `make testbuild` in order to get a version of this app that doesn't require
+privileges and permissions. You can run the app `testbuild/index.html` in
 any browser (mobile or non-mobile, offline or online) and test all the ui stuff
 like i10n.js, AngularJS, jQuery and stylesheets. (The test worker uses dummy
 dictionaries and dummy lookups etc.)
 
-Licensing and third-party code
+licensing and third-party code
 ----------------
 
 FireDict is free software: you can redistribute it and/or modify
