@@ -2,18 +2,19 @@
     <div data-ng-header="" data-toggle="toggleSidebar" data-text="{{title}}"></div>
     <div role="main">
         <section data-type="list">
-            <ul>
-                <li class="settings" data-ng-repeat="stg in settings">
+            <ul class="settings">
+                <li data-ng-repeat="stg in settings">
                     <a data-ng-if="stg.type == 'action'"
                        data-ng-click="stg.onclick()">
                         <p data-ng-moz-l10n="{{stg.name}}"></p>
                     </a>
                     <a data-ng-if="stg.type == 'value'"
-                       data-ng-click="stg.onclick()">
-                        <div class="value">{{stg.value()}}</div>
+                       data-ng-click="stg.onclick()"
+                       class="value">
+                        <div>{{stg.value()}}</div>
                         <p data-ng-moz-l10n="{{stg.name}}"></p>
                     </a>
-                    <div data-ng-if="stg.type == 'toggle'">
+                    <div class="toggle" data-ng-if="stg.type == 'toggle'">
                         <label class="pack-switch">
                             <input type="checkbox"
                                 data-ng-checked="stg.checked()"

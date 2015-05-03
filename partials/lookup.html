@@ -1,12 +1,13 @@
 <div class="partial-container">
     <div data-ng-header="" data-toggle="toggleSidebar" data-type="lookup"
          data-term="search_term" data-focus="back"
-         data-enter="lookup_enterpressed"></div>
+         data-enter="lookup_enterpressed"
+         data-groups="choose_groups"></div>
     <div role="main">
         <section data-type="list" data-ng-if="!showingEntry">
             <ul class="matches">
                 <li data-ng-show="!matches.length &amp;&amp; !idle">
-                    <p data-ng-moz-l10n="no-matches">No matches!</p>
+                    <p data-ng-moz-l10n="lookup-no-matches"></p>
                 </li>
                 <li data-ng-show="idle" class="idle"></li>
                 <li data-ng-repeat="match in matches">
@@ -37,11 +38,11 @@
                     </div>
                     <div class="button showmore"
                          data-ng-click="showPreview(false, $event)">
-                        <div data-ng-moz-l10n="show-more">Show more</div>
+                        <div data-ng-moz-l10n="lookup-show-more"></div>
                     </div>
                     <div class="button showless"
                          data-ng-click="showPreview(true, $event)">
-                        <div data-ng-moz-l10n="show-less">Show less</div>
+                        <div data-ng-moz-l10n="lookup-show-less"></div>
                     </div>
                 </div>
             </div>

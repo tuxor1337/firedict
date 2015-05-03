@@ -1,6 +1,6 @@
 <section role="dialog" data-ng-show="modal.visible">
     <div class="main">
-        <p data-ng-moz-l10n="{{modal.l20n.text}}">{{modal.text}}</p>
+        <p data-ng-moz-l10n="{{modal.l20n.text}}"></p>
         <input type="text" data-ng-if="modal.type == 'prompt'" data-ng-model="modal.result" />
         <div ng-if="modal.type == 'color'" class="numpicker colorpicker">
             <input type="range" data-ng-model="modal.result[0]" min="0" max="255" class="red" /><br />
@@ -18,6 +18,23 @@
                 ligula ac quam viverra.
             </div>
         </div>
+        <div ng-if="modal.type == 'group_membership'" class="grouppicker">
+            <ul class="checklist">
+                <li data-ng-if="modal.result.length === 0" class="notfound">
+                    <p data-ng-moz-l10n="groups-no-groups"></p>
+                </li>
+                <li data-ng-repeat="group in modal.result">
+                    <p>{{group.name}}</p>
+                    <label class="pack-switch">
+                        <input type="checkbox" data-ng-model="group.active" />
+                        <span></span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+        <div ng-if="modal.type == 'grouppicker'" class="grouppicker">
+            <ul data-ng-grouppicker="" data-selectable="false"></ul>
+        </div>
         <progress data-ng-if="modal.type == 'progress' &amp;&amp; modal.result.length &gt;= 2"
                   value="{{modal.result[0]}}"
                   max="{{modal.result[1]}}"></progress>
@@ -25,8 +42,9 @@
     </div>
     <div data-ng-if="modal.type != 'progress'" class="buttons">
         <button data-ng-click="modal.callbk(modal.result)"
-                data-ng-moz-l10n="{{modal.l20n.success}}">{{modal.success}}</button>
-        <button data-ng-click="modal.callbk(null)" class="cancel"
-                data-ng-moz-l10n="{{modal.l20n.cancel}}">{{modal.cancel}}</button>
+                data-ng-moz-l10n="{{modal.l20n.success}}"></button>
+        <button data-ng-if="modal.l20n.cancel !== ''"
+                data-ng-click="modal.callbk(null)" class="cancel"
+                data-ng-moz-l10n="{{modal.l20n.cancel}}"></button>
     </div>
 </section>

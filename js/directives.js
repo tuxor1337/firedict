@@ -4,7 +4,7 @@
  * License: GPLv3
  */
 
-var FireDictDirectives = angular.module("FireDictDirectives", [])
+var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider"])
 .directive("ngHeader", function ($timeout) {
     return {
         replace: true,
@@ -14,7 +14,9 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             "searchTerm": '=term',
             "toggleSidebar": '=toggle',
             "onReindex": '=reindex',
+            "onAdd": '=addButton',
             "onEnter": '=enter',
+            "onGroupButton": '=groups',
             "text": '@text'
         },
         link: function ($scope, $element, $attrs) {
@@ -37,6 +39,84 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
         templateUrl: "partials/header.html"
     };
 })
+.directive("ngGrouppicker", ["$rootScope", "dictProvider", "ngDialog",
+    function ($rootScope, dictProvider, ngDialog) {
+        return {
+            replace: true,
+            restrict: "A",
+            link: function ($scope, $element, $attrs) {
+                $scope.selectable = $attrs.selectable;
+                $scope.selected = -1;
+                $scope.dictColor = $rootScope.dictColor;
+                $scope.groups = dictProvider.groups;
+                $scope.dictionaries = dictProvider.dictionaries;
+                $scope.select = function (group) {
+                    if($scope.selectable) {
+                        if($scope.selected == group) $scope.selected = -1;
+                        else $scope.selected = group;
+                    }
+                };
+                $scope.isSelected = function (group) {
+                    return ($scope.selected === group)? "selected" : "";
+                }
+                $scope.groupDictFilter = function (group) {
+                    return function (dict) {
+                        return dictProvider.groups.members(group).indexOf(dict.version) >= 0;
+                    };
+                };
+                $scope.remove = function (group) {
+                    ngDialog.open({
+                        l20n: {
+                            text: "dialog-remove-group",
+                            success: "dialog-yes-sure",
+                            cancel: "dialog-no-forget-it"
+                        },
+                        value: group,
+                        callbk: function (result) {
+                            if(result === true) dictProvider.groups.remove_group(group);
+                        }
+                    });
+                };
+                $scope.rename = function (group) {
+                    ngDialog.open({
+                        type: "prompt",
+                        l20n: {
+                            text: "dialog-rename-group"
+                        },
+                        value: group,
+                        callbk: function (alias) {
+                            if(alias !== null) dictProvider.groups.rename_group(group, alias);
+                        }
+                    });
+                };
+                $scope.setMembers = function (group) {
+                    var aDicts = [];
+                    dictProvider.dictionaries(true).forEach(function (dict) {
+                        aDicts.push({
+                            active: dictProvider.groups.is_member(group, dict.version),
+                            name: dict.alias,
+                            did: dict.version
+                        });
+                    });
+                    ngDialog.open({
+                        type: "group_membership",
+                        l20n: {
+                            text: "dialog-change-members"
+                        },
+                        value: aDicts,
+                        callbk: function (dicts) {
+                            if(dicts === null) return;
+                            dicts.forEach(function (d) {
+                                if(d.active) dictProvider.groups.add_to_group(group, d.did);
+                                else dictProvider.groups.remove_from_group(group, d.did);
+                            });
+                        }
+                    });
+                };
+            },
+            templateUrl: "partials/grouppicker.html"
+        };
+}])
 .directive("ngDrawer", function () {
     return {
         replace: true,
@@ -47,23 +127,23 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             $scope.menuitems = [
                 {
                     "route": "#/lookup",
-                    "l10n": "lookup-words",
-                    "fullname": "Lookup Words"
+                    "l10n": "section-lookup-words"
                 },
                 {
                     "route": "#/manage",
-                    "l10n": "manage-dicts",
-                    "fullname": "Manage Dictionaries"
+                    "l10n": "section-manage-dicts"
+                },
+                {
+                    "route": "#/groups",
+                    "l10n": "section-manage-groups"
                 },
                 {
                     "route": "#/settings",
-                    "l10n": "settings",
-                    "fullname": "Settings"
+                    "l10n": "section-settings"
                 },
                 {
                     "route": "#/about",
-                    "l10n": "about",
-                    "fullname": "About"
+                    "l10n": "section-about"
                 }
             ];
         },
@@ -205,9 +285,11 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             },
             function(value) {
                 element.html(value);
-                var content_div = $(element).parents(".content");
-                if(content_div[0].scrollHeight > 150) {
-                    content_div.addClass("expandable");
+                if(localStorage.getItem("settings-expandable") != "false") {
+                    var content_div = $(element).parents(".content");
+                    if(content_div[0].scrollHeight > 150) {
+                        content_div.addClass("expandable");
+                    }
                 }
                 $compile(element.contents())(scope);
                 ensureCompileRunsOnce();
@@ -239,7 +321,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             if(scope.search_term == term && scope.search_term != "")
                 result += "<b>" + term + "</b>";
             else result += term + " ("
-                        + '<span data-ng-moz-l10n="synonym">Synonym</span>:'
+                        + '<span data-ng-moz-l10n="lookup-synonym"></span>:'
                         + " <b>" + scope.search_term + "</b>)";
             element.html(result);
             $compile(element.contents())(scope);
@@ -260,9 +342,6 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
     function ($document, $compile, $rootScope) {
         var defaults = {
               type: "confirm",
-              text: "Default text",
-              success: 'OK',
-              cancel:'Cancel',
               range: null,
               l20n: null,
               value: null,
@@ -270,8 +349,8 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             },
             defaults_l20n = {
               text: "",
-              success: "",
-              cancel: ""
+              success: "dialog-ok",
+              cancel: "dialog-cancel"
             },
             body = $document.find("body"),
             modalEl = angular.element('<div ng:dialog data="modal"></div>'),
@@ -291,9 +370,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
                 range: options.range,
                 type: options.type,
                 text: options.text,
-                success: options.success,
                 l20n: options.l20n,
-                cancel: options.cancel,
                 callbk: function (result) {
                     var callFn = options.callbk || closeFn;
                     callFn(result);
@@ -327,61 +404,4 @@ var FireDictDirectives = angular.module("FireDictDirectives", [])
             }
         };
     }
-])
-.factory("dictWorker", function () {
-    var oWorker = new Worker("js/worker.js"),
-        oListeners = {
-            reply: function (obj) {
-                transactions[obj.tid](obj.data);
-                delete transactions[obj.tid];
-            }
-        },
-        transactions = [];
-
-    oWorker.onmessage = function (oEvent) {
-        if (oEvent.data instanceof Object
-            && oEvent.data.hasOwnProperty("vo42t30")
-            && oEvent.data.hasOwnProperty("e4b869b")
-            && oEvent.data.hasOwnProperty("rnb93qh")) {
-            var tid = oEvent.data.e4b869b;
-            oListeners[oEvent.data.vo42t30]({
-                tid: tid,
-                data: oEvent.data.rnb93qh,
-                reply: function (data) {
-                    oWorker.postMessage({
-                        "bk4e1h0": "reply",
-                        "df65d4e": tid,
-                        "ktp3fm1": data
-                    });
-                }
-            });
-        } else console.log("Wk: " + oEvent.data);
-    };
-
-    oWorker.onerror = function (e) {
-            e.preventDefault();
-            console.error("Wk: " + e.filename + "(" + e.lineno + "): " + e.message);
-    };
-
-    return {
-        query: function () {
-            if (arguments.length < 1) {
-                throw new TypeError("dictWorker.query - not enough arguments");
-                return;
-            }
-            var queryObj = {
-                "bk4e1h0": arguments[0],
-                "df65d4e": 0,
-                "ktp3fm1": arguments[1]
-            }
-            return new Promise(function (resolve, reject) {
-                queryObj.df65d4e = transactions.length;
-                transactions.push(resolve);
-                oWorker.postMessage(queryObj);
-            });
-        },
-        addListener: function (sName, fListener) {
-            oListeners[sName] = fListener;
-        }
-    };
-});
+]);

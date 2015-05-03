@@ -28,6 +28,7 @@
         <script type="application/javascript" src="js/lib/angular-route.min.js"></script>
         <script type="application/javascript" src="js/lib/angular-sanitize.min.js"></script>
         <script type="application/javascript" src="js/lib/angular-touch.min.js"></script>
+        <script type="application/javascript" src="js/dictfactory.js"></script>
         <script type="application/javascript" src="js/directives.js"></script>
         <script type="application/javascript" src="js/controllers.js"></script>
         <script type="application/javascript" src="js/app.js"></script>
@@ -38,7 +39,6 @@
                 <a data-ng-href="{{item.route}}"
                    data-ng-click="toggleSidebar($event, false)"
                    data-ng-moz-l10n="{{item.l10n}}">
-                    {{item.fullname}}
                 </a>
             </li>
         </div>

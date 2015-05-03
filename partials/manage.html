@@ -5,26 +5,11 @@
         <section data-type="list">
             <ul class="manage" data-ng-sortable="" data-move-fn="dictMoveAfter">
                 <li data-ng-if="dictionaries.length == 0" class="notfound">
-                    <h2 data-ng-moz-l10n="no-dictionaries-found">
-                        No dictionaries found
-                    </h2>
-                    <p data-ng-moz-l10n="scan-unsuccessful">
-                        Unfortunately, scanning your memory card's *dictdata*
-                        directory for dictionaries was not successful.
-                    </p>
-                    <p data-ng-moz-l10n="make-sure-everythings-okay">
-                        Please make sure you inserted the (right) memory card and
-                        place your dictionaries in a directory named *dictdata*
-                        directly at your memory card's root.
-                    </p>
-                    <p data-ng-moz-l10n="proper-stardict-format">
-                        Furthermore, make sure your dictionary is in proper *StarDict*
-                        format, i.e. containing at least one file of each of the
-                        following types/file endings: idx, ifo, dict.
-                    </p>
-                    <p data-ng-moz-l10n="examplary-dir-structure">
-                        Examplary directory structure:
-                    </p>
+                    <h2 data-ng-moz-l10n="manage-no-dictionaries-found"></h2>
+                    <p data-ng-moz-l10n="manage-scan-unsuccessful"></p>
+                    <p data-ng-moz-l10n="manage-make-sure-everythings-okay"></p>
+                    <p data-ng-moz-l10n="manage-proper-stardict-format"></p>
+                    <p data-ng-moz-l10n="manage-examplary-dir-structure"></p>
                     <ul>
                         <li>dictdata/testDict/mydict.dict</li>
                         <li>dictdata/testDict/mydict.idx</li>
@@ -33,10 +18,7 @@
                         <li>dictdata/testdict2/a2ndDict.idx</li>
                         <li>dictdata/testdict2/a2ndDict.ifo</li>
                     </ul>
-                    <p data-ng-moz-l10n="files-may-be-compressed">
-                        Note that files may be compressed, i.e. having an additional
-                        *dz* at the end.
-                    </p>
+                    <p data-ng-moz-l10n="manage-files-may-be-compressed"></p>
                 </li>
                 <li draggable="" data-ng-repeat="dict in dictionaries | orderBy:'rank'"
                     data-ng-class="{'inactive': !dict.active, 'selected': selected == dict.version }">
@@ -47,12 +29,13 @@
                     <p data-ng-click="select(dict)">{{dict.alias}}</p>
                     <div class="buttons">
                         <button data-ng-click="setColor(dict)"
-                                data-ng-moz-l10n="color-dots">
-                            Color...
+                                data-ng-moz-l10n="manage-color-dots">
                         </button>
                         <button data-ng-click="rename(dict)"
-                                data-ng-moz-l10n="rename-dots">
-                            Rename...
+                                data-ng-moz-l10n="manage-rename-dots">
+                        </button>
+                        <button data-ng-click="setGroups(dict)"
+                                data-ng-moz-l10n="manage-groups-dots">
                         </button>
                     </div>
                 </li>

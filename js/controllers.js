@@ -5,9 +5,9 @@
  */
 
 var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirectives"])
-.controller("manageCtrl", ["$scope", "ngDialog", "dictWorker",
-    function ($scope, ngDialog, dictWorker) {
-        $scope.title = "manage-dicts";
+.controller("manageCtrl", ["$scope", "ngDialog", "dictProvider",
+    function ($scope, ngDialog, dictProvider) {
+        $scope.title = "section-manage-dicts";
         $scope.selected = -1;
         $scope.select = function (dict) {
             if($scope.selected == dict.version)
@@ -28,9 +28,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             ngDialog.open({
                 type: "prompt",
                 l20n: {
-                    text: "type-new-alias",
-                    success: "ok",
-                    cancel: "cancel"
+                    text: "dialog-new-alias"
                 },
                 value: dict.alias,
                 callbk: function (alias) {
@@ -42,9 +40,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             ngDialog.open({
                 type: "color",
                 l20n: {
-                    text: "choose-color",
-                    success: "ok",
-                    cancel: "cancel"
+                    text: "dialog-choose-color"
                 },
                 value: hexToRGB(dict.color),
                 callbk: function (color) {
@@ -52,8 +48,35 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 }
             });
         };
+        $scope.setGroups = function (dict) {
+            var aGroups = [],
+                did = dict.version;
+            dictProvider.groups.list.forEach(function (group) {
+                aGroups.push({
+                    active: dictProvider.groups.is_member(group, did),
+                    name: group
+                });
+            });
+            ngDialog.open({
+                type: "group_membership",
+                l20n: {
+                    text: "dialog-change-groups",
+                    success: "dialog-ok",
+                    cancel: "dialog-cancel"
+                },
+                value: aGroups,
+                callbk: function (groups) {
+                    if(groups === null) return;
+                    groups.forEach(function (group) {
+                        if(group.active)
+                            dictProvider.groups.add_to_group(group.name, did);
+                        else dictProvider.groups.remove_from_group(group.name, did);
+                    });
+                }
+            });
+        };
         $scope.reindex = function () {
-            dictWorker.query("init");
+            dictProvider.worker.query("init", true);
         };
         $scope.dictMoveAfter = function (selected, target) {
             var aDictSorted = $scope.dictionaries.concat().sort(function (a,b) {
@@ -85,9 +108,26 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
     }
 ])
-.controller("lookupCtrl", ["$scope", "$rootScope", "$timeout", "dictWorker",
-    "ngDialog", function ($scope, $rootScope, $timeout, dictWorker, ngDialog) {
-
+.controller("groupsCtrl", ["$scope", "$rootScope", "ngDialog", "dictProvider",
+    function ($scope, $rootScope, ngDialog, dictProvider) {
+        $scope.title = "section-manage-groups";
+        $scope.addGroup = function () {
+            ngDialog.open({
+                type: "prompt",
+                l20n: {
+                    text: "dialog-add-new-group"
+                },
+                value: "",
+                callbk: function (alias) {
+                    if(alias !== null) dictProvider.groups.new_group(alias);
+                }
+            });
+        };
+    }
+])
+.controller("lookupCtrl", [
+    "$scope", "$rootScope", "$timeout", "ngDialog", "dictProvider",
+    function ($scope, $rootScope, $timeout, ngDialog, dictProvider) {
         $rootScope.showingEntry = false;
         $scope.idle = false;
         $scope.matches = [];
@@ -99,7 +139,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 $scope.idle = true;
                 $scope.matches = [];
                 $rootScope.search_term = $scope.search_term;
-                dictWorker.query("lookup", $scope.search_term)
+                dictProvider.worker.query("lookup", $scope.search_term)
                 .then(function (matches) {
                     if($scope.search_term == val) {
                         $scope.matches = matches;
@@ -131,6 +171,17 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             delay(function () { $scope.lookup(val); }, milliseconds);
         };
 
+        $scope.choose_groups = function () {
+            ngDialog.open({
+                type: "grouppicker",
+                l20n: {
+                    text: "dialog-choose-groups",
+                    success: "dialog-ok",
+                    cancel: ""
+                }
+            });
+        };
+
         $scope.show_entry = function(matchObj) {
             $scope.idle = true;
             $scope.matches = [];
@@ -142,7 +193,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 term = matchObj.term;
             }
             $scope.search_term = term;
-            dictWorker.query("entry", entr)
+            dictProvider.worker.query("entry", entr)
             .then(function (entries) {
                 $rootScope.showingEntry = true;
                 $scope.entries = entries;
@@ -188,7 +239,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 if(!$scope.resources.hasOwnProperty(did))
                     $scope.resources[did] = {};
                 if(!$scope.resources[did].hasOwnProperty(name)) {
-                    dictWorker.query("resource", {
+                    dictProvider.worker.query("resource", {
                             did: did, name: name
                     }).then(function (blob) {
                         if(blob == null)
@@ -449,23 +500,23 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
     }
 ])
-.controller("settingsCtrl", ["$scope", "ngDialog", "dictWorker",
-    function ($scope, ngDialog, dictWorker) {
-        $scope.title = "settings";
+.controller("settingsCtrl", ["$scope", "ngDialog", "dictProvider",
+    function ($scope, ngDialog, dictProvider) {
+        $scope.title = "section-settings";
         $scope.settings = [
             {
                 type: "action",
-                name: "clear-history",
+                name: "settings-clear-history",
                 onclick: function () {
                     ngDialog.open({
                         l20n: {
-                            text: "really-clear-history",
-                            success: "yes-sure",
-                            cancel: "no-forget-it"
+                            text: "dialog-clear-history",
+                            success: "dialog-yes-sure",
+                            cancel: "dialog-no-forget-it"
                         },
                         callbk: function (result) {
                             if(result === true) {
-                                dictWorker.query("clear_history");
+                                dictProvider.worker.query("clear_history");
                             }
                         }
                     });
@@ -481,9 +532,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                     ngDialog.open({
                         type: "fontsize",
                         l20n: {
-                            text: "dialog-set-fontsize",
-                            success: "ok",
-                            cancel: "cancel"
+                            text: "dialog-set-fontsize"
                         },
                         value: parseFloat(localStorage.getItem("settings-fontsize"))*100,
                         range: [75,105],
@@ -505,12 +554,24 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 checked: function () {
                     return localStorage.getItem("settings-greyscale") == "true";
                 }
+            },
+            {
+                type: "toggle",
+                name: "settings-expandable",
+                onclick: function () {
+                    var curr = localStorage.getItem("settings-expandable"),
+                        newval = (curr == "true")?"false":"true";
+                    localStorage.setItem("settings-expandable", newval);
+                },
+                checked: function () {
+                    return localStorage.getItem("settings-expandable") == "true";
+                }
             }
         ];
     }
 ])
 .controller("aboutCtrl", function ($scope) {
-    $scope.title = "about";
+    $scope.title = "section-about";
     $scope.manifest = {
       "name": "FireDict",
       "description": "",

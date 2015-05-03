@@ -1,82 +1,44 @@
 
-[data-type="list"] li.settings {
-    position: relative;
+[data-type="list"] ul.settings p {
+    line-height:1.3rem;
 }
 
-[data-type="list"] li.settings p {
-    padding:0.8rem 0.9rem; font-size:1rem;
+[data-type="list"] ul.settings a.value {
+    padding-right: 3.2rem;
 }
 
-[data-type="list"] li.settings div.value {
-  display: block;
-  float:right;
-  width: 3rem;
-  height: 1.5rem;
-  position: absolute;
-  top:50%; right: 0.2rem;
-  margin-top: -0.7rem;
-  color: #aaa;
-  line-height: 1.4rem;
-  font-size:0.9rem;
-  background: none;
+[data-type="list"] ul.settings a.value div {
+    display: block;
+    position: absolute;
+    top:50%; right: 0.2rem;
+    width: 3rem; height: 1.5rem;
+    margin-top: -0.7rem;
+    line-height: 1.4rem;
+    color: #aaa;
+    font-size:0.9rem;
 }
 
-[data-type="list"] li.settings label.pack-switch {
-  display: block;
-  float:right;
-  width: 50px;
-  height: 27px;
-  position: absolute;
-  top:50%; right: 5px;
-  margin-top: -14px;
-  background: none;
+[data-type="list"] ul.settings div.toggle {
+    padding-right: 65px;
 }
 
-[data-type="list"] li.settings label.pack-switch input {
-  margin: 0;
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 0;
+[data-type="list"] ul.settings label.pack-switch {
+    width: 50px; height: 27px;
+    margin-top: -14px;
 }
 
-[data-type="list"] li.settings label.pack-switch input:checked ~ span:after {
-  background-position: center bottom;
+[data-type="list"] ul.settings label.pack-switch input ~ span:after {
+    width: 60px; height: 27px;
+    margin: -13px 0 0;
+    border-radius: 13px;
+    background-color: #e6e6e6;
+    background-image: url(images/switch-background_off.png);
+    background-size: 92px 27px;
+    background-position: -32px 0;
 }
 
-[data-type="list"] li.settings label.pack-switch input ~ span:after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 50%;
-  width: 60px;
-  margin: -13px 0 0;
-  height: 27px;
-  pointer-events: none;
-  border-radius: 13px;
-  overflow: hidden;
-  background: #e6e6e6 url(images/switch-background_off.png) no-repeat -32px 0 / 92px 27px;
-  transition: background 0.2s ease;
+[data-type="list"] ul.settings label.pack-switch input:checked ~ span:after {
+    background-image: url(images/switch-background.png);
+    background-position: 0 0;
 }
 
-[data-type="list"] li.settings label.pack-switch input:checked ~ span:after {
-  background: #e6e6e6 url(images/switch-background.png) no-repeat 0 0 / 92px 27px;
-}
-
-[data-type="list"] li.settings label.pack-switch input:disabled ~ span:after {
-  opacity: 0.4;
-}
-
-[data-type="list"] li.settings > a {
-  text-decoration: none;
-  color: #000;
-  display: block;
-  border: none;
-  outline: none;
-}
-
-[data-type="list"] li.settings > a:hover {
-    background-color: #fff7df;
-}

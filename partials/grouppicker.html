@@ -1,0 +1,30 @@
+<ul class="groups manage">
+    <li data-ng-if="groups.list.length == 0" class="notfound">
+        <p data-ng-moz-l10n="groups-no-groups"></p>
+    </li>
+    <li data-ng-repeat="group in groups.list"
+        data-ng-class="[groups.is_active(group), isSelected(group)]">
+        <div class="group-colors">
+            <span data-ng-repeat="dict in dictionaries() | filter:groupDictFilter(group) | orderBy: 'rank'"
+                  data-ng-style="{'background-color':dictColor(dict)}"
+                  class="marker"></span>
+        </div>
+        <div class="color" data-ng-click="groups.toggle_active(group)"></div>
+        <p data-ng-click="select(group)">{{group}}</p>
+        <div class="buttons" data-ng-if="selectable">
+            <button class="remove"
+                    data-ng-click="remove(group)"
+                    data-ng-moz-l10n="remove-dots">
+                Remove...
+            </button>
+            <button data-ng-click="rename(group)"
+                    data-ng-moz-l10n="set-icon-dots">
+                Rename...
+            </button>
+            <button data-ng-click="setMembers(group)"
+                    data-ng-moz-l10n="change-members-dots">
+                Change members...
+            </button>
+        </div>
+    </li>
+</ul>

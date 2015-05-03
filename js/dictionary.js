@@ -104,7 +104,7 @@
     var Dictionary = (function () {
         var cls = function(files, cmp_fct) {
             var meta_info = {},
-                idxOft, synOft,
+                idxOft = null, synOft = null,
                 oStarDict = new StarDict(files), oDB,
                 cmp_func = cmp_fct || stardict_strcmp,
                 that = this;
@@ -149,6 +149,18 @@
                     term = syn.term;
                 }
                 return [term, idx, oDB.version()];
+            }
+
+            function createOft() {
+                idxOft = oStarDict.oft();
+                synOft = oStarDict.oft("synonyms");
+                query("progress", {
+                    text: oStarDict.keyword("bookname")
+                });
+                return oDB.store_oft({
+                    "idxOft": idxOft,
+                    "synOft": synOft
+                });
             }
 
             this.resource = oStarDict.resource;
@@ -217,21 +229,9 @@
                 return dictionaryIdb.create()
                 .then(function (db) {
                     oDB = db;
-
                     console.log("(syn)wordcount for dictionary `"
                             + short_name + "`: " + wordcount + " (" + synwordcount + ")");
-
-                    idxOft = oStarDict.oft();
-                    synOft = oStarDict.oft("synonyms");
-
-                    query("progress", {
-                        text: oStarDict.keyword("bookname")
-                    });
-
-                    return oDB.store_oft({
-                        "idxOft": idxOft,
-                        "synOft": synOft
-                    });
+                    return createOft();
                 }).then(function () {
                     meta_info = {
                         "path": path,
@@ -246,15 +246,18 @@
                 });
             };
 
-            this.restore = function (version) {
+            this.restore = function (version, force_oft_creation) {
                 oDB = new dictionaryIdb(version);
                 return new Promise(function (resolve, reject) {
                     oDB.get_meta().then(function (meta) {
                         meta_info = meta;
-                        return oDB.restore_oft();
+                        if(force_oft_creation) return createOft();
+                        else return oDB.restore_oft();
                     }).then(function (data) {
-                        idxOft = data.idxOft;
-                        synOft = data.synOft;
+                        if(idxOft === null) {
+                            idxOft = data.idxOft;
+                            synOft = data.synOft;
+                        }
                         resolve();
                     });
                 });

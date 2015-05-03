@@ -152,11 +152,11 @@
                         .transaction(idb_ostore, "readwrite")
                         .objectStore(idb_ostore),
 
-                    request = store.add(data.idxOft, 0);
+                    request = store.put(data.idxOft, 0);
 
                 return new Promise(function (resolve, reject) {
                     request.onsuccess = function () {
-                        store.add(data.synOft, 1)
+                        store.put(data.synOft, 1)
                         .onsuccess = function () { resolve(); };
                     };
                 });
