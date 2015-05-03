@@ -28,7 +28,7 @@ var dictMan = new DictionaryManager(),
     queryableFunctions = {
         init: function (obj) {
             dictMan = new DictionaryManager();
-            dictMan.init();
+            dictMan.init(obj.data);
         },
         lookup: function (obj) {
             if(obj.data == "") {

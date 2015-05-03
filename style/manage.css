@@ -1,122 +1,150 @@
 
-[data-type="list"] ul.manage > li {
-    padding:0.4rem 40px 0.4rem 28px;
-    height: auto;
-    position:relative;
-    min-height:40px;
-    border-top: 0px solid #e7e7e7;
+[data-type="list"] > ul.manage > li {
+    min-height: 40px;
+    padding: 0.7rem 42px 0.6rem 25px;
 }
 
-[data-type="list"] ul.manage > li.insertBefore {
-    border-top: 60px #ff9 solid;
+[data-type="list"] > ul.manage > li.selected {
+    background-color: #fff7df;
 }
 
-[data-type="list"] ul.manage > li.insertAfter {
-    border-bottom: 60px #ff9 solid;
+[data-type="list"] > ul.manage > li > p {
+    margin: 0; padding: 0;
+    line-height: 1.3rem;
 }
 
-[data-type="list"] ul.manage > li > p {
-    white-space: normal;
-    line-height:1.3rem;
-    padding: 0;
-}
-
-[data-type="list"] ul.manage > li div.buttons {
-    margin: 0.3rem 0; display:none;
-}
-
-[data-type="list"] ul.manage > li div.buttons button {
-    border-radius: 0.2rem;
-    background-image: linear-gradient(to top, #eee, #fff);
-    border: 1px solid #ddd;
-    padding:0.3rem 0.1rem;
-    margin:0; width:46%;
-    -moz-box-sizing:border-box;
-}
-[data-type="list"] ul.manage > li div.buttons button:first-of-type {
-    margin-right:2%;
-}
-
-[data-type="list"] ul.manage > li div.color {
-    font-size:0; line-height:0;
-    width:20px; height:20px;
-    position:absolute;
-    top: 50%; right: 5px;
-    margin-top:-14px;
-    border: 4px #000 solid;
-    border-radius:7px;
-    background-image: url(images/checkmark.png);
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-[data-type="list"] ul.manage > li div.handle {
+ul.manage div.handle {
     position:absolute;
     top: 50%; left: 6px;
+    width: 12px; height: 32px;
     margin-top: -16px;
-    width:12px; height:32px;
-    border-radius:0.3rem;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url(images/draghandle.png);
+    background: transparent url(images/draghandle.png) no-repeat center;
 }
 
-[data-type="list"] ul.manage > li div.color.light {
+ul.manage li.sorting div.handle {
+    border-radius: 4px;
+    background-image: url(images/draghandle-light.png);
+    background-color: #000;
+}
+
+ul.manage > li > div.buttons {
+    -moz-box-sizing: border-box;
+    margin: 0.3rem 0; display: none;
+    overflow: auto;
+}
+
+ul.manage > li.selected > div.buttons {
+    display:block;
+}
+
+ul.manage > li > div.buttons button {
+    float: right;
+    -moz-box-sizing:border-box;
+    width:49%;
+    margin: 0;
+    padding: 0.3rem 0.1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.2rem;
+    background-image: linear-gradient(to top, #eee, #fff);
+}
+ul.manage > li > div.buttons button:first-of-type {
+    float:left;
+}
+
+ul.manage > li > div.buttons button:nth-child(3) {
+    float:none; clear:both;
+    width: 100%;
+    margin:0.3rem 0 0 0;
+}
+
+ul.manage > li > div.color {
+    position:absolute;
+    top: 50%; right: 5px;
+    width: 20px; height: 20px;
+    margin-top:-14px;
+    font-size: 0; line-height: 0;
+    border: 3px #000 solid;
+    border-radius:7px;
+    background: #fff url(images/checkmark.png) no-repeat center;
+}
+
+ul.manage > li > div.color.light {
     background-image: url(images/checkmark-light.png);
 }
 
-[data-type="list"] ul.manage > li.sorting {
+ul.manage > li.inactive div.color {
+    background-image: none;
+    background-color: #fff !important;
+}
+
+ul.manage > li.active div.color {
+    background-image: url(images/checkmark-light.png);
+    background-color: #000 !important;
+}
+
+ul.manage > li.insertBefore {
+    border-top: 60px #ff9 solid;
+}
+
+ul.manage > li.insertAfter {
+    border-bottom: 60px #ff9 solid;
+}
+
+ul.manage > li.sorting {
+    z-index: 100;
     position: absolute;
-    z-index: 100; left: 0;
+    left: 0;
     background-color: #fff;
     box-shadow: 0 0 10px 6px #999;
 }
 
-[data-type="list"] ul.manage > li.sorting div.handle {
-    background-image: url(images/draghandle-light.png);
-    background-color:#000;
-}
-
-[data-type="list"] ul.manage > li.selected {
-    background-color: #fff7df;
-}
-
-[data-type="list"] ul.manage > li.selected div.buttons {
-    display:block;
-}
-
-[data-type="list"] ul.manage > li.inactive div.color {
-    background: #fff !important;
-}
-
-[data-type="list"] ul.manage > li.notfound {
+ul.manage > li.notfound {
     padding:0.9rem 1rem 0 0.8rem; margin:0; border: none;
 }
 
-[data-type="list"] ul.manage > li.notfound ul {
-    list-style:none; margin:0.4rem 0;
-    padding: 0 0 0 0.2rem;
-    font-family:Courier, monospace; font-size:0.85rem;
-}
-
-[data-type="list"] ul.manage > li.notfound ul li {
-    margin:0; padding:0; line-height:1.4rem;
-}
-
-[data-type="list"] ul.manage > li.notfound h2 {
+ul.manage > li.notfound h2 {
     font-size: 1rem; font-weight:bold; margin:0; padding:0;
 }
 
-[data-type="list"] ul.manage > li.notfound p i {
-    font-weight: bold; font-style: normal;
-    font-size:0.9rem; color:#555;
-}
-
-[data-type="list"] ul.manage > li.notfound p {
+ul.manage > li.notfound p {
     text-align:justify;
     padding: 0;
     margin: 0.5rem 0 0 0;
     line-height: 1.2rem;
-    white-space: normal;
-    font-weight: normal;
+}
+
+ul.manage > li.notfound p i {
+    font-weight: bold; font-style: normal;
+    font-size:0.9rem; color:#555;
+}
+
+ul.manage > li.notfound ul {
+    list-style: none; margin:0.4rem 0;
+    padding: 0 0 0 0.2rem;
+    font-family:Courier, monospace; font-size:0.85rem;
+}
+
+ul.manage > li.notfound ul li {
+    margin:0; padding:0; line-height:1.4rem;
+}
+
+ul.groups > li  { overflow: hidden; }
+
+[data-type="list"] > ul.manage.groups > li {
+    padding-left: 30px;
+}
+
+ul.manage.groups > li.notfound p { text-align: center; }
+
+ul.groups div.group-colors {
+    position: absolute;
+    top: 3px; left: 6px;
+    width: 18px;
+    line-height: 9px;
+}
+
+ul.groups div.group-colors span.marker {
+    display: inline-block;
+    width: 7px; height: 7px;
+    margin-right: 2px;
 }

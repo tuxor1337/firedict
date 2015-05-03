@@ -1,180 +1,137 @@
 
 header.main {
-  position: absolute;
-  z-index: 90;
-  padding: 0;
-  color: #fff;
-  background-color: #111;
-  border: none;
-  width:100%;
-  top: 0; left: 0;
+    position: absolute;
+    top: 0; left: 0;
+    width:100%;
+    padding: 0;
+    z-index: 100;
+    background-color: #111;
 }
 
 header.main h1 {
-  font-size: 1.3rem;
-  line-height: 3rem;
-  text-align: left;
-  color: #fff;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  display: block;
-  overflow: hidden;
-  margin: 0;
-  padding: 0 0 0 2.5rem;
-  height: 100%;
-  font-weight: lighter;
-}
-
-header.main form[role="search"]  {
-  display: block;
-  overflow: hidden;
-  position: relative;
-  padding: 0.45rem 0.6rem 0 0;
-  margin-left: 2.4rem;
-  line-height:2.1rem;
-}
-
-header.main form[role="search"] input[type="text"] {
-  width: 100%;
-  height: 2rem;
-  -moz-box-sizing: border-box;
-  padding: 0 2rem 0 0.45rem;
-  border: 0; border-radius:0;
-  background: #fff url(images/header-shadow.png) repeat-x left -0.1rem;
-  line-height: 2rem;
-  box-shadow: none;
-}
-
-header.main form[role="search"] button {
-  font-size: 0;
-  overflow: hidden;
-  position: absolute;
-  right: 0.5rem;
-  top: 0.55rem;
-  bottom: 0;
-  width: 2rem;
-  height: auto;
-  margin: 0;
-  display: none;
-  border: none;
-  background: url(images/search-clear.png) no-repeat center center / 1.2rem auto;
-}
-
-header.main form[role="search"] input[type="text"]:valid + button {
-  display: block;
-}
-
-header.main menu[type="toolbar"] {
-  height: 100%;
-  float: right;
-}
-
-header.main menu[type="toolbar"] a,
-header.main menu[type="toolbar"] button {
-  -moz-box-sizing: border-box;
-  position: relative;
-  float: left;
-  width: auto;
-  min-width: 3rem;
-  height: 3rem;
-  margin-bottom: 0;
-  padding: 0 1rem;
-  border-radius: 0;
-  line-height: 3rem;
-  background: none;
-  text-align: center;
-  text-shadow: none;
-  z-index: 5;
-}
-
-
-header.main menu[type="toolbar"] {
-  padding: 0;
-  margin: 0;
+    display: block;
+    padding: 0; margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 3rem;
+    font-size: 1.3rem;
+    font-weight:normal;
+    color: #fff;
 }
 
 header.main a,
 header.main button {
-  border: none;
-  padding: 0;
-  overflow: hidden;
-  border-radius: 0;
-  text-decoration: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    overflow: hidden;
+    text-decoration: none;
+    font-size: 0;
 }
 
-
-header.main button::-moz-focus-inner {
-  outline: none;
-  border: none;
-  margin-top: -0.2rem;
-  padding: 0;
+header.main form[role="search"]  {
+    display: block;
+    overflow: hidden;
+    position: relative;
+    padding: 0.45rem 0 0 0;
+    margin-left: 2.4rem;
+    line-height:2.1rem;
 }
 
-header.main > a:not([aria-disabled="true"]):active:after,
-header.main > button:not(:disabled):active:after,
-header.main > a:not([aria-disabled="true"]):hover:after,
-header.main > button:not(:disabled):hover:after,
+header.main form[role="search"] input[type="text"] {
+    -moz-box-sizing: border-box;
+    width: 100%; height: 2rem;
+    line-height: 2rem;
+    padding: 0 2rem 0 0.45rem;
+    border: 0; border-radius: 0;
+    box-shadow: none;
+}
+
+header.main form[role="search"] button {
+    position: absolute;
+    top: 0.55rem; right: 0; bottom: 0;
+    width: 2rem; height: auto;
+    margin: 0;
+    display: none;
+    font-size: 0;
+    background: url(images/search-clear.png) no-repeat center center;
+}
+
+header.main form[role="search"] input[type="text"]:valid + button {
+    display: block;
+}
+
+header.main menu[type="toolbar"] {
+    padding: 0; margin: 0 0 0 0.1rem;
+    height: 100%;
+    float: right;
+}
+
+header.main menu[type="toolbar"] a,
+header.main menu[type="toolbar"] button {
+    -moz-box-sizing: border-box;
+    position: relative;
+    float: left;
+    width: 3rem; height: 3rem;
+    margin: 0; padding: 0;
+    border-radius: 0;
+}
+
+header.main > a:not([aria-disabled="true"]):active,
+header.main > button:not(:disabled):active,
+header.main > a:not([aria-disabled="true"]):hover,
+header.main > button:not(:disabled):hover,
 header.main menu[type="toolbar"] a:not([aria-disabled="true"]):hover,
 header.main menu[type="toolbar"] button:not(:disabled):hover,
 header.main menu[type="toolbar"] a:not([aria-disabled="true"]):active,
 header.main menu[type="toolbar"] button:not(:disabled):active  {
-  background-color: #222 !important;
-}
-
-header.main menu[type="toolbar"] a[aria-disabled="true"],
-header.main menu[type="toolbar"] button[disabled]  {
-  opacity: 0.5;
+    background-color: #222 !important;
 }
 
 header.main .icon {
-  position: relative;
-  float: none;
-  display: inline-block;
-  vertical-align: middle;
-  width: 2rem;
-  height: 2rem;
-  margin: 0 -1rem;
-  background: transparent no-repeat center center / 2rem auto;
-  font-size: 0;
-  overflow: hidden;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    background: transparent no-repeat center center;
+    overflow: hidden;
 }
 
 header.main .icon.icon-menu {
-  background-image: url(images/header-icon-menu.png);
-  background-size: 2.6rem auto;
-  width: 2.6rem;
-  height: 3rem;
+    background-image: url(images/header-icon-menu.png);
+    background-size: 2.4rem auto;
+    width: 2.6rem; height: 3rem;
 }
 
 header.main .icon.icon-reindex {
-  background-image: url(images/header-icon-reindex.png);
+    background-image: url(images/header-icon-reindex.png);
+    background-size: 2.2rem auto;
+    width: 3rem; height: 3rem;
+}
+
+header.main .icon.icon-groups {
+    background-image: url(images/header-icon-groups.png);
+    background-size: 2.2rem auto;
+    width: 3rem; height: 3rem;
+}
+
+header.main .icon.icon-add {
+    width: 3rem; height: 3rem;
+}
+
+header.main .icon.icon-add::after {
+    content: "+";
+    display:block;
+    position:absolute;
+    top:-0.25rem; left:0.7rem;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #fff;
 }
 
 header.main > button,
 header.main > a {
-  position: relative;
-  width: 4.5rem;
-  height: 3rem;
-  background: none;
-  float: left;
-  overflow: visible;
-  margin: 0 -5rem 0 0;
-}
-
-header.main > button:after,
-header.main > a:after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: -1;
-  width: 2.2rem;
-  height: 3rem;
-}
-
-header.main > button .icon,
-header.main > a .icon {
-  display: block;
-  margin: 0;
-  font-size: 0;
+    width: 2.4rem; height: 3rem;
+    margin: 0 0.1rem 0 0;
+    float: left;
 }

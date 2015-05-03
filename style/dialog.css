@@ -1,110 +1,194 @@
+
 section[role="dialog"] {
-    position:absolute; top: 0; left:0;
-    background-color: rgba(0,0,0,.8);
-    width:100%; height:100%;
-    color:#fff; z-index:1000;
-    text-align:center;
+    z-index: 1000;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    color: #fff; text-align: center;
 }
 
 section[role="dialog"] div.main {
-    position:absolute;
-    margin:auto 0;
-    bottom:6.3rem;
-    width:100%;
-    font-weight:bold;
+    position: absolute;
+    bottom: 6.3rem;
+    width: 100%;
 }
 
-section[role="dialog"] div.main p {
-    max-width:90%;
-    margin:0 auto 0.5rem;
-}
-
-section[role="dialog"] div.main input[type=text] {
-    border:1px #444 solid;
-    font-size:1.1rem;
-    padding:0.4rem;
-    width: 88%;
-    background-color: rgba(180,180,180,0.8);
+section[role="dialog"] div.main > p {
+    font-weight: bold;
+    max-width: 90%;
+    margin: 0 auto 0.5rem;
 }
 
 section[role="dialog"] div.buttons {
-    position:absolute;
-    bottom:0; left:0;
-    width:100%;
-    -moz-box-sizing:border-box;
-    padding:0.7rem 0.5rem;
+    -moz-box-sizing: border-box;
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    padding: 0.7rem 0.5rem;
     border-top: 1px #444 solid;
     background-color: rgba(0,0,0,0.5);
 }
 
 section[role="dialog"] div.buttons button {
-    width:45%; border-radius: 0.2rem;
-    margin: 0.3rem 1.2%; padding:0.4rem 0;
-    background-image: linear-gradient(to top, #ccc, #eee);
+    -moz-box-sizing: border-box;
+    width: 46%;
+    margin: 0.3rem 1.2%;
+    padding: 0.4rem 0;
     border: 1px solid #ccc;
+    border-radius: 0.2rem;
+    background-image: linear-gradient(to top, #ccc, #eee);
 }
 
 section[role="dialog"] div.buttons button.cancel {
     background-image: linear-gradient(to top, #700, #a00);
-    border-color:#800; color:#fff;
+    border-color: #800; color: #fff;
 }
 
-section[role="dialog"] div.numpicker input:first-of-type { margin-top:2rem; }
+section[role="dialog"] input[type=text] {
+    -moz-box-sizing: border-box;
+    width: 90%;
+    border: 1px #444 solid;
+    font-size: 1.1rem;
+    padding: 0.4rem;
+    background-color: rgba(180,180,180,0.8);
+}
+
+section[role="dialog"] div.numpicker input:first-of-type { margin-top: 2rem; }
 section[role="dialog"] div.numpicker input {
-    border: 0; border-radius:0; outline:none;
-    background:transparent;
-    border-radius:0;
-    width:80%;height:2.25rem;
+    border: 0; border-radius: 0; outline: none;
+    background: transparent;
+    width: 80%; height: 2.25rem;
 }
-
-section[role="dialog"] div.numpicker input.red::-moz-range-track { background:#f00; }
-section[role="dialog"] div.numpicker input.green::-moz-range-track { background:#0f0; }
-section[role="dialog"] div.numpicker input.blue::-moz-range-track { background:#00f; }
 
 section[role="dialog"] div.numpicker input::-moz-range-track {
-    border: 0; border-radius:0; outline:none; height:1px;
+    border: 0; border-radius: 0; outline: none; height: 1px;
 }
 
+section[role="dialog"] div.numpicker input.red::-moz-range-track { background: #f00; }
+section[role="dialog"] div.numpicker input.green::-moz-range-track { background: #0f0; }
+section[role="dialog"] div.numpicker input.blue::-moz-range-track { background: #00f; }
+
 section[role="dialog"] div.numpicker input::-moz-range-thumb {
-    height:1.2rem; width:1.2rem; border-radius:0.15rem; border:0; background: #fff;
+    height: 1.2rem; width: 1.2rem;
+    border-radius: 0.15rem;
+    border: 0;
+    background: #fff;
 }
 
 section[role="dialog"] div.numpicker div {
-    margin: 1.2rem auto; text-align:center;
+    margin: 1.2rem auto;
+    text-align: center;
 }
 
 section[role="dialog"] div.numpicker.fontpicker div {
     padding: 0.4rem 0.5rem;
-    height:8rem; text-align:left;
-    width:80%; font-weight:normal;
+    height: 8rem; width: 80%;
+    text-align: left;
     background-color: #fff; color: #000;
 }
 
 section[role="dialog"] div.numpicker.colorpicker div {
-    font-size:1.1rem; letter-spacing:0.15rem; line-height:2.25rem;
-    width:70%; height:2.25rem;
+    width: 70%; height: 2.25rem;
+    line-height: 2.25rem;
+    letter-spacing: 0.15rem;
+    font-size: 1.1rem;
 }
 
-/* Progress */
+section[role="dialog"] div.grouppicker {
+    -moz-box-sizing: border-box;
+    max-height: 15rem;
+    overflow: auto;
+    margin: 1rem;
+    box-shadow: inset 0 0 4px 4px #444;
+    border: 1px rgba(200,200,200,0.5) solid;
+    color: #fff;
+}
+
+section[role="dialog"] ul.checklist {
+    padding: 0; margin: 0;
+    list-style: none;
+    overflow: hidden;
+}
+
+section[role="dialog"] ul.checklist li {
+    -moz-box-sizing: border-box;
+    display: block;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0.7rem 38px 0.7rem 1rem;
+    text-align: right;
+}
+
+section[role="dialog"] ul.checklist li p { margin: 0; }
+section[role="dialog"] ul.checklist li.notfound { padding-right: 1rem; }
+section[role="dialog"] ul.checklist li.notfound p { text-align:center; }
+
+section[role="dialog"] ul.checklist label.pack-switch {
+    width: 16px; height: 16px;
+    margin-top: -10px;
+}
+
+section[role="dialog"] ul.checklist label.pack-switch input ~ span:after {
+    width: 16px; height: 16px;
+    margin: -8px 0 0;
+    border: 2px #999 solid;
+    border-radius: 3px;
+    background-color: #999;
+    background-image: none;
+    background-size: 16px 16px;
+    background-position: 0 0;
+}
+
+section[role="dialog"] ul.checklist label.pack-switch input:checked ~ span:after {
+    background-image: url(images/checkmark-light.png);
+}
+
+section[role="dialog"] ul.groups {
+    padding: 0 0 0.3rem; margin: 0;
+    text-align: left;
+}
+
+section[role="dialog"] ul.groups li {
+    -moz-box-sizing: border-box;
+    display: block;
+    position: relative;
+    width: 92%;
+    padding: 0.3rem 40px 0.4rem 30px;
+    margin: 0.3rem 2% 0 5%;
+    list-style: none;
+}
+
+section[role="dialog"] ul.groups li.notfound {
+    padding: 0;
+}
+
+section[role="dialog"] ul.groups li > p {
+    line-height: 1.3rem;
+    padding: 0; margin: 0;
+}
+
 section[role="dialog"] progress[value] {
-   border:none;
-   width:80%; height:0.7rem;
+   border: none;
+   width: 80%; height: 0.7rem;
    background: #fff;
 }
 
 section[role="dialog"] progress[value]::-moz-progress-bar {
-  background: #01c5ed;
-  border-radius: 0;
+    background: #01c5ed;
+    border-radius: 0;
 }
 
 section[role="dialog"] progress:not([value]) {
-  background: url(images/spinner.png) no-repeat center center / 100% auto;
-  animation: 0.9s rotate infinite steps(30);
-  width: 2.9rem;
-  height: 2.9rem;
-  border: none;
-  display: inline-block;
-  vertical-align: middle;
+    background: url(images/spinner.png) no-repeat center center / 100% auto;
+    animation: 0.9s rotate infinite steps(30);
+    width: 2.9rem;
+    height: 2.9rem;
+    border: none;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 section[role="dialog"] progress:not([value])::-moz-progress-bar {
@@ -112,11 +196,11 @@ section[role="dialog"] progress:not([value])::-moz-progress-bar {
 }
 
 @keyframes rotate {
-  from { transform: rotate(1deg); }
-  to   { transform: rotate(360deg); }
+    from { transform: rotate(1deg); }
+    to   { transform: rotate(360deg); }
 }
 
 @keyframes move {
-  from { background-position: 0 0; }
-  to   { background-position: 1rem 0; }
+    from { background-position: 0 0; }
+    to   { background-position: 1rem 0; }
 }

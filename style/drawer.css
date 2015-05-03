@@ -1,11 +1,11 @@
 /* Main region */
 #mainArea {
-  width: 100%;
-  height: 100%;
-  transition: all 0.25s ease;
-  position: relative;
-  z-index: 100;
-  transform: translateX(0%);
+    width: 100%;
+    height: 100%;
+    transition: all 0.25s ease;
+    position: relative;
+    z-index: 100;
+    transform: translateX(0%);
 }
 
 #mainArea > div {
@@ -15,118 +15,80 @@
 }
 
 #mainArea.drawer {
-  transform: translateX(80%);
+    transform: translateX(80%);
+    box-shadow: 0 0 10px 5px rgba(0,0,0,0.8);
 }
 
 #mainArea.drawer:before {
-  display: block;
-  position: absolute;
-  width:100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index:100;
-  content: "";
+    content: "";
+    display: block;
+    position: absolute;
+    width:100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index:110;
 }
 
 /* Sidebar */
 section[data-type="sidebar"] {
-  position: absolute;
-  width: 80%;
-  background-image: url(../icon-60.png), url(images/drawer-pattern.png);
-  background-repeat: no-repeat, repeat;
-  background-position: 10px -4px, top left;
-  height: 100%;
-  top: 0;
-  left: 0;
-  overflow: hidden;
+    position: absolute;
+    top: 0; left: 0;
+    width: 80%; height: 100%;
+    overflow: hidden;
+    color: #fff;
 }
 
 /* Sidebar header */
 section[data-type="sidebar"] > header {
-  position: relative;
-  z-index: 10;
-  height: 45px;
-  color: #fff;
-  background: url(images/drawer-header.png) repeat-x left bottom / 100% auto;
-}
-
-section[data-type="sidebar"] > header:after {
-  content: "";
-  height: 0.3rem;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: url(images/drawer-shadow_header.png) repeat-x left top;
-  background-size: auto 100%;
+    position: absolute;
+    width: 100%; height: 45px;
+    background-image: url(../icon-60.png), url(images/drawer-pattern.png);
+    background-repeat: no-repeat, repeat;
+    background-position: 10px -4px, top left;
 }
 
 section[data-type="sidebar"] > header h1 {
-  font-size: 21px;
-  line-height: 45px;
-  text-align: left;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  display: block;
-  overflow: hidden;
-  margin: 0 0 0 0;
-  height: 100%;
-  padding: 0 0 0 81px;
-  color:#999;
-}
-
-section[data-type="sidebar"]:after {
-  content: "";
-  width: 1rem;
-  background: url(images/drawer-shadow.png) right top repeat-y;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 5;
+    margin: 0;
+    padding: 0 0 0 81px;
+    font-size: 21px;
+    line-height: 45px;
 }
 
 section[data-type="sidebar"] > nav {
-  overflow-y: auto;
-  max-height: 100%;
-  margin-right: -0.8rem;
+    -moz-box-sizing: border-box;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 45px 0 0 0;
+    background: transparent url(images/drawer-pattern.png) repeat top left;
 }
 
-
 section[data-type="sidebar"] > nav > ul {
-  width: 100%;
-  margin: 0;
-  padding: 0;
+    width: 100%;
+    margin: 0; padding: 0;
+    background: transparent url(../icon-60.png) no-repeat 10px -49px;
 }
 
 section[data-type="sidebar"] > nav > ul > li {
-  color: #fff;
-  list-style: none;
-  transition: background 0.2s ease;
+    list-style: none;
+    transition: background 0.2s ease;
 }
 
 section[data-type="sidebar"] > nav > ul > li:active {
-  background: rgba(0,171,204,0.4);
-}
-
-section[data-type="sidebar"] > nav > ul > li.chosen {
-  background: rgba(255,255,255,0.1);
+    background: rgba(0,171,204,0.4);
 }
 
 section[data-type="sidebar"] > nav > ul > li > a {
-  border:0; outline:none;
-  text-decoration: none;
-  color: #fff;
-  font-size: 1.1rem;
-  line-height: 3.2rem;
-  border-bottom: 0.1rem solid #596068;
-  text-indent: 1.5rem;
-  padding-right: 0.8rem;
-  width: 100%;
-  -moz-box-sizing: border-box;
-  display: block;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
+    display: block;
+    -moz-box-sizing: border-box;
+    width: 100%;
+    padding: 0 0.8rem 0 1.5rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    border:0;
+    text-decoration: none;
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 3.2rem;
+    border-bottom: 0.1rem solid #596068;
 }
-
-section[data-type="sidebar"] > nav > ul > li > a:active { border:0; outline:none; }

@@ -7,7 +7,7 @@
 (function (GLOBAL) {
     var transactions = [];
 
-    function historyManager() {
+    function HistoryManager() {
         var cache = [];
 
         function put_data(data) { IdbWrapper.set_history(data); }
@@ -59,7 +59,7 @@
         this.get = function () { return cache.concat().reverse(); }
     }
 
-    function cacheManager() {
+    function CacheManager() {
         var cache = [];
 
         this.add = function (key, did, data) {
@@ -81,10 +81,10 @@
     var DictionaryManager = (function () {
         var cls = function () {
             var aDicts = [], ready = false;
-                oHistoryManager = new historyManager(),
+                oHistoryManager = new HistoryManager(),
                 oCaches = {
-                    "entries": new cacheManager(),
-                    "lookup": new cacheManager()
+                    "entries": new CacheManager(),
+                    "lookup": new CacheManager()
                 };
 
             function dict_by_id(version) {
@@ -95,7 +95,7 @@
                 return result;
             }
 
-            this.init = function () {
+            this.init = function (force_oft_creation) {
                 var dictdata_dirs = [];
 
                 function add_dictionary(n) {
@@ -130,7 +130,7 @@
                     if(n < aDicts.length) {
                         var ver = aDicts[n].version;
                         aDicts[n] = new Dictionary(aDicts[n].files);
-                        aDicts[n].restore(ver).then(function () {
+                        aDicts[n].restore(ver, force_oft_creation).then(function () {
                             load_dictionary(n+1);
                         });
                     } else add_dictionary(0);

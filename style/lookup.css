@@ -1,64 +1,85 @@
+
+section[data-type="list"] ul.matches li.idle {
+    margin: 1rem 0;
+    height: 2.9rem;
+    border: none;
+    background: url(images/spinner.png) no-repeat center center;
+    animation: 0.9s rotate infinite steps(30);
+}
+
+section[data-type="list"] ul.matches span.marker {
+    display: block;
+    float: right;
+    width: 7px; height: 7px;
+    margin-left: 3px;
+}
+
 section[data-type="output"] div.text {
-    background-color:#fff; padding: 0; margin:0 1px 2px;
+    padding: 0; margin: 0 1px 2px;
     border: 2px #000 solid;
 }
 
 section[data-type="output"] div.text h2.dictname {
     overflow: hidden;
     white-space: nowrap;
-    margin:0; padding:0.1em 0.3em;
-    text-align:center;
-    color:#fff; font-size:0.9em;
-    font-weight:normal;
-    background-color:#000;
+    margin: 0; padding: 0.1em 0.3em;
+    text-align: center;
+    font-size: 0.9em;
+    font-weight: normal;
+    color: #fff;
+    background-color: #000;
 }
 
-section[data-type="output"] div.text div.content { margin:0; }
-section[data-type="output"] div.text div.content div { padding: 0.3em 0.4em; }
-
-section[data-type="output"] div.text .button {
-    position:relative;
-    display:none;
+section[data-type="output"] div.text h3.term {
+    margin: 0; padding: 0.1em 0.2em;
+    font-size: 0.9em;
+    font-weight: normal;
+    color: #fff;
+    background-color: #000;
 }
 
-section[data-type="output"] div.text .button div {
-    border: 1px #ccc solid;
-    background-color: #f3f3f3;
-    padding: 0.7rem;
-    text-align:center;
-}
+section[data-type="output"] div.text h3.term b { font-weight: bold; }
+
+section[data-type="output"] div.text div.content > div { padding: 0.3em 0.4em; }
 
 section[data-type="output"] div.text div.content.expandable {
-    overflow:hidden;
-}
-
-section[data-type="output"] div.text .content.expandable ~ .showmore {
-    display:none;
-}
-
-section[data-type="output"] div.text .content.expandable ~ .showless {
-    display:block;
+    overflow: hidden;
 }
 
 section[data-type="output"] div.text .content.expandable.preview {
     max-height: 80px;
 }
 
-section[data-type="output"] div.text .showmore { margin-top: -20px; }
-section[data-type="output"] div.text .showmore::before {
-    content: "";
-    display:block;
-    height:20px;
-    background-position: bottom center;
-    background-image: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.2) 10px, transparent 20px);
+section[data-type="output"] div.text .button {
+    position: relative;
+    display: none;
+}
+
+section[data-type="output"] div.text .button div {
+    border: 1px #ccc solid;
+    background-color: #f3f3f3;
+    padding: 0.7rem;
+    text-align: center;
+}
+
+section[data-type="output"] div.text .showmore {
+    box-shadow: 0 0 9px 3px rgba(0,0,0,0.6);
+}
+
+section[data-type="output"] div.text .content.expandable ~ .showmore {
+    display: none;
+}
+
+section[data-type="output"] div.text .content.expandable ~ .showless {
+    display: block;
 }
 
 section[data-type="output"] div.text .content.expandable.preview ~ .showmore {
-    display:block;
+    display: block;
 }
 
 section[data-type="output"] div.text .content.expandable.preview ~ .showless {
-    display:none;
+    display: none;
 }
 
 section[data-type="output"] div.text div.content ol,
@@ -66,18 +87,18 @@ section[data-type="output"] div.text div.content ul,
 section[data-type="output"] div.text div.content dl,
 section[data-type="output"] div.text div.content dt,
 section[data-type="output"] div.text div.content dd {
-    margin:0; padding:0;
+    margin: 0; padding: 0;
 }
 
 section[data-type="output"] div.text div.content dt {
-    color: #8B4513; margin-bottom:0.2em;
+    color: #8B4513; margin-bottom: 0.2em;
 }
 section[data-type="output"] div.text div.content a {
     color: #0044AA;
 }
 
 section[data-type="output"] div.text div.content li {
-    margin:0 0 0 2em; padding:0;
+    margin: 0 0 0 2em; padding: 0;
 }
 
 section[data-type="output"] div.text div.content p {
@@ -91,59 +112,22 @@ section[data-type="output"] div.text div.content h4,
 section[data-type="output"] div.text div.content h5,
 section[data-type="output"] div.text div.content h6 {
     font-weight: bold;
-    padding:0; margin: 0.3em 0;
+    padding: 0; margin: 0.3em 0;
 }
 
 section[data-type="output"] div.text div.content i {
-    color:#841;
+    color: #841;
 }
 
 section[data-type="output"] div.text div.content blockquote p {
-    margin-top:0.2em; padding:0; color:#000;
+    margin-top: 0.2em; padding: 0; color: #000;
 }
 
 section[data-type="output"] div.text div.content blockquote {
-    margin:0.2em 0.7em; padding:0; font-style:italic;
-    color:#00006E;
+    margin: 0.2em 0.7em; padding: 0; font-style: italic;
+    color: #00006E;
 }
 
-section[data-type="output"] div.text h3.term {
-    font-size:0.9em; font-weight:normal;
-    margin:0; padding:0.1em 0.2em;
-    background-color:#000; color:#fff;
-}
-
-section[data-type="output"] div.text h3.term b {
-    font-weight:bold;
-}
-
-section[data-type="output"] div.text img {
-    max-width:100%;
-}
-
-section[data-type="list"] ul.matches a {
-  text-decoration: none;
-  color: #000;
-  display: block;
-  border: none;
-  outline: none;
-}
-
-section[data-type="list"] ul.matches a:hover,
-section[data-type="list"] ul.matches a:active {
-    background-color: #fff7df;
-}
-
-section[data-type="list"] ul.matches span.marker {
-    display:block;
-    width:7px; height:7px;
-    margin-left:3px;
-    float:right;
-}
-
-section[data-type="list"] ul.matches li.idle {
-  background: url(images/spinner.png) no-repeat center center;
-  animation: 0.9s rotate infinite steps(30);
-  height: 2.9rem;
-  border: none; margin: 1rem 0;
+section[data-type="output"] div.text div.content img {
+    max-width: 100%;
 }

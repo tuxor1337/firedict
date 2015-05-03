@@ -2,6 +2,9 @@
     <a data-ng-click="toggleSidebar($event)">
         <span class="icon icon-menu">show/hide sidebar</span>
     </a>
+    <menu type="toolbar" data-ng-if="type == 'lookup'">
+        <a data-ng-click="onGroupButton()"><span class="icon icon-groups">groups</span></a>
+    </menu>
     <form role="search" data-ng-show="type == 'lookup'">
         <input type="text" data-ng-moz-l10n="lookup-dots" placeholder="Lookup..."
                data-ng-model="searchTerm" data-ng-focus="onFocus()" />
@@ -9,6 +12,9 @@
     </form>
     <menu type="toolbar" data-ng-if="type == 'manage'">
         <a data-ng-click="onReindex()"><span class="icon icon-reindex">reindex</span></a>
+    </menu>
+    <menu type="toolbar" data-ng-if="type == 'groups'">
+        <a data-ng-click="onAdd()"><span class="icon icon-add">add</span></a>
     </menu>
     <h1 data-ng-moz-l10n="{{text}}"></h1>
 </header>
