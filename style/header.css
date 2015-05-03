@@ -116,17 +116,9 @@ header.main .icon.icon-groups {
 }
 
 header.main .icon.icon-add {
+    background-image: url(images/header-icon-add.png);
+    background-size: 2.2rem auto;
     width: 3rem; height: 3rem;
-}
-
-header.main .icon.icon-add::after {
-    content: "+";
-    display:block;
-    position:absolute;
-    top:-0.25rem; left:0.7rem;
-    font-size: 3rem;
-    font-weight: bold;
-    color: #fff;
 }
 
 header.main > button,
