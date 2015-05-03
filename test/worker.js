@@ -24,32 +24,27 @@ function random_color() {
             .toString(16).substr(1,2);
     return result;
 }
-    
+
 var transactions = [],
     queryableFunctions = {
         init: function (obj) {
             var result = [],
                 testnames = [
-                    "WAHRIG.digital - Deutsches Wörterbuch",
-                    "Dictionnaires de l’Académie française : 8ème édition ",
+                    "Dictionnaires de l’Académie française: 8ème édition ",
+                    "Etymologisches Wörterbuch © Dr. Wolfgang Pfeifer",
                     "Georges: Kleines deutsch-lateinisches Handwörterbuch (1910)",
                     "Georges: Ausführliches lateinisch-deutsches Handwörterbuch (1913-1918)",
                     "Online Etymology Dictionary, ©Douglas Harper/etymonline.com",
                     "Folkets lexikon En-Sv, ©folkets-lexikon.csc.kth.se",
+                    "Oxford Dictionaries Online - British & World English",
                     "Folkets lexikon Sv-En, ©folkets-lexikon.csc.kth.se",
                     "Pape: Handwörterbuch der griechischen Sprache (1914)",
                     "XMLittré, ©littre.org",
-                    "Gran Diccionario de la Lengua Española LAROUSSE",
-                    "Handwörterbuch Deutsch-Englisch",
-                    "Handwörterbuch Englisch-Deutsch",
-                    "PONS Universelles Wörterbuch Deutsch-Spanisch",
-                    "PONS Universelles Wörterbuch Deutsch-Französisch",
-                    "PONS Universelles Wörterbuch Deutsch-Italienisch",
-                    "PONS Universelles Wörterbuch Spanisch-Deutsch",
-                    "PONS Universelles Wörterbuch Französisch-Deutsch",
-                    "PONS Universelles Wörterbuch Italienisch-Deutsch",
-                    "SOED",
-                    "CIA World Factbook 2005"
+                    "GNU Collaborative International Dictionary of English",
+                    "The World Factbook 2014",
+                    "The American Heritage Dictionary of the English Language, Fifth Edition",
+                    "Diccionario de la lengua española: 22a edición"
+
                 ];
             for(var i = 0; i < testnames.length; i++) {
                 result.push({ alias: testnames[i], version: 2*i, rank: i, color: random_color(), active: true });
@@ -58,16 +53,32 @@ var transactions = [],
         },
         lookup: function (obj) {
             obj.reply([
-                { term: "Testterm", entries: [ ["Testterm", [0,0], 2], ["Testterm", [0,0], 4] ] },
-                { term: "Testterm3", entries: [ ["Testterm3", [0,0], 2], ["Testterm3", [0,0], 8] ] },
-                { term: "Testterm2", entries: [ ["Testterm2", [0,0], 6], ["Testterm2", [0,0], 4] ] }
+                { term: "hand", entries: [ ["hand", [0,0], 8], ["Hand", [0,0], 2], ["hand", [0,0], 12] ] },
+                { term: "trop", entries: [ ["trop", [0,0], 18], ["trop", [0,0], 0] ] },
+                { term: "ἁγαθός", entries: [ ["ἁγαθός", [0,0], 16] ] }
             ]);
         },
         entry: function (obj) {
             obj.reply([
-                { term: "Testterm2a", data: [{ type: "m", content: "Hello World!" }], did: 4 },
-                { term: "Testterm2a", data: [{ type: "h", content: "Hello World!" }], did: 8 },
-                { term: "Testterm2a", data: [{ type: "m", content: "Hello World!" }], did: 6 }
+                { term: "git", data: [{
+                    type: "m",
+                    content: "Hello World! This is <b>injected HTML</b>."
+                }], did: 20 },
+                { term: "origin", data: [{
+                    type: "h",
+                    content: "Hello World! This markup is okay: <b>test</b>."
+                }], did: 8 },
+                { term: "master", data: [{
+                        type: "h",
+                        content: "<dt>Hello World!</dt> <dd>"
+                            + "<p>I'm an entry with a lot of text.</p>"
+                            + "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+                            + "Donec a diam lectus. Sed amet mauris. Maecenas congue "
+                            + "ligula ac quam viverra.</p>"
+                            + "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+                            + "Donec a diam lectus. Sed amet mauris. Maecenas congue "
+                            + "ligula ac quam viverra.</p></dd>"
+                }], did: 6 }
             ]);
         },
         clear_history: function (obj) {
@@ -102,7 +113,7 @@ var transactions = [],
     };
 
 onmessage = function (oEvent) {
-    if (oEvent.data instanceof Object 
+    if (oEvent.data instanceof Object
         && oEvent.data.hasOwnProperty("bk4e1h0")
         && oEvent.data.hasOwnProperty("df65d4e")
         && oEvent.data.hasOwnProperty("ktp3fm1")) {
