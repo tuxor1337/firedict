@@ -182,6 +182,23 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             });
         };
 
+        $scope.pick_word = function ($event) {
+            wordpicker_wrap($event.originalEvent);
+            ngDialog.open({
+                type: "wordpicker",
+                range: $event.currentTarget.innerHTML,
+                l20n: {
+                    text: "dialog-pick-word"
+                },
+                value: "",
+                callbk: function (picked) {
+                    if(picked === null) return;
+                    $scope.show_entry(picked);
+                }
+            });
+            wordpicker_unwrap($event.currentTarget);
+        };
+
         $scope.show_entry = function(matchObj) {
             $scope.idle = true;
             $scope.matches = [];

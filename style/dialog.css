@@ -55,50 +55,75 @@ section[role="dialog"] input[type=text] {
     background-color: rgba(180,180,180,0.8);
 }
 
-section[role="dialog"] div.numpicker {
+section[role="dialog"] div.picker {
     position: absolute;
     top: 3.5rem; bottom: 1rem;
     left: 1rem; right: 1rem;
 }
 
-section[role="dialog"] div.numpicker input {
+section[role="dialog"] div.picker input {
     border: 0; border-radius: 0; outline: none;
     background: transparent;
     width: 80%; height: 1.2rem;
 }
 
-section[role="dialog"] div.numpicker input::-moz-range-track {
+section[role="dialog"] div.picker input::-moz-range-track {
     border: 0; border-radius: 0; outline: none; height: 1px;
 }
 
-section[role="dialog"] div.numpicker input.red::-moz-range-track { background: #f00; }
-section[role="dialog"] div.numpicker input.green::-moz-range-track { background: #0f0; }
-section[role="dialog"] div.numpicker input.blue::-moz-range-track { background: #00f; }
+section[role="dialog"] div.picker input.red::-moz-range-track { background: #f00; }
+section[role="dialog"] div.picker input.green::-moz-range-track { background: #0f0; }
+section[role="dialog"] div.picker input.blue::-moz-range-track { background: #00f; }
 
-section[role="dialog"] div.numpicker input::-moz-range-thumb {
+section[role="dialog"] div.picker input::-moz-range-thumb {
     height: 1.2rem; width: 1.2rem;
     border-radius: 0.15rem;
     border: 0;
     background: #fff;
 }
 
-section[role="dialog"] div.numpicker div {
+section[role="dialog"] div.picker > div {
     -moz-box-sizing: border-box;
     width: 100%;
     position: absolute;
     top: 2.5rem; bottom: 0;
     padding: 0.4rem 0.5rem;
+    overflow: auto;
     text-align: left;
     background-color: #fff; color: #000;
 }
 
-section[role="dialog"] div.numpicker.colorpicker { line-height: 2rem; }
+section[role="dialog"] div.picker.colorpicker { line-height: 2rem; }
 
-section[role="dialog"] div.numpicker.colorpicker div {
+section[role="dialog"] div.picker.colorpicker > div {
     top: 6rem;
     padding: 0 0.3rem;
     line-height: 1.2rem;
     color: rgba(50,50,50,0.8);
+}
+
+section[role="dialog"] div.picker.wordpicker > p.picked {
+    margin: 0 auto; padding: 0;
+    width: 70%; height: 1.5rem;
+    line-height: 1.5rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-radius: 0.2rem;
+    text-align: center;
+    background-color: rgba(220,220,220,0.8);
+    color: #000;
+    font-weight:bold;
+}
+
+section[role="dialog"] div.picker.wordpicker > div.content {
+    font-size: 1.1rem;
+}
+
+section[role="dialog"] div.picker.wordpicker > div.content span.picked {
+    padding: 0.2em;
+    border-radius: 0.1em;
+    background-color: #ff4;
 }
 
 section[role="dialog"] div.grouppicker {
@@ -167,9 +192,8 @@ section[role="dialog"] ul.groups li {
     list-style: none;
 }
 
-section[role="dialog"] ul.groups li.notfound {
-    padding: 0;
-}
+section[role="dialog"] ul.groups li.notfound { display:none; }
+section[role="dialog"] ul.groups li.all { display:block; }
 
 section[role="dialog"] ul.groups li > p {
     line-height: 1.3rem;

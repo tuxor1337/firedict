@@ -148,3 +148,5 @@ ul.groups div.group-colors span.marker {
     width: 7px; height: 7px;
     margin-right: 2px;
 }
+
+ul.groups li.all { display: none; }

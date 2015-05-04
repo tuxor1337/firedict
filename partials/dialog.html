@@ -2,21 +2,26 @@
     <div class="main">
         <p data-ng-moz-l10n="{{modal.l20n.text}}"></p>
         <input type="text" data-ng-if="modal.type == 'prompt'" data-ng-model="modal.result" />
-        <div ng-if="modal.type == 'color'" class="numpicker colorpicker">
+        <div data-ng-if="modal.type == 'color'" class="picker colorpicker">
             <input type="range" data-ng-model="modal.result[0]" min="0" max="255" class="red" /><br />
             <input type="range" data-ng-model="modal.result[1]" min="0" max="255" class="green" /><br />
-            <input type="range" data-ng-model="modal.result[2]" min="0" max="255" class="blue" /><br />
+            <input type="range" data-ng-model="modal.result[2]" min="0" max="255" class="blue" />
             <div data-ng-style="{'background-color':'rgb('+modal.result[0]+','+modal.result[1]+','+modal.result[2]+')'}">
                 <span data-ng-moz-l10n="preview">Preview</span>
             </div>
         </div>
-        <div ng-if="modal.type == 'fontsize'" class="numpicker fontpicker">
-            <input type="range" data-ng-model="modal.result" min="{{modal.range[0]}}" max="{{modal.range[1]}}" /><br />
+        <div data-ng-if="modal.type == 'fontsize'" class="picker">
+            <input type="range" data-ng-model="modal.result" min="{{modal.range[0]}}" max="{{modal.range[1]}}" />
             <div data-ng-style="{'font-size':modal.result/100.0+'rem'}">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 Donec a diam lectus. Sed amet mauris. Maecenas congue
                 ligula ac quam viverra.
             </div>
+        </div>
+        <div data-ng-if="modal.type == 'wordpicker'"
+             data-ng-wordpicker=""
+             data-markup="modal.range"
+             data-picked="modal.result">
         </div>
         <div ng-if="modal.type == 'group_membership'" class="grouppicker">
             <ul class="checklist">
@@ -32,7 +37,7 @@
                 </li>
             </ul>
         </div>
-        <div ng-if="modal.type == 'grouppicker'" class="grouppicker">
+        <div data-ng-if="modal.type == 'grouppicker'" class="grouppicker">
             <ul data-ng-grouppicker="" data-selectable="false"></ul>
         </div>
         <progress data-ng-if="modal.type == 'progress' &amp;&amp; modal.result.length &gt;= 2"
