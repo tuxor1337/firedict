@@ -53,3 +53,4 @@ along with FireDict (see `COPYING`).  If not, see <http://www.gnu.org/licenses/>
 
 However, FireDict is heavily based on third-party code that is listed in
 `LICENSE.3rd-party` along with its corresponding authors and licenses.
+
