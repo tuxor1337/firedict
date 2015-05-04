@@ -33,6 +33,7 @@
                         data-ng-render-term="{{entry.term}}"></h3>
                     <div class="content preview">
                         <div data-ng-repeat="dt in entry.data"
+                             data-ng-click="pick_word($event)"
                              data-compile="render_content(dt, dict.version)">
                        </div>
                     </div>

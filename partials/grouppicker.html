@@ -1,4 +1,13 @@
 <ul class="groups manage">
+    <li class="all" data-ng-class="all_active()">
+        <div class="group-colors">
+            <span data-ng-repeat="dict in dictionaries() | orderBy: 'rank'"
+                  data-ng-style="{'background-color':dictColor(dict)}"
+                  class="marker"></span>
+        </div>
+        <div class="color" data-ng-click="all_active(true)"></div>
+        <p data-ng-moz-l10n="groups-all-dicts"></p>
+    </li>
     <li data-ng-if="groups.list.length == 0" class="notfound">
         <p data-ng-moz-l10n="groups-no-groups"></p>
     </li>

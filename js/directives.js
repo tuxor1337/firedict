@@ -39,6 +39,31 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
         templateUrl: "partials/header.html"
     };
 })
+.directive("ngWordpicker", ["$rootScope", "dictProvider", "ngDialog",
+    function ($rootScope, dictProvider, ngDialog) {
+        return {
+            replace: true,
+            restrict: "A",
+            scope: {
+                "markup": '=markup',
+                "picked": '='
+            },
+            link: function ($scope, $element, $attrs) {
+                var content = $element.find("div.content")[0];
+                $scope.$watch(
+                function () { return $(content).find(".picked").text(); },
+                function (value) {
+                    $scope.picked = value
+                    .replace(/[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*$/,'')
+                    .replace(/^[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*/,'');
+                });
+                $scope.pick_word = function ($event) {
+                    wordpicker_wrap($event.originalEvent);
+                };
+            },
+            templateUrl: "partials/wordpicker.html"
+        };
+}])
 .directive("ngGrouppicker", ["$rootScope", "dictProvider", "ngDialog",
     function ($rootScope, dictProvider, ngDialog) {
         return {
@@ -63,6 +88,24 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                     return function (dict) {
                         return dictProvider.groups.members(group).indexOf(dict.version) >= 0;
                     };
+                };
+                $scope.all_active = function (bol) {
+                    var aDicts = dictProvider.dictionaries();
+                    function is_active() {
+                        var result = 0;
+                        aDicts.forEach(function (dict) {
+                            if(dict.active) result += 1;
+                        });
+                        if(result == 0) return "inactive";
+                        if(result < aDicts.length) return "";
+                        return "active";
+                    }
+                    var target = false;
+                    if(typeof bol === "undefined") return is_active();
+                    else {
+                        if(is_active() === "inactive") target = true;
+                        aDicts.forEach(function (dict) { dict.active = target; });
+                    }
                 };
                 $scope.remove = function (group) {
                     ngDialog.open({
@@ -285,13 +328,19 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
             },
             function(value) {
                 element.html(value);
+                var c_div = $(element).parents(".content"),
+                    picked_el = $(element).find(".picked");
                 if(localStorage.getItem("settings-expandable") != "false") {
-                    var content_div = $(element).parents(".content");
-                    if(content_div[0].scrollHeight > 150) {
-                        content_div.addClass("expandable");
+                    if(c_div.length > 0 && c_div[0].scrollHeight > 150) {
+                        c_div.addClass("expandable");
                     }
                 }
                 $compile(element.contents())(scope);
+                if($(element).parents(".wordpicker").length > 0) {
+                    if(picked_el.length > 0) {
+                        element[0].scrollTop = picked_el[0].offsetTop;
+                    } else element[0].scrollTop = 0;
+                }
                 ensureCompileRunsOnce();
             }
         );

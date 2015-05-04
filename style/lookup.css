@@ -40,9 +40,9 @@ section[data-type="output"] div.text h3.term {
 
 section[data-type="output"] div.text h3.term b { font-weight: bold; }
 
-section[data-type="output"] div.text div.content > div { padding: 0.3em 0.4em; }
+section[data-type="output"] div.text .content > div { padding: 0.3em 0.4em; }
 
-section[data-type="output"] div.text div.content.expandable {
+section[data-type="output"] div.text .content.expandable {
     overflow: hidden;
 }
 
@@ -63,7 +63,7 @@ section[data-type="output"] div.text .button div {
 }
 
 section[data-type="output"] div.text .showmore {
-    box-shadow: 0 0 9px 3px rgba(0,0,0,0.6);
+    box-shadow: 0 -3px 4px rgba(0,0,0,0.6);
 }
 
 section[data-type="output"] div.text .content.expandable ~ .showmore {
@@ -82,52 +82,53 @@ section[data-type="output"] div.text .content.expandable.preview ~ .showless {
     display: none;
 }
 
-section[data-type="output"] div.text div.content ol,
-section[data-type="output"] div.text div.content ul,
-section[data-type="output"] div.text div.content dl,
-section[data-type="output"] div.text div.content dt,
-section[data-type="output"] div.text div.content dd {
+div.content ol,
+div.content ul,
+div.content dl,
+div.content dt,
+div.content dd {
     margin: 0; padding: 0;
 }
 
-section[data-type="output"] div.text div.content dt {
+div.content dt {
     color: #8B4513; margin-bottom: 0.2em;
 }
-section[data-type="output"] div.text div.content a {
+div.content a {
     color: #0044AA;
 }
 
-section[data-type="output"] div.text div.content li {
+div.content li {
     margin: 0 0 0 2em; padding: 0;
 }
 
-section[data-type="output"] div.text div.content p {
+div.content p {
     margin: 0 0 0.3em; padding: 0;
 }
 
-section[data-type="output"] div.text div.content h1,
-section[data-type="output"] div.text div.content h2,
-section[data-type="output"] div.text div.content h3,
-section[data-type="output"] div.text div.content h4,
-section[data-type="output"] div.text div.content h5,
-section[data-type="output"] div.text div.content h6 {
+div.content h1,
+div.content h2,
+div.content h3,
+div.content h4,
+div.content h5,
+div.content h6 {
     font-weight: bold;
     padding: 0; margin: 0.3em 0;
 }
 
-section[data-type="output"] div.text div.content i {
+div.content i {
     color: #841;
 }
 
-section[data-type="output"] div.text div.content blockquote p {
+div.content blockquote p {
     margin-top: 0.2em; padding: 0; color: #000;
 }
 
-section[data-type="output"] div.text div.content blockquote {
+div.content blockquote {
     margin: 0.2em 0.7em; padding: 0; font-style: italic;
     color: #00006E;
 }
 
-section[data-type="output"] div.text div.content img {
+div.content img {
     max-width: 100%;
 }
+
