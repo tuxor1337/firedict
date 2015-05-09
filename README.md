@@ -3,17 +3,10 @@ firedict
 
 A simple offline dictionary software for Firefox OS
 
-![screenshot0](https://raw.github.com/tuxor1337/firedict/master/screen0.png "drawer") #
-![screenshot1](https://raw.github.com/tuxor1337/firedict/master/screen1.png "list of matches")
+![screenshot1](https://raw.github.com/tuxor1337/firedict/master/screen1.png "list of matches") # 
+![screenshot2](https://raw.github.com/tuxor1337/firedict/master/screen2.png "displaying an entry")
 
-![screenshot2](https://raw.github.com/tuxor1337/firedict/master/screen2.png "displaying an entry") #
-![screenshot3](https://raw.github.com/tuxor1337/firedict/master/screen3.png "choosing the groups")
-
-![screenshot4](https://raw.github.com/tuxor1337/firedict/master/screen4.png "managing dictionaries") #
-![screenshot5](https://raw.github.com/tuxor1337/firedict/master/screen5.png "moving dictionaries around")
-
-![screenshot6](https://raw.github.com/tuxor1337/firedict/master/screen6.png "managing groups") #
-![screenshot7](https://raw.github.com/tuxor1337/firedict/master/screen7.png "settings")
+See the files `screen*.png` for more screenshots.
 
 localization
 ------------
