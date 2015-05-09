@@ -19,6 +19,10 @@ section[data-type="output"] div.text {
     border: 2px #000 solid;
 }
 
+section[data-type="output"] div.text > div {
+    overflow: hidden;
+}
+
 section[data-type="output"] div.text h2.dictname {
     overflow: hidden;
     white-space: nowrap;
@@ -42,10 +46,6 @@ section[data-type="output"] div.text h3.term b { font-weight: bold; }
 
 section[data-type="output"] div.text .content > div { padding: 0.3em 0.4em; }
 
-section[data-type="output"] div.text .content.expandable {
-    overflow: hidden;
-}
-
 section[data-type="output"] div.text .content.expandable.preview {
     max-height: 80px;
 }
@@ -56,14 +56,12 @@ section[data-type="output"] div.text .button {
 }
 
 section[data-type="output"] div.text .button div {
-    border: 1px #ccc solid;
-    background-color: #f3f3f3;
-    padding: 0.7rem;
+    border: none;
+    border-radius:1rem;
+    background-color: rgba(230,230,230,0.95);
+    padding: 0.7rem 0.5rem;
     text-align: center;
-}
-
-section[data-type="output"] div.text .showmore {
-    box-shadow: 0 -3px 4px rgba(0,0,0,0.6);
+    margin: 0 0.5rem 0.2rem;
 }
 
 section[data-type="output"] div.text .content.expandable ~ .showmore {

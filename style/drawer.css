@@ -44,6 +44,7 @@ section[data-type="sidebar"] > header {
     background-image: url(../icon-60.png), url(images/drawer-pattern.png);
     background-repeat: no-repeat, repeat;
     background-position: 10px -4px, top left;
+    box-shadow: 0 -2px 7px 3px rgba(0,0,0,0.4);
 }
 
 section[data-type="sidebar"] > header h1 {

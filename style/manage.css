@@ -1,11 +1,7 @@
 
 [data-type="list"] > ul.manage > li {
     min-height: 40px;
-    padding: 0.7rem 42px 0.6rem 25px;
-}
-
-[data-type="list"] > ul.manage > li.selected {
-    background-color: #fff7df;
+    padding: 0.7rem 45px 0.6rem 25px;
 }
 
 [data-type="list"] > ul.manage > li > p {
@@ -43,9 +39,6 @@ ul.manage > li > div.buttons button {
     width:49%;
     margin: 0;
     padding: 0.3rem 0.1rem;
-    border: 1px solid #ddd;
-    border-radius: 0.2rem;
-    background-image: linear-gradient(to top, #eee, #fff);
 }
 ul.manage > li > div.buttons button:first-of-type {
     float:left;
@@ -60,8 +53,8 @@ ul.manage > li > div.buttons button:nth-child(3) {
 ul.manage > li > div.color {
     position:absolute;
     top: 50%; right: 5px;
-    width: 20px; height: 20px;
-    margin-top:-14px;
+    width: 24px; height: 24px;
+    margin-top:-15px;
     font-size: 0; line-height: 0;
     border: 3px #000 solid;
     border-radius:7px;
