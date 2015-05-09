@@ -1,12 +1,24 @@
 firedict
 ========
 
-A simple offline dictionary software for Firefox OS
+A simple offline dictionary software for Firefox OS and Firefox for Android
+
+Currently, only StarDict dictionaries are supported. Users can organize many
+dictionaries by renaming, coloring, reordering them and by classifying them in
+groups. The last 20 terms that have been looked up are stored and can be accessed
+directly from the start screen.
+
+The user interface can be customized. Users can change the font size of dictionary
+entries or force all dictionary colors to be greyscale. Furthermore, long entries
+can be truncated by default.
+
+screenshots
+-----------
+
+See the files `screen*.png` for more screenshots.
 
 ![screenshot1](https://raw.github.com/tuxor1337/firedict/master/screen1.png "list of matches") # 
 ![screenshot2](https://raw.github.com/tuxor1337/firedict/master/screen2.png "displaying an entry")
-
-See the files `screen*.png` for more screenshots.
 
 localization
 ------------
