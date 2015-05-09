@@ -1,7 +1,7 @@
 {
   "name": "FireDict",
   "description": "A simple offline dictionary app in the spirit of ColorDict and GoldenDict. It scans for StarDict dictionaries stored in subdirectories of the sdcard's <b>dictdata</b> directory.",
-  "version": "1.4",
+  "version": "1.4.1",
   "default_locale": "en",
   "locales": {
     "de": {
