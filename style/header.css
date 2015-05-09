@@ -97,27 +97,31 @@ header.main .icon {
     overflow: hidden;
 }
 
+/* *
+ *
+ * Don't specify a background size for the
+ * icons, because they look blurry when resized.
+ *
+ *     background-size: 2.2rem auto;
+ */
+
 header.main .icon.icon-menu {
     background-image: url(images/header-icon-menu.png);
-    background-size: 2.4rem auto;
     width: 2.6rem; height: 3rem;
 }
 
 header.main .icon.icon-reindex {
     background-image: url(images/header-icon-reindex.png);
-    background-size: 2.2rem auto;
     width: 3rem; height: 3rem;
 }
 
 header.main .icon.icon-groups {
     background-image: url(images/header-icon-groups.png);
-    background-size: 2.2rem auto;
     width: 3rem; height: 3rem;
 }
 
 header.main .icon.icon-add {
     background-image: url(images/header-icon-add.png);
-    background-size: 2.2rem auto;
     width: 3rem; height: 3rem;
 }
 
