@@ -48,3 +48,7 @@ Author: Google, Inc.
 URL: http://angularjs.org
 License: MIT - https://github.com/angular/angular.js/blob/master/LICENSE
 
+`style/fonts/firasans.woff`, `style/fonts/firasans-light.woff`, `style/fonts/firasans-medium.woff`
+Author: Erik Spiekermann, The Mozilla Foundation and Telefonica S.A.
+URL: https://github.com/mozilla/Fira
+License: SIL OPEN FONT LICENSE Version 1.1
