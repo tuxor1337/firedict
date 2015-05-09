@@ -33,7 +33,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 value: dict.alias,
                 callbk: function (alias) {
                     if(alias !== null) dict.alias = alias;
-                }
+                },
+                validate: function (alias) { return alias != ""; }
             });
         };
         $scope.setColor = function (dict) {
@@ -120,7 +121,8 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 value: "",
                 callbk: function (alias) {
                     if(alias !== null) dictProvider.groups.new_group(alias);
-                }
+                },
+                validate: function (alias) { return alias != ""; }
             });
         };
     }
@@ -212,8 +214,14 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             $scope.search_term = term;
             dictProvider.worker.query("entry", entr)
             .then(function (entries) {
-                $rootScope.showingEntry = true;
-                $scope.entries = entries;
+                $scope.idle = false;
+                if(entries.length > 0) {
+                    $rootScope.showingEntry = true;
+                    $scope.entries = entries;
+                } else {
+                    $rootScope.showingEntry = false;
+                    $scope.lookup_enterpressed();
+                }
                 if(!$scope.$$phase) { $scope.$apply(); }
             });
         };

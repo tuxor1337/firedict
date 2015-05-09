@@ -129,7 +129,8 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                         value: group,
                         callbk: function (alias) {
                             if(alias !== null) dictProvider.groups.rename_group(group, alias);
-                        }
+                        },
+                        validate: function (alias) { return alias != ""; }
                     });
                 };
                 $scope.setMembers = function (group) {
@@ -394,7 +395,8 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
               range: null,
               l20n: null,
               value: null,
-              callbk: null
+              callbk: null,
+              validate: null
             },
             defaults_l20n = {
               text: "",
@@ -403,7 +405,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
             },
             body = $document.find("body"),
             modalEl = angular.element('<div ng:dialog data="modal"></div>'),
-            closeFn = function () { set_opts(defaults); },
+            validateFn = function () { return true; },
             $scope = $rootScope.$new();
 
         function set_opts(options) {
@@ -411,6 +413,11 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                 options.value = [];
             options = angular.extend({}, defaults, options);
             if(options.type == "confirm") options.value = true;
+            if(options.type == "prompt") {
+                window.screen.mozLockOrientation("portrait-primary");
+            } else {
+                window.screen.mozUnlockOrientation();
+            }
             if(options.l20n instanceof Object)
                 options.l20n = angular.extend({}, defaults_l20n, options.l20n);
             $scope.modal = {
@@ -421,15 +428,19 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                 text: options.text,
                 l20n: options.l20n,
                 callbk: function (result) {
-                    var callFn = options.callbk || closeFn;
+                    var callFn = options.callbk || validateFn;
                     callFn(result);
                     $scope.$modalClose();
+                },
+                validate: function (result) {
+                    var callFn = options.validate || validateFn;
+                    return callFn(result);
                 }
             };
             if(!$scope.$$phase) { $scope.$apply(); }
         }
 
-        $scope.$modalClose = closeFn;
+        $scope.$modalClose = function () { set_opts(defaults); };
         set_opts(defaults);
         $compile(modalEl)($scope);
         body.append(modalEl);
