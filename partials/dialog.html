@@ -47,6 +47,7 @@
     </div>
     <div data-ng-if="modal.type != 'progress'" class="buttons">
         <button data-ng-click="modal.callbk(modal.result)"
+                data-ng-disabled="!modal.validate(modal.result)"
                 data-ng-moz-l10n="{{modal.l20n.success}}"></button>
         <button data-ng-if="modal.l20n.cancel !== ''"
                 data-ng-click="modal.callbk(null)" class="cancel"
