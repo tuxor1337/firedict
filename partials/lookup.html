@@ -29,7 +29,7 @@
                     data-ng-style="{'background-color':dictColor(dict)}">{{dict.alias}}</h2>
                 <div data-ng-repeat="entry in entries | filter:{ did: dict.version }:true | orderBy:termOrderFn">
                     <h3 class="term"
-                        data-ng-style="{'background-color':dictColor(dict)}"
+                        data-ng-style="{'border-color':dictColor(dict)}"
                         data-ng-render-term="{{entry.term}}"></h3>
                     <div class="content preview">
                         <div data-ng-repeat="dt in entry.data"

@@ -108,7 +108,7 @@
                                 add_dictionary(n+1);
                             });
                         } catch (err) {
-                            console.log(err.message);
+                            console.debug(err.message);
                             add_dictionary(n+1);
                         }
                     } else {
@@ -146,7 +146,7 @@
                                 return;
                             }
                         }
-                        console.log("Zombie: " + aDicts[n].path);
+                        console.debug("Zombie: " + aDicts[n].path);
                         oHistoryManager.clear(aDicts[n].version);
                         IdbWrapper.remove_dictionary(aDicts[n].version)
                         .then(function () {
@@ -183,9 +183,9 @@
             };
 
             this.lookup_fuzzy = function (term) {
-                if(!ready) return [];
+                if(!ready) Promise.resolve([]);
 
-                console.log("DictionaryManager: lookup_fuzzy(" + term + ")");
+                console.debug("DictionaryManager: lookup_fuzzy(" + term + ")");
 
                 var matches = [];
                 function add_matches(raw_matches) {
@@ -208,14 +208,14 @@
                             query("lookup_continue", { term: term })
                             .then(function (bool) {
                                 if(!bool)
-                                    console.log("lookup_fuzzy("
+                                    console.debug("lookup_fuzzy("
                                         + term + ") request canceled");
                                 else {
                                     if(aDicts[d].meta().active) {
                                         var short_name = aDicts[d].meta().alias;
                                         if(short_name.length > 10)
                                             short_name = short_name.substring(0,10) + "...";
-                                        console.log("lookup_fuzzy(" + term + ") in `"
+                                        console.debug("lookup_fuzzy(" + term + ") in `"
                                             + short_name + "`");
 
                                         var cached_matches = oCaches["lookup"].get(term,d);
@@ -223,9 +223,9 @@
                                             cached_matches = aDicts[d].lookup(term, true);
                                             oCaches["lookup"].add(term, d, cached_matches);
                                         } else {
-                                            console.log("...from cache...");
+                                            console.debug("...from cache...");
                                         }
-                                        console.log("... " + cached_matches.length + " matches");
+                                        console.debug("... " + cached_matches.length + " matches");
                                         add_matches(cached_matches);
                                     }
                                     continue_lookup(d+1);
@@ -277,7 +277,7 @@
                 var short_name = dict_by_id(decodedObj[2]).meta().alias;
                 if(short_name.length > 10)
                     short_name = short_name.substring(0,10) + "..."
-                console.log("loading entry " + decodedObj[1].term
+                console.debug("loading entry " + decodedObj[1].term
                     + " from `" + short_name + "`");
 
                 var cached_entry = oCaches["entries"]
@@ -286,7 +286,7 @@
                     cached_entry = dict_by_id(decodedObj[2]).entry(decodedObj);
                     oCaches["entries"].add(decodedObj[1].dictpos[0], decodedObj[2], cached_entry);
                 } else {
-                    console.log("...from cache...");
+                    console.debug("...from cache...");
                 }
 
                 return {

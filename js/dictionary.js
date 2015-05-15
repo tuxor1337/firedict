@@ -229,7 +229,7 @@
                 return dictionaryIdb.create()
                 .then(function (db) {
                     oDB = db;
-                    console.log("(syn)wordcount for dictionary `"
+                    console.debug("(syn)wordcount for dictionary `"
                             + short_name + "`: " + wordcount + " (" + synwordcount + ")");
                     return createOft();
                 }).then(function () {

@@ -1,7 +1,14 @@
 
+[data-type="list"] > ul.manage {
+    margin: 4px 3px;
+}
+
 [data-type="list"] > ul.manage > li {
-    min-height: 40px;
+    min-height: 2.5rem;
     padding: 0.7rem 45px 0.6rem 25px;
+    margin-bottom: 4px;
+    box-shadow: 1px 1px 2px 1px #bbb;
+    border-width: 0;
 }
 
 [data-type="list"] > ul.manage > li > p {
@@ -11,16 +18,9 @@
 
 ul.manage div.handle {
     position:absolute;
-    top: 50%; left: 6px;
-    width: 12px; height: 32px;
-    margin-top: -16px;
-    background: transparent url(images/draghandle.png) no-repeat center;
-}
-
-ul.manage li.sorting div.handle {
-    border-radius: 4px;
-    background-image: url(images/draghandle-light.png);
-    background-color: #000;
+    top: 0.6rem; bottom: 0.6rem;
+    left: 0px; width: 18px;
+    background: transparent url(images/draghandle.png) repeat-y center top;
 }
 
 ul.manage > li > div.buttons {
@@ -52,7 +52,7 @@ ul.manage > li > div.buttons button:nth-child(3) {
 
 ul.manage > li > div.color {
     position:absolute;
-    top: 50%; right: 5px;
+    top: 50%; right: 8px;
     width: 24px; height: 24px;
     margin-top:-15px;
     font-size: 0; line-height: 0;
@@ -75,28 +75,21 @@ ul.manage > li.active div.color {
     background-color: #000 !important;
 }
 
-ul.manage > li.insertBefore {
-    border-top: 60px #ff9 solid;
-}
-
-ul.manage > li.insertAfter {
-    border-bottom: 60px #ff9 solid;
-}
-
 ul.manage > li.sorting {
     z-index: 100;
     position: absolute;
-    left: 0;
     background-color: #fff;
-    box-shadow: 0 0 10px 6px #999;
+    opacity: 0.8;
 }
 
 ul.manage > li.notfound {
-    padding:0.9rem 1rem 0 0.8rem; margin:0; border: none;
+    padding: 0.9rem 1rem 0 0.8rem;
+    margin: 0; border: none; box-shadow: none;
 }
 
 ul.manage > li.notfound h2 {
-    font-size: 1rem; font-weight:bold; margin:0; padding:0;
+    margin: 0; padding: 0;
+    font-size: 1rem; font-weight: bold;
 }
 
 ul.manage > li.notfound p {

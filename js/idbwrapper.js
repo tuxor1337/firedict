@@ -12,6 +12,11 @@
         });
     }
 
+    function DEBUG(msg) {
+        /* Set to true for debugging purposes. */
+        if(false) console.log("idbwrapper: " + msg);
+    }
+
     var IdbWrapper = (function () {
         var indexedDB = GLOBAL.indexedDB;
 
@@ -25,7 +30,7 @@
                     request = indexedDB.open(dbName);
                 else {
                     request = indexedDB.open(dbName, version);
-                    console.log("Opening " + dbName + " v" + version);
+                    DEBUG("Opening " + dbName + " v" + version);
                 }
 
                 request.onerror = function (event) {
@@ -207,6 +212,6 @@
 
     if(!GLOBAL.indexedDB) {
         GLOBAL.IdbWrapper = IdbWrapperCompat;
-        console.log("Using IdbWrapper in compat mode, i.e. calls are redirected to main thread.");
+        DEBUG("Using IdbWrapper in compat mode, i.e. calls are redirected to main thread.");
     } else GLOBAL.IdbWrapper = IdbWrapper;
 }(this));
