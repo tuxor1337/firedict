@@ -46,7 +46,7 @@ button:disabled {
     color: #777;
 }
 
-button::-moz-focus-inner, a:active {
+button::-moz-focus-inner, a:active, a:focus {
     outline: none; border: none;
 }
 
@@ -59,7 +59,14 @@ input[type=text] {
     border: 1px #aaa solid;
     border-radius: 0;
     background: none #fff;
+    box-shadow: none;
     padding: 0.4rem;
+    color: #000;
+}
+
+input[type=text]::-moz-placeholder {
+    font-style:italic;
+    color: #444;
 }
 
 label.pack-switch {

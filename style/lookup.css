@@ -1,10 +1,23 @@
 
+section[data-type="list"] ul.matches {
+    margin: 4px 3px;
+}
+
+section[data-type="list"] ul.matches li {
+    margin-bottom: 4px;
+    box-shadow: 1px 1px 2px 1px #bbb;
+    border-width: 0;
+}
+
 section[data-type="list"] ul.matches li.idle {
-    margin: 1rem 0;
-    height: 2.9rem;
+    position: absolute;
+    left: 50%;
+    margin: 1rem 0 0 -1.5rem;
+    width: 2.9rem; height: 2.9rem;
     border: none;
     background: url(images/spinner.png) no-repeat center center;
     animation: 0.9s rotate infinite steps(30);
+    box-shadow: none;
 }
 
 section[data-type="list"] ul.matches span.marker {
@@ -14,9 +27,16 @@ section[data-type="list"] ul.matches span.marker {
     margin-left: 3px;
 }
 
+section[data-type="output"] {
+    background-color:#fff; padding: 4px 4px 0;
+}
+
 section[data-type="output"] div.text {
-    padding: 0; margin: 0 1px 2px;
-    border: 2px #000 solid;
+    padding: 0 1em 0 0; margin: 0 0 7px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 1px 1px 2px 1px #bbb;
+    background-color: #fff;
 }
 
 section[data-type="output"] div.text > div {
@@ -24,22 +44,35 @@ section[data-type="output"] div.text > div {
 }
 
 section[data-type="output"] div.text h2.dictname {
+    position: absolute;
+    left: 100%;
+    transform: rotateZ(90deg);
+    transform-origin: 0 0 0;
+    height: 1.1em;
     overflow: hidden;
     white-space: nowrap;
     margin: 0; padding: 0.1em 0.3em;
+    line-height: 0.9em;
     text-align: center;
-    font-size: 0.9em;
+    font-size: 0.8em;
     font-weight: normal;
     color: #fff;
     background-color: #000;
 }
 
+section[data-type="output"] div.text > div + div h3.term {
+    border-top: 1px #000 solid;
+    padding-top: 5px;
+}
+
 section[data-type="output"] div.text h3.term {
-    margin: 0; padding: 0.1em 0.2em;
-    font-size: 0.9em;
+    margin: 0; padding: 0 0.3em;
+    line-height:1.4em;
+    font-size: 0.8em;
     font-weight: normal;
-    color: #fff;
-    background-color: #000;
+    color: #000;
+    background-color: transparent;
+    text-align: right;
 }
 
 section[data-type="output"] div.text h3.term b { font-weight: bold; }
@@ -56,12 +89,12 @@ section[data-type="output"] div.text .button {
 }
 
 section[data-type="output"] div.text .button div {
+    margin: 0 0.5rem 0.4rem;
+    padding: 0.7rem 0.5rem;
     border: none;
     border-radius:1rem;
     background-color: rgba(230,230,230,0.95);
-    padding: 0.7rem 0.5rem;
     text-align: center;
-    margin: 0 0.5rem 0.2rem;
 }
 
 section[data-type="output"] div.text .content.expandable ~ .showmore {

@@ -10,6 +10,10 @@ var console = {
     },
     error: function (str) {
         postMessage("(error) " + str);
+    },
+    debug: function (str) {
+        /* Set to true for debugging purposes. */
+        if(false) postMessage(str);
     }
 };
 

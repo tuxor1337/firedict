@@ -198,123 +198,136 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
     return {
         compile: function () {
             return function ($scope, $element, $attr) {
-                var handle, startY, currIndex = -1, dragover = null;
+                var currIndex = -1,
+                    dragover = null,
+                    curr = null,
+                    offsetX = 0, offsetY = 0,
+                    ul_top = 0;
 
                 var moveAfter = $scope.$eval($attr.moveFn);
 
-                function touchY(evt) {
-                    return evt.originalEvent.changedTouches[0].pageY;
-                }
-
-                function getNext(curr, last) {
-                    $(curr).siblings().css("transition", "border 0.5s");
-                    var currRect = curr.getBoundingClientRect(),
-                        lastRect = last.getBoundingClientRect(),
-                        currMiddleY = 0.5*(currRect.bottom + currRect.top),
-                        next = null;
-                    if(currMiddleY < lastRect.top + 0.5*last.clientHeight) {
-                        if(isFirst(curr, last)) {
-                            next = last;
-                            $(next).removeClass("insertAfter")
-                                .addClass("insertBefore");
-                        } else {
-                            $(last).removeClass("insertAfter");
-                            if($(last).index() == $(curr).index() + 1)
-                                next = $(curr).prev()[0];
-                            else next = $(last).prev()[0];
-                            $(next).addClass("insertAfter");
-                        }
-                    } else {
-                        var parentRect = $(curr).parent()[0].getBoundingClientRect();
-                        if($(last).hasClass("insertBefore")) {
-                            next = last;
-                            $(next).removeClass("insertBefore")
-                                .addClass("insertAfter");
-                        } else if(isLast(curr, last)) {
-                            next = last;
-                        } else {
-                            $(last).removeClass("insertAfter");
-                            if($(last).index() == $(curr).index() - 1)
-                                next = $(curr).next()[0];
-                            else next = $(last).next()[0];
-                            $(next).addClass("insertAfter");
-                        }
+                function touchXY(evt) {
+                    var changed = evt.originalEvent.changedTouches;
+                    if(changed) changed = changed[0];
+                    else changed = evt.originalEvent;
+                    return {
+                        "Y": changed.pageY,
+                        "X": changed.pageX
                     }
-                    return next;
                 }
 
-                function parentMiddleDistY(el) {
-                    var parentRect = $(el).parent()[0].getBoundingClientRect(),
-                        currRect = el.getBoundingClientRect();
-                    return 0.5*(currRect.bottom + currRect.top) - parentRect.top;
-                }
-
-                function isContained(curr, testEl) {
-                    var currRect = curr.getBoundingClientRect(),
-                        testRect = testEl.getBoundingClientRect(),
-                        currMiddleY = 0.5*(currRect.bottom + currRect.top);
-                    if(isFirst(curr, testEl)) {
-                        if(parentMiddleDistY(curr) <= 0) return true;
-                        if($(testEl).hasClass("insertBefore")) {
-                            return currMiddleY <= testRect.bottom - 0.5*testEl.clientHeight;
-                        }
+                function dragover_handler() {
+                    if(dragover === null) {
+                        if(currIndex > 0) dragover = $(curr).prev();
+                        else dragover = $(curr).next();
+                        dragover = dragover.addClass("dragover")[0];
                     }
-                    var parentRect = $(curr).parent()[0].getBoundingClientRect();
-                    return (currMiddleY  >= testRect.top + 0.5*testEl.clientHeight
-                        && currMiddleY <= testRect.bottom + 0.5*testEl.clientHeight)
-                        || (currRect.bottom > parentRect.bottom && isLast(curr, testEl));
+                    var pad = parseInt($(curr).css("margin-bottom")), refy = 0;
+                    if($(dragover).index() == 0
+                       || $(dragover).index() == 1 && currIndex == 0)
+                        refy = ul_top - pad;
+                    else refy = dragover_prev().getBoundingClientRect().bottom;
+                    var crect = curr.getBoundingClientRect(),
+                        drect = dragover.getBoundingClientRect(),
+                        dheight = drect.bottom - drect.top + pad,
+                        cheight = crect.bottom - crect.top + pad,
+                        mbottom = (crect.top - refy - pad)*cheight/dheight;
+                        mtop = cheight - mbottom;
+                    if(mtop < 0 || mbottom < 0) {
+                        var candidate = (mtop < 0)?dragover_next():dragover_prev();
+                        if(candidate !== null) return dragover_reset(candidate);
+                    }
+                    mtop = Math.min(cheight,Math.max(mtop,0))
+                    mbottom = Math.min(cheight,Math.max(mbottom,0))
+                    $(dragover)
+                    .css("margin-top", (mtop + pad) + "px")
+                    .css("margin-bottom", (mbottom + pad) + "px");
                 }
 
-                function isFirst(curr, testEl) {
-                    return $(testEl).index() == 0
-                        || ($(testEl).index() == 1 && $(curr).index() == 0);
+                function dragover_reset(candidate) {
+                    $(dragover).removeClass("dragover");
+                    dragover = $(candidate).addClass("dragover")[0];
+                    $(curr).siblings()
+                    .css("margin-top","").css("margin-bottom","");
+                    dragover_handler();
                 }
 
-                function isLast(curr, testEl) {
-                    var len = $(testEl).siblings().length,
-                        result = $(testEl).index() == len
-                        || ($(testEl).index() == len-1 && $(curr).index() == len);
-                    return result;
+                function dragover_prev() {
+                    var candidate = (currIndex+1 === $(dragover).index())?
+                        $(curr).prev():$(dragover).prev();
+                    if(candidate.length === 0) return null;
+                    return candidate[0];
+                }
+
+                function dragover_next() {
+                    var candidate = (currIndex-1 === $(dragover).index())?
+                        $(curr).next():$(dragover).next();
+                    if(candidate.length === 0) return null;
+                    return candidate[0];
+                }
+
+                function curr_prev() {
+                    var crect = curr.getBoundingClientRect(),
+                        cmid = 0.5*(crect.bottom+crect.top),
+                        drect = dragover.getBoundingClientRect(),
+                        dmid = 0.5*(drect.bottom+drect.top);
+                    if(cmid > dmid) return dragover;
+                    else return dragover_prev();
+                }
+
+                function ontouchstart(e) {
+                    var t = touchXY(e),
+                        crect = curr.getBoundingClientRect(),
+                        parent_ul = $(curr).parents("ul");
+                    parent_ul.css("height", parent_ul[0].clientHeight + "px")
+                    ul_top = parent_ul[0].getBoundingClientRect().top;
+                    currIndex = $(curr).index();
+                    offsetY = t.Y - crect.top;
+                    offsetX = t.X - crect.left;
+                    $(curr).css("width", $(curr).css("width"))
+                        .addClass("sorting")
+                        .css({ "top": crect.top + "px" })
+                        .css({ "left": crect.left + "px" });
+                    dragover_handler();
+                }
+
+                function ontouchmove(e) {
+                    var t = touchXY(e);
+                    $(curr).css({ "top": (t.Y - offsetY) + "px" })
+                        .css({ "left": (t.X - offsetX) + "px" });
+                    dragover_handler();
+                }
+
+                function ontouchend(e) {
+                    var prev = curr_prev();
+                    $(curr).removeClass("sorting").css("width","")
+                        .css("top","").css("left","")
+                        .siblings().removeClass("dragover")
+                        .css("margin-top","").css("margin-bottom","")
+                        .parents("ul").css("height","");
+                    moveAfter(curr, prev);
+                    curr = null, currIndex = -1, dragover = null;
                 }
 
                 $element
-                .on("touchstart", "li[draggable]", function (e) {
-                    if($(this).siblings().length > 0) {
-                        handle = e.target;
-                        startY = touchY(e);
-                    }
-                })
-                .on("touchmove", "li[draggable]", function (e) {
-                    if($(this).find(".handle").length == 0) return;
-                    if($(this).find(".handle")[0].contains(handle)) {
+                .on("touchstart mousedown", "li[draggable] .handle", function(e){
                         e.preventDefault();
-                        if(currIndex >= 0) {
-                            $(this).css({ "top": touchY(e) - 20 + "px" });
-                            if(dragover == null) {
-                                if($(this).index() > 0)
-                                    dragover = $(this).prev().addClass("insertAfter")[0];
-                                else dragover = $(this).next().addClass("insertBefore")[0];
-                            } else if (!isContained(this, dragover)) {
-                                dragover = getNext(this, dragover);
-                            }
-                        } else if(Math.abs(startY - touchY(e)) > 3) {
-                            $(this).parent("ul").height($(this).parent("ul").height()+20);
-                            $(this).addClass("sorting")
-                            .siblings().addBack().removeClass("selected");
-                            currIndex = $(this).index();
+                        var li = $(this).parents("li");
+                        if($(li).siblings().length > 0) {
+                            curr = li[0];
+                            ontouchstart(e);
                         }
+                })
+                .on("touchmove mousemove", function (e) {
+                    if(currIndex >= 0) {
+                        e.preventDefault();
+                        ontouchmove(e);
                     }
                 })
-                .on("touchend", "li[draggable]", function (e) {
-                    if($(this).find(".handle").length == 0) return;
-                    if($(this).find(".handle")[0].contains(handle) && currIndex >= 0) {
-                        var target = $(this).siblings(".insertAfter");
-                        $(this).removeClass("sorting").css({ "top": "auto" })
-                        .siblings().css("transition", "none")
-                        .removeClass("insertBefore insertAfter")
-                        .parent("ul").height("auto");
-                        startY = null; currIndex = -1; handle = null; dragover = null;
-                        moveAfter(this, (target.length > 0) ? target[0] : null);
+                .on("touchend mouseup", function (e) {
+                    if(currIndex >= 0) {
+                        e.preventDefault();
+                        ontouchend(e);
                     }
                 });
             };
