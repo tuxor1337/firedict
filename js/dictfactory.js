@@ -4,9 +4,13 @@
  * License: GPLv3
  */
 
-var FireDictProvider = angular.module("FireDictProvider", [])
-.factory("dictProvider", ["$rootScope", function ($rootScope) {
-    var groupProvider = (function () {
+"use strict";
+
+var FireDictProvider = angular.module("FireDictProvider", ["FireDictDirectives"])
+.factory("dictProvider", ["$rootScope", "ngDialog", function ($rootScope, ngDialog) {
+    var groupProvider, dictWorker, dictionaries, settingsProvider;
+
+    groupProvider = (function () {
         var groups = {}, cls;
 
         (function () {
@@ -75,8 +79,8 @@ var FireDictProvider = angular.module("FireDictProvider", [])
             "is_active": function (group) {
                 var members = groupProvider.members(group),
                     result = 0;
-                $rootScope.dictionaries.forEach(function (dict) {
-                    if(members.indexOf(dict.version) >= 0 && dict.active)
+                dictionaries.forEach(function (dict) {
+                    if(members.indexOf(dict.id) >= 0 && dict.active)
                         result += 1;
                 });
                 if(result == 0) return "inactive";
@@ -87,8 +91,8 @@ var FireDictProvider = angular.module("FireDictProvider", [])
                 if(typeof target !== "undefined") target = false;
                 var members = groupProvider.members(group);
                 if(groupProvider.is_active(group) === "inactive") target = true;
-                $rootScope.dictionaries.forEach(function (dict) {
-                    if(members.indexOf(dict.version) >= 0) dict.active = target;
+                dictionaries.forEach(function (dict) {
+                    if(members.indexOf(dict.id) >= 0) dict.active = target;
                 });
             }
         };
@@ -108,7 +112,7 @@ var FireDictProvider = angular.module("FireDictProvider", [])
         return cls;
     })();
 
-    var dictWorker = (function () {
+    dictWorker = (function () {
         var oWorker = new Worker("js/worker.js"),
             oListeners = {
                 reply: function (obj) {
@@ -143,7 +147,7 @@ var FireDictProvider = angular.module("FireDictProvider", [])
                 console.error("Wk: " + e.filename + "(" + e.lineno + "): " + e.message);
         };
 
-        return {
+        var workerObj = {
             query: function () {
                 if (arguments.length < 1) {
                     throw new TypeError("dictWorker.query - not enough arguments");
@@ -164,19 +168,127 @@ var FireDictProvider = angular.module("FireDictProvider", [])
                 oListeners[sName] = fListener;
             }
         };
+
+        workerObj.addListener("init_ready", function (obj) {
+            ngDialog.close();
+            dictionaries.set(obj.data);
+            if(!$rootScope.$$phase) { $rootScope.$apply(); }
+        });
+
+        workerObj.addListener("progress", function (obj) {
+            var data = obj.data,
+                value = [];
+            if(data.hasOwnProperty("total"))
+                value = [data.status, data.total];
+            if(ngDialog.type() == "progress") {
+                ngDialog.update(value, data.text);
+            } else {
+                ngDialog.open({
+                    type: "progress",
+                    text: data.text,
+                    value: value
+                });
+            }
+            if(!$rootScope.$$phase) { $rootScope.$apply(); }
+        });
+
+        workerObj.addListener("IdbWrapper", function (obj) {
+            var action = obj.data.action, data = obj.data.data;
+            IdbWrapper[action](data).then(obj.reply);
+        });
+
+        workerObj.addListener("DictScanner", function (obj) {
+            DictScanner.scan().then(obj.reply);
+        });
+
+        workerObj.query("init");
+
+        return workerObj;
+    })();
+
+    dictionaries = (function () {
+        var aDicts = [];
+
+        function edited() {
+            var arr = [];
+            aDicts.forEach(function (dict) { arr.push(dict.toObj()); });
+            dictWorker.query("edit_dictionaries", arr);
+        };
+
+        var DictCls = function (dictObj) {
+            var dobj = dictObj;
+
+            this.toObj = function () { return dictObj; };
+
+            this.__defineSetter__("color", function (val) {
+                dobj.color = val; edited();
+            });
+            this.__defineGetter__("color", function () {
+                if(settingsProvider.get("greyscale") == "true") {
+                    var aRGB = hexToRGB(dobj.color),
+                        gr = ((aRGB[0]+aRGB[1]+aRGB[2])/3.0)>>0;
+                    return RGBToHex([gr,gr,gr]);
+                }
+                return dobj.color;
+            });
+
+            this.__defineGetter__("rank", function () { return dobj.rank; });
+            this.__defineSetter__("rank", function (val) { dobj.rank = val; edited(); });
+            this.__defineGetter__("alias", function () { return dobj.alias; });
+            this.__defineSetter__("alias", function (val) { dobj.alias = val; edited(); });
+            this.__defineGetter__("active", function () { return dobj.active; });
+            this.__defineSetter__("active", function (val) { dobj.active = val; edited(); });
+            this.__defineGetter__("id", function () { return dobj.version; });
+        };
+
+        aDicts.sorted = function () {
+            var arr = aDicts.concat();
+            arr.sort(function(a,b) {return a.rank - b.rank;});
+            return arr;
+        }
+
+        aDicts.byId = function (id) {
+            for(var d = 0; d < aDicts.length; d++) {
+                if(aDicts[d].id == id) return aDicts[d];
+            }
+        };
+
+        aDicts.set = function (arr) {
+            aDicts.splice(0, aDicts.length);
+            for(var d = 0; d < arr.length; d++)
+                aDicts.push(new DictCls(arr[d]));
+        };
+
+        return aDicts;
+    })();
+
+    settingsProvider = (function () {
+        var DEFAULT_SETTINGS = [
+            ["settings-greyscale", "false"],
+            ["settings-expandable", "true"],
+            ["settings-fontsize", "1.0"]
+        ];
+
+        DEFAULT_SETTINGS.forEach(function (el) {
+            var key = "settings-" + el[0];
+            if(localStorage.getItem(key) === null)
+                localStorage.setItem(key, el[1]);
+        });
+
+        return {
+            "get": function (key) {
+                return localStorage.getItem("settings-" + key);
+            },
+            "set": function (key, val) {
+                localStorage.setItem("settings-" + key, val);
+            }
+        };
     })();
 
     return {
-        "dictionaries": function (sorted) {
-            if("undefined" === typeof sorted) sorted = false;
-            var aDicts = $rootScope.dictionaries;
-            if(sorted) {
-                aDicts = aDicts.concat();
-                aDicts.sort(function(a,b) {return a.rank - b.rank;});
-            }
-            return aDicts;
-        },
+        "dicts": dictionaries,
         "worker": dictWorker,
-        "groups": groupProvider
+        "groups": groupProvider,
+        "settings": settingsProvider
     };
 }]);

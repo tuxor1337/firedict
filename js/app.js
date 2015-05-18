@@ -6,20 +6,8 @@
 
 "use strict";
 
-var DEFAULT_SETTINGS = [
-        ["settings-greyscale", "false"],
-        ["settings-expandable", "true"],
-        ["settings-fontsize", "1.0"]
-    ];
-
-DEFAULT_SETTINGS.forEach(function (el) {
-    if(localStorage.getItem(el[0]) === null)
-        localStorage.setItem(el[0], el[1]);
-});
-
 angular.module("FireDict", [
-    "ngRoute", "ngSanitize", "ngTouch",
-    "FireDictControllers", "FireDictDirectives", "FireDictProvider"
+    "ngRoute", "ngSanitize", "ngTouch", "FireDictControllers"
 ])
 .config(["$compileProvider", function($compileProvider) {
     $compileProvider.aHrefSanitizationWhitelist(/^\s*(file|https?|ftp|mailto|app):/);
@@ -50,9 +38,7 @@ angular.module("FireDict", [
             redirectTo: '/lookup'
         });
 }])
-.run(["$rootScope", "dictProvider", "ngDialog",
-    function ($rootScope, dictProvider, ngDialog) {
-        $rootScope.search_term = "";
+.run(["$rootScope", function ($rootScope) {
         $rootScope.drawerOpen = false;
         $rootScope.toggleSidebar = function ($event, drawerOpen) {
             if(typeof drawerOpen === "undefined")
@@ -61,58 +47,5 @@ angular.module("FireDict", [
             if($event.currentTarget.getAttribute("id") !== "mainArea")
                 $event.stopPropagation();
         };
-
-        $rootScope.dictionaries = [];
-        $rootScope.dictColor = function(dict) {
-            if(localStorage.getItem("settings-greyscale") == "true") {
-                var aRGB = hexToRGB(dict.color),
-                    gr = ((aRGB[0]+aRGB[1]+aRGB[2])/3.0)>>0;
-                return RGBToHex([gr,gr,gr]);
-            }
-            return dict.color;
-        }
-        $rootScope.$watch("dictionaries", function (val) {
-            dictProvider.worker.query("edit_dictionaries", val);
-        }, true);
-        $rootScope.dictById = function (ver) {
-            for(var d = 0; d < $rootScope.dictionaries.length; d++) {
-                if($rootScope.dictionaries[d].version == ver)
-                    return $rootScope.dictionaries[d];
-            }
-        };
-        dictProvider.worker.addListener("init_ready", function (obj) {
-            ngDialog.close();
-            $rootScope.dictionaries = obj.data;
-            if(!$rootScope.$$phase) { $rootScope.$apply(); }
-        });
-        dictProvider.worker.addListener("progress", function (obj) {
-            var data = obj.data,
-                value = [];
-            if(data.hasOwnProperty("total"))
-                value = [data.status, data.total];
-            if(ngDialog.type() == "progress") {
-                ngDialog.update(value, data.text);
-            } else {
-                ngDialog.open({
-                    type: "progress",
-                    text: data.text,
-                    value: value
-                });
-            }
-            if(!$rootScope.$$phase) { $rootScope.$apply(); }
-        });
-        dictProvider.worker.addListener("lookup_continue", function (obj) {
-            obj.reply(obj.data.term == $rootScope.search_term
-                      && $rootScope.showingEntry === false);
-        });
-        dictProvider.worker.addListener("IdbWrapper", function (obj) {
-            var action = obj.data.action, data = obj.data.data;
-            IdbWrapper[action](data).then(obj.reply);
-        });
-        dictProvider.worker.addListener("DictScanner", function (obj) {
-            DictScanner.scan().then(obj.reply);
-        });
-
-        dictProvider.worker.query("init");
     }
 ]);

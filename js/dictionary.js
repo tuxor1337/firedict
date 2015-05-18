@@ -4,6 +4,8 @@
  * License: GPLv3
  */
 
+"use strict";
+
 (function (GLOBAL) {
     var CHUNKSIZE = 2531;
 

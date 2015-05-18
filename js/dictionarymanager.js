@@ -4,6 +4,8 @@
  * License: GPLv3
  */
 
+"use strict";
+
 (function (GLOBAL) {
     var transactions = [];
 
@@ -80,7 +82,7 @@
 
     var DictionaryManager = (function () {
         var cls = function () {
-            var aDicts = [], ready = false;
+            var aDicts = [], ready = false,
                 oHistoryManager = new HistoryManager(),
                 oCaches = {
                     "entries": new CacheManager(),

@@ -4,6 +4,8 @@
  * License: GPLv3
  */
 
+"use strict";
+
 (function (GLOBAL) {
     function split_path(path) {
         var pos_slash = path.lastIndexOf('/'),

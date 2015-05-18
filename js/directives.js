@@ -4,6 +4,8 @@
  * License: GPLv3
  */
 
+"use strict";
+
 var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider"])
 .directive("ngHeader", function ($timeout) {
     return {
@@ -49,9 +51,9 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                 "picked": '='
             },
             link: function ($scope, $element, $attrs) {
-                var content = $element.find("div.content")[0];
+                var $content = $element.find("div.content");
                 $scope.$watch(
-                function () { return $(content).find(".picked").text(); },
+                function () { return $content.find(".picked").text(); },
                 function (value) {
                     $scope.picked = value
                     .replace(/[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*$/,'')
@@ -74,7 +76,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                 $scope.selected = -1;
                 $scope.dictColor = $rootScope.dictColor;
                 $scope.groups = dictProvider.groups;
-                $scope.dictionaries = dictProvider.dictionaries;
+                $scope.dictionaries = dictProvider.dicts;
                 $scope.select = function (group) {
                     if($scope.selectable) {
                         if($scope.selected == group) $scope.selected = -1;
@@ -86,11 +88,11 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                 }
                 $scope.groupDictFilter = function (group) {
                     return function (dict) {
-                        return dictProvider.groups.members(group).indexOf(dict.version) >= 0;
+                        return dictProvider.groups.members(group).indexOf(dict.id) >= 0;
                     };
                 };
                 $scope.all_active = function (bol) {
-                    var aDicts = dictProvider.dictionaries();
+                    var aDicts = dictProvider.dicts;
                     function is_active() {
                         var result = 0;
                         aDicts.forEach(function (dict) {
@@ -135,11 +137,11 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                 };
                 $scope.setMembers = function (group) {
                     var aDicts = [];
-                    dictProvider.dictionaries(true).forEach(function (dict) {
+                    dictProvider.dicts.sorted().forEach(function (dict) {
                         aDicts.push({
-                            active: dictProvider.groups.is_member(group, dict.version),
+                            active: dictProvider.groups.is_member(group, dict.id),
                             name: dict.alias,
-                            did: dict.version
+                            did: dict.id
                         });
                     });
                     ngDialog.open({
@@ -231,7 +233,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                         drect = dragover.getBoundingClientRect(),
                         dheight = drect.bottom - drect.top + pad,
                         cheight = crect.bottom - crect.top + pad,
-                        mbottom = (crect.top - refy - pad)*cheight/dheight;
+                        mbottom = (crect.top - refy - pad)*cheight/dheight,
                         mtop = cheight - mbottom;
                     if(mtop < 0 || mbottom < 0) {
                         var candidate = (mtop < 0)?dragover_next():dragover_prev();
@@ -334,32 +336,35 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
         }
     };
 })
-.directive('compile', ['$compile', function ($compile) {
-    return function(scope, element, attrs) {
-        var ensureCompileRunsOnce = scope.$watch(
-            function(scope) {
-                return scope.$eval(attrs.compile);
-            },
-            function(value) {
-                element.html(value);
-                var c_div = $(element).parents(".content"),
-                    picked_el = $(element).find(".picked");
-                if(localStorage.getItem("settings-expandable") != "false") {
-                    if(c_div.length > 0 && c_div[0].scrollHeight > 150) {
-                        c_div.addClass("expandable");
+.directive('compile', ['$compile', "dictProvider",
+    function ($compile, dictProvider) {
+        return function(scope, element, attrs) {
+            var ensureCompileRunsOnce = scope.$watch(
+                function(scope) {
+                    return scope.$eval(attrs.compile);
+                },
+                function(value) {
+                    element.html(value);
+                    var c_div = element.parent(),
+                        picked_el = element.find(".picked");
+                    if(dictProvider.settings.get("expandable") != "false") {
+                        if(c_div.hasClass("content")
+                           && c_div[0].scrollHeight > 150) {
+                            c_div.addClass("expandable");
+                        }
                     }
+                    $compile(element.contents())(scope);
+                    if(element.parent().hasClass("wordpicker")) {
+                        if(picked_el.length > 0) {
+                            element[0].scrollTop = picked_el[0].offsetTop;
+                        } else element[0].scrollTop = 0;
+                    }
+                    ensureCompileRunsOnce();
                 }
-                $compile(element.contents())(scope);
-                if($(element).parents(".wordpicker").length > 0) {
-                    if(picked_el.length > 0) {
-                        element[0].scrollTop = picked_el[0].offsetTop;
-                    } else element[0].scrollTop = 0;
-                }
-                ensureCompileRunsOnce();
-            }
-        );
-    };
-}])
+            );
+        };
+    }
+])
 .directive('ngMozL10n', function () {
     return {
         restrict: "A",
