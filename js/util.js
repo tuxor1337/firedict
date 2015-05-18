@@ -4,6 +4,8 @@
  * License: GPLv3
  */
 
+"use strict";
+
 function escapeHtml(text) {
     var map = {
         '&': '&amp;',
@@ -33,25 +35,35 @@ function hexToRGB(hex) {
 }
 
 function wordpicker_wrap(event) {
-    var content = event.currentTarget,
-        picked = event.explicitOriginalTarget,
-        picked_wrapped = "",
-        parent = picked.parentNode,
-        wrapper;
-    wordpicker_unwrap(content);
-    if(picked.nodeType === 3) {
-        wrapper = document.createElement("span");
-        picked_wrapped = "<span>" + picked.textContent.split(" ").join(" </span><span>") + "</span>";
-        $(wrapper).html(picked_wrapped);
-        parent.replaceChild(wrapper, picked);
-        $(document.elementFromPoint(event.clientX, event.clientY)).addClass("picked");
-        $(wrapper).find("span:not(.picked)").each(function () {
-            $(this).replaceWith($(this).text());
+    var oContent = event.currentTarget,
+        oPicked = event.explicitOriginalTarget,
+        oParent = oPicked.parentNode,
+        aSpans = [];
+    wordpicker_unwrap(oContent);
+    if(oPicked.nodeType === 3) {
+        oPicked.textContent.split(" ").forEach(function (sWord) {
+            var oChild = document.createElement("span");
+            oChild.textContent = sWord + " ";
+            oParent.insertBefore(oChild, oPicked);
+            aSpans.push(oChild);
         });
-        $(wrapper).replaceWith($(wrapper).html());
+        oParent.removeChild(oPicked);
+        document.elementFromPoint(event.clientX, event.clientY)
+            .classList.add("picked");
+        aSpans.forEach(function (oSpan) {
+            if(!oSpan.classList.contains("picked")) {
+                oParent.replaceChild(
+                    document.createTextNode(oSpan.textContent),
+                    oSpan
+                );
+            }
+        });
     }
 }
 
 function wordpicker_unwrap(content) {
-    $(content).find(".picked").removeClass("picked");
+    var matches = content.getElementsByClassName("picked");
+    for(var i = 0; i < matches.length; i++) {
+        matches[i].classList.remove("picked");
+    }
 }

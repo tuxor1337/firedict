@@ -1,7 +1,7 @@
 <ul class="groups manage">
     <li class="all" data-ng-class="all_active()">
         <div class="group-colors">
-            <span data-ng-repeat="dict in dictionaries() | orderBy: 'rank'"
+            <span data-ng-repeat="dict in dictionaries | orderBy: 'rank'"
                   data-ng-style="{'background-color':dictColor(dict)}"
                   class="marker"></span>
         </div>
@@ -14,8 +14,8 @@
     <li data-ng-repeat="group in groups.list"
         data-ng-class="[groups.is_active(group), isSelected(group)]">
         <div class="group-colors">
-            <span data-ng-repeat="dict in dictionaries() | filter:groupDictFilter(group) | orderBy: 'rank'"
-                  data-ng-style="{'background-color':dictColor(dict)}"
+            <span data-ng-repeat="dict in dictionaries | filter:groupDictFilter(group) | orderBy: 'rank'"
+                  data-ng-style="{'background-color':dict.color}"
                   class="marker"></span>
         </div>
         <div class="color" data-ng-click="groups.toggle_active(group)"></div>

@@ -21,11 +21,11 @@
                     <p data-ng-moz-l10n="manage-files-may-be-compressed"></p>
                 </li>
                 <li draggable="" data-ng-repeat="dict in dictionaries | orderBy:'rank'"
-                    data-ng-class="{'inactive': !dict.active, 'selected': selected == dict.version }">
+                    data-ng-class="{'inactive': !dict.active, 'selected': selected == dict.id }">
                     <div class="handle"></div>
-                    <div class="color" data-ng-class="{'light': isDark(dictColor(dict))}"
-                         data-ng-style="{'background-color': dictColor(dict), 'border-color': dictColor(dict)}"
-                         data-ng-click="toggleActive(dict)">{{dict.version}}</div>
+                    <div class="color" data-ng-class="{'light': isDark(dict.color)}"
+                         data-ng-style="{'background-color': dict.color, 'border-color': dict.color}"
+                         data-ng-click="toggleActive(dict)">{{dict.id}}</div>
                     <p data-ng-click="select(dict)">{{dict.alias}}</p>
                     <div class="buttons">
                         <button data-ng-click="setColor(dict)"

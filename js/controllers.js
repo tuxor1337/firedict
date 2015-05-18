@@ -4,15 +4,19 @@
  * License: GPLv3
  */
 
-var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirectives"])
+"use strict";
+
+var FireDictControllers = angular.module("FireDictControllers",
+    ["FireDictDirectives", "FireDictProvider"])
 .controller("manageCtrl", ["$scope", "ngDialog", "dictProvider",
     function ($scope, ngDialog, dictProvider) {
         $scope.title = "section-manage-dicts";
+        $scope.dictionaries = dictProvider.dicts;
         $scope.selected = -1;
         $scope.select = function (dict) {
-            if($scope.selected == dict.version)
+            if($scope.selected == dict.id)
                 $scope.selected = -1;
-            else $scope.selected = dict.version;
+            else $scope.selected = dict.id;
         };
         $scope.isDark = function (hexColor) {
             var rgb = hexToRGB(hexColor),
@@ -51,7 +55,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
         $scope.setGroups = function (dict) {
             var aGroups = [],
-                did = dict.version;
+                did = dict.id;
             dictProvider.groups.list.forEach(function (group) {
                 aGroups.push({
                     active: dictProvider.groups.is_member(group, did),
@@ -80,15 +84,11 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             dictProvider.worker.query("init", true);
         };
         $scope.dictMoveAfter = function (selected, target) {
-            var aDictSorted = $scope.dictionaries.concat().sort(function (a,b) {
-                if (a.rank < b.rank) return -1;
-                if (a.rank > b.rank) return 1;
-                return 0;
-            });
+            var aDictSorted = dictProvider.dicts.sorted();
             var currVer = parseInt($(selected).find(".color").text()),
                 currIdx = -1;
             for(var i = 0; i < aDictSorted.length; i++) {
-                if(currVer == aDictSorted[i].version) currIdx = i;
+                if(currVer == aDictSorted[i].id) currIdx = i;
             }
             if(target == null) {
                 if(currIdx == 0) return;
@@ -97,13 +97,13 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 var curr = aDictSorted.splice(currIdx,1)[0],
                     targetVer = parseInt($(target).find(".color").text());
                 for(var i = 0; i < aDictSorted.length; i++) {
-                    if(targetVer == aDictSorted[i].version) {
+                    if(targetVer == aDictSorted[i].id) {
                         aDictSorted.splice(i+1, 0, curr); break;
                     }
                 }
             }
             for(var i = 0; i < aDictSorted.length; i++) {
-                $scope.dictById(aDictSorted[i].version).rank = i;
+                aDictSorted[i].rank = i;
             }
             if(!$scope.$$phase) { $scope.$apply(); }
         };
@@ -130,17 +130,23 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
 .controller("lookupCtrl", [
     "$scope", "$rootScope", "$timeout", "ngDialog", "dictProvider",
     function ($scope, $rootScope, $timeout, ngDialog, dictProvider) {
-        $rootScope.showingEntry = false;
         $scope.idle = false;
         $scope.matches = [];
         $scope.entries = [];
         $scope.resources = {};
+        $scope.search_term = "";
+        $scope.showing_entry = false;
+        $scope.dictionaries = dictProvider.dicts;
+
+        dictProvider.worker.addListener("lookup_continue", function (obj) {
+            obj.reply(obj.data.term == $scope.search_term
+                      && $scope.showing_entry === false);
+        });
 
         $scope.lookup = function (val) {
             if(val == $scope.search_term) {
                 $scope.idle = true;
                 $scope.matches = [];
-                $rootScope.search_term = $scope.search_term;
                 dictProvider.worker.query("lookup", $scope.search_term)
                 .then(function (matches) {
                     if($scope.search_term == val) {
@@ -153,7 +159,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         };
 
         $scope.lookup_enterpressed = function () {
-            if($rootScope.showingEntry) return;
+            if($scope.showing_entry) return;
             $scope.lookup($scope.search_term);
         };
 
@@ -162,7 +168,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 milliseconds = 800 - 150*Math.min(val.length,4);
             $scope.idle = true;
             $scope.matches = [];
-            if($rootScope.showingEntry) return;
+            if($scope.showing_entry) return;
             var delay = (function(){
               var timer = 0;
               return function(callback, ms) {
@@ -216,10 +222,10 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             .then(function (entries) {
                 $scope.idle = false;
                 if(entries.length > 0) {
-                    $rootScope.showingEntry = true;
+                    $scope.showing_entry = true;
                     $scope.entries = entries;
                 } else {
-                    $rootScope.showingEntry = false;
+                    $scope.showing_entry = false;
                     $scope.lookup_enterpressed();
                 }
                 if(!$scope.$$phase) { $scope.$apply(); }
@@ -238,26 +244,24 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
         );
 
         $scope.back = function () {
-            if($rootScope.showingEntry) {
-                $rootScope.showingEntry = false;
+            if($scope.showing_entry) {
+                $scope.showing_entry = false;
                 $scope.lookup($scope.search_term);
             }
         };
         $scope.matchDictFilter = function (match) {
             return function (dict) {
-                var result = false;
-                match.entries.forEach(function (e) {
-                    if(e[2] == dict.version) result = true;
-                });
-                return result;
+                for(var e = 0; e < match.entries.length; e++) {
+                    if(match.entries[e][2] == dict.id) return true;
+                }
+                return false;
             };
         };
         $scope.entryDictFilter = function (dict) {
-            var result = false;
-            $scope.entries.forEach(function (e) {
-                if(e.did == dict.version) result = true;
-            });
-            return result;
+            for(var e = 0; e < $scope.entries.length; e++) {
+                if($scope.entries[e].did == dict.id) return true;
+            }
+            return false;
         };
         $scope.render_content = function (d, did) {
             function inject_resource(name) {
@@ -268,7 +272,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                             did: did, name: name
                     }).then(function (blob) {
                         if(blob == null)
-                            console.log($scope.dictById(did).alias +
+                            console.log(dictProvider.dicts.byId(did).alias +
                                 ": File " + name + " not found.");
                         else {
                             $scope.resources[did][name] = window.URL.createObjectURL(blob);
@@ -518,7 +522,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
             return render_plain_content(d.content);
         };
         $scope.content_fontsize = function () {
-            return localStorage.getItem("settings-fontsize")+"rem";
+            return dictProvider.settings.get("fontsize")+"rem";
         };
         $scope.termOrderFn = function (entry) {
             return entry.term.replace(/\(([0-9])\)$/g, '(0$1)');
@@ -551,7 +555,7 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 type: "value",
                 name: "settings-fontsize",
                 value: function () {
-                    return localStorage.getItem("settings-fontsize");
+                    return dictProvider.settings.get("fontsize");
                 },
                 onclick: function () {
                     ngDialog.open({
@@ -559,11 +563,11 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                         l20n: {
                             text: "dialog-set-fontsize"
                         },
-                        value: parseFloat(localStorage.getItem("settings-fontsize"))*100,
+                        value: parseFloat(dictProvider.settings.get("fontsize"))*100,
                         range: [75,105],
                         callbk: function (value) {
                             if(value !== null)
-                                localStorage.setItem("settings-fontsize", value/100.0);
+                                dictProvider.settings.set("fontsize", value/100.0);
                         }
                     });
                 }
@@ -572,24 +576,24 @@ var FireDictControllers = angular.module("FireDictControllers", ["FireDictDirect
                 type: "toggle",
                 name: "settings-greyscale",
                 onclick: function () {
-                    var curr = localStorage.getItem("settings-greyscale"),
+                    var curr = dictProvider.settings.get("greyscale"),
                         newval = (curr == "true")?"false":"true";
-                    localStorage.setItem("settings-greyscale", newval);
+                    dictProvider.settings.set("greyscale", newval);
                 },
                 checked: function () {
-                    return localStorage.getItem("settings-greyscale") == "true";
+                    return dictProvider.settings.get("greyscale") == "true";
                 }
             },
             {
                 type: "toggle",
                 name: "settings-expandable",
                 onclick: function () {
-                    var curr = localStorage.getItem("settings-expandable"),
+                    var curr = dictProvider.settings.get("expandable"),
                         newval = (curr == "true")?"false":"true";
-                    localStorage.setItem("settings-expandable", newval);
+                    dictProvider.settings.set("expandable", newval);
                 },
                 checked: function () {
-                    return localStorage.getItem("settings-expandable") == "true";
+                    return dictProvider.settings.get("expandable") == "true";
                 }
             }
         ];

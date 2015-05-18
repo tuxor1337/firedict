@@ -4,6 +4,8 @@
  * License: GPLv3
  */
 
+"use strict";
+
 var console = {
     log: function (str) {
         postMessage(str);

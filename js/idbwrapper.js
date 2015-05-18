@@ -4,6 +4,8 @@
  * License: GPLv3
  */
 
+"use strict";
+
 (function (GLOBAL) {
     function do_async_rec(work, check, terminate) {
         if(!check()) terminate();
