@@ -7,8 +7,6 @@
 "use strict";
 
 (function (GLOBAL) {
-    var transactions = [];
-
     function HistoryManager() {
         var cache = [];
 
@@ -204,7 +202,7 @@
                     }
                 }
 
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     function continue_lookup(d) {
                         if(d < aDicts.length) {
                             query("lookup_continue", { term: term })

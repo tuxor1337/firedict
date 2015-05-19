@@ -12,7 +12,7 @@ testbuild: icon-60.png
 	cp -r index.html icon-60.png testbuild
 	cp -r js/*.js testbuild/js
 	cp test/worker.js testbuild/js/worker.js
-	cp -r js/lib/{angular*,l10n,wiki2html,jquery*,promise*}.js testbuild/js/lib
+	cp -r js/lib/{angular*,l10n*,wiki2html,promise*}.js testbuild/js/lib
 
 icon-%.png: icon-scalable.svg icon-scalable-detail.svg
 	if [ $* -lt 100 ] ; then \
