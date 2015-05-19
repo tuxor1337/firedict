@@ -94,7 +94,7 @@
         };
 
         cls.create = function () {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 IdbWrapper.add_dictionary()
                 .then(function (version) { resolve(new cls(version)); });
             });
@@ -108,8 +108,7 @@
             var meta_info = {},
                 idxOft = null, synOft = null,
                 oStarDict = new StarDict(files), oDB,
-                cmp_func = cmp_fct || stardict_strcmp,
-                that = this;
+                cmp_func = cmp_fct || stardict_strcmp;
 
             function save_meta() {
                 return oDB.set_meta(meta_info);
@@ -141,7 +140,7 @@
             }
 
             function decodeObj(obj) {
-                var idx, term, result = [];
+                var idx, term;
                 if(obj.type == 0) {
                     idx = getIndexAt(obj.id);
                     term = idx.term;
@@ -250,7 +249,7 @@
 
             this.restore = function (version, force_oft_creation) {
                 oDB = new dictionaryIdb(version);
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     oDB.get_meta().then(function (meta) {
                         meta_info = meta;
                         if(force_oft_creation) return createOft();

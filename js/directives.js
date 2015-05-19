@@ -23,13 +23,11 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
         },
         link: function ($scope, $element, $attrs) {
             $scope.type = $attrs.type;
-            $scope.onClear = function (e) {
+            $scope.onClear = function () {
                 $scope.searchTerm = "";
-                $timeout(function() {
-                  $element.find("form input").focus();
-                });
+                $timeout(function() { $element.find("form input").focus(); });
             };
-            $element.find("form input").bind("keydown keypress",
+            $element.find("form input").on("keydown keypress",
                 function (e) {
                     if(e.which === 13) {
                         $scope.onEnter(e);
@@ -41,31 +39,28 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
         templateUrl: "partials/header.html"
     };
 })
-.directive("ngWordpicker", ["$rootScope", "dictProvider", "ngDialog",
-    function ($rootScope, dictProvider, ngDialog) {
-        return {
-            replace: true,
-            restrict: "A",
-            scope: {
-                "markup": '=markup',
-                "picked": '='
-            },
-            link: function ($scope, $element, $attrs) {
-                var $content = $element.find("div.content");
-                $scope.$watch(
-                function () { return $content.find(".picked").text(); },
-                function (value) {
-                    $scope.picked = value
-                    .replace(/[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*$/,'')
-                    .replace(/^[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*/,'');
-                });
-                $scope.pick_word = function ($event) {
-                    wordpicker_wrap($event.originalEvent);
-                };
-            },
-            templateUrl: "partials/wordpicker.html"
-        };
-}])
+.directive("ngWordpicker", function () {
+    return {
+        replace: true,
+        restrict: "A",
+        scope: {
+            "markup": '=markup',
+            "picked": '='
+        },
+        link: function ($scope, $element) {
+            var c_div = $element[0].children[1];
+            $scope.$watch(
+            function () { return c_div.querySelector(".picked").textContent; },
+            function (value) {
+                $scope.picked = value
+                .replace(/[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*$/,'')
+                .replace(/^[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*/,'');
+            });
+            $scope.pick_word = wordpicker_wrap;
+        },
+        templateUrl: "partials/wordpicker.html"
+    };
+})
 .directive("ngGrouppicker", ["$rootScope", "dictProvider", "ngDialog",
     function ($rootScope, dictProvider, ngDialog) {
         return {
@@ -208,31 +203,23 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
 
                 var moveAfter = $scope.$eval($attr.moveFn);
 
-                function touchXY(evt) {
-                    var changed = evt.originalEvent.changedTouches;
-                    if(changed) changed = changed[0];
-                    else changed = evt.originalEvent;
-                    return {
-                        "Y": changed.pageY,
-                        "X": changed.pageX
-                    }
-                }
-
                 function dragover_handler() {
                     if(dragover === null) {
-                        if(currIndex > 0) dragover = $(curr).prev();
-                        else dragover = $(curr).next();
+                        if(currIndex > 0) dragover = jq(curr).prev();
+                        else dragover = jq(curr).next();
                         dragover = dragover.addClass("dragover")[0];
                     }
-                    var pad = parseInt($(curr).css("margin-bottom")), refy = 0;
-                    if($(dragover).index() == 0
-                       || $(dragover).index() == 1 && currIndex == 0)
+                    var pad = parseInt(
+                            window.getComputedStyle(curr, null).marginBottom
+                        ), refy = 0;
+                    if(jq(dragover).index() == 0
+                       || jq(dragover).index() == 1 && currIndex == 0)
                         refy = ul_top - pad;
                     else refy = dragover_prev().getBoundingClientRect().bottom;
                     var crect = curr.getBoundingClientRect(),
                         drect = dragover.getBoundingClientRect(),
-                        dheight = drect.bottom - drect.top + pad,
-                        cheight = crect.bottom - crect.top + pad,
+                        dheight = drect.height + pad,
+                        cheight = crect.height + pad,
                         mbottom = (crect.top - refy - pad)*cheight/dheight,
                         mtop = cheight - mbottom;
                     if(mtop < 0 || mbottom < 0) {
@@ -241,29 +228,28 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                     }
                     mtop = Math.min(cheight,Math.max(mtop,0))
                     mbottom = Math.min(cheight,Math.max(mbottom,0))
-                    $(dragover)
+                    jq(dragover)
                     .css("margin-top", (mtop + pad) + "px")
                     .css("margin-bottom", (mbottom + pad) + "px");
                 }
 
                 function dragover_reset(candidate) {
-                    $(dragover).removeClass("dragover");
-                    dragover = $(candidate).addClass("dragover")[0];
-                    $(curr).siblings()
-                    .css("margin-top","").css("margin-bottom","");
+                    jq(dragover).removeClass("dragover")
+                        .css("margin-top","").css("margin-bottom","");
+                    dragover = jq(candidate).addClass("dragover")[0];
                     dragover_handler();
                 }
 
                 function dragover_prev() {
-                    var candidate = (currIndex+1 === $(dragover).index())?
-                        $(curr).prev():$(dragover).prev();
+                    var candidate = (currIndex+1 === jq(dragover).index())?
+                        jq(curr).prev():jq(dragover).prev();
                     if(candidate.length === 0) return null;
                     return candidate[0];
                 }
 
                 function dragover_next() {
-                    var candidate = (currIndex-1 === $(dragover).index())?
-                        $(curr).next():$(dragover).next();
+                    var candidate = (currIndex-1 === jq(dragover).index())?
+                        jq(curr).next():jq(dragover).next();
                     if(candidate.length === 0) return null;
                     return candidate[0];
                 }
@@ -279,14 +265,13 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
 
                 function ontouchstart(e) {
                     var t = touchXY(e),
-                        crect = curr.getBoundingClientRect(),
-                        parent_ul = $(curr).parents("ul");
-                    parent_ul.css("height", parent_ul[0].clientHeight + "px")
-                    ul_top = parent_ul[0].getBoundingClientRect().top;
-                    currIndex = $(curr).index();
+                        crect = curr.getBoundingClientRect();
+                    $element.css("height", $element[0].clientHeight + "px")
+                    ul_top = $element[0].getBoundingClientRect().top;
+                    currIndex = jq(curr).index();
                     offsetY = t.Y - crect.top;
                     offsetX = t.X - crect.left;
-                    $(curr).css("width", $(curr).css("width"))
+                    jq(curr).css("width", curr.clientWidth + "px")
                         .addClass("sorting")
                         .css({ "top": crect.top + "px" })
                         .css({ "left": crect.left + "px" });
@@ -295,30 +280,31 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
 
                 function ontouchmove(e) {
                     var t = touchXY(e);
-                    $(curr).css({ "top": (t.Y - offsetY) + "px" })
+                    jq(curr).css({ "top": (t.Y - offsetY) + "px" })
                         .css({ "left": (t.X - offsetX) + "px" });
                     dragover_handler();
                 }
 
-                function ontouchend(e) {
+                function ontouchend() {
                     var prev = curr_prev();
-                    $(curr).removeClass("sorting").css("width","")
-                        .css("top","").css("left","")
-                        .siblings().removeClass("dragover")
-                        .css("margin-top","").css("margin-bottom","")
-                        .parents("ul").css("height","");
+                    jq(dragover).removeClass("dragover")
+                        .css("margin-top","").css("margin-bottom","");
+                    jq(curr).removeClass("sorting").css("width","")
+                        .css("top","").css("left","");
+                    $element.css("height","");
                     moveAfter(curr, prev);
                     curr = null, currIndex = -1, dragover = null;
                 }
 
                 $element
-                .on("touchstart mousedown", "li[draggable] .handle", function(e){
-                        e.preventDefault();
-                        var li = $(this).parents("li");
-                        if($(li).siblings().length > 0) {
-                            curr = li[0];
+                .on("touchstart mousedown", function(e) {
+                        var handle;
+                        if(e.target.classList.contains("handle")
+                           && jq(this).children().length > 1) {
+                            e.preventDefault();
+                            curr = jq(e.target).parent()[0];
                             ontouchstart(e);
-                        }
+                       }
                 })
                 .on("touchmove mousemove", function (e) {
                     if(currIndex >= 0) {
@@ -338,26 +324,26 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
 })
 .directive('compile', ['$compile', "dictProvider",
     function ($compile, dictProvider) {
-        return function(scope, element, attrs) {
-            var ensureCompileRunsOnce = scope.$watch(
-                function(scope) {
-                    return scope.$eval(attrs.compile);
+        return function($scope, $element, $attrs) {
+            var ensureCompileRunsOnce = $scope.$watch(
+                function($scope) {
+                    return $scope.$eval($attrs.compile);
                 },
                 function(value) {
-                    element.html(value);
-                    var c_div = element.parent(),
-                        picked_el = element.find(".picked");
+                    $element.html(value);
+                    var c_div = $element.parent(),
+                        picked_el = $element[0].querySelector(".picked");
                     if(dictProvider.settings.get("expandable") != "false") {
                         if(c_div.hasClass("content")
                            && c_div[0].scrollHeight > 150) {
                             c_div.addClass("expandable");
                         }
                     }
-                    $compile(element.contents())(scope);
-                    if(element.parent().hasClass("wordpicker")) {
-                        if(picked_el.length > 0) {
-                            element[0].scrollTop = picked_el[0].offsetTop;
-                        } else element[0].scrollTop = 0;
+                    $compile($element.contents())($scope);
+                    if(c_div.hasClass("wordpicker")) {
+                        if(picked_el !== null) {
+                            $element[0].scrollTop = picked_el.offsetTop;
+                        } else $element[0].scrollTop = 0;
                     }
                     ensureCompileRunsOnce();
                 }

@@ -41,7 +41,7 @@
             }
         }
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             request.onsuccess = function () {
                 if(!this.result) {
                     sort_files();
@@ -81,7 +81,7 @@
         var sdcard_areas = GLOBAL.navigator.getDeviceStorages("sdcard"),
             subdirs = [];
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             (function rec_scan(n) {
                 if(n < sdcard_areas.length) {
                     scan_area(sdcard_areas[n])

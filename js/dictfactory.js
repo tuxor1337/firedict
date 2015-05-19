@@ -149,16 +149,14 @@ var FireDictProvider = angular.module("FireDictProvider", ["FireDictDirectives"]
 
         var workerObj = {
             query: function () {
-                if (arguments.length < 1) {
-                    throw new TypeError("dictWorker.query - not enough arguments");
-                    return;
-                }
+                if (arguments.length < 1)
+                    throw new TypeError("dictWorker.query: not enough arguments");
                 var queryObj = {
                     "bk4e1h0": arguments[0],
                     "df65d4e": 0,
                     "ktp3fm1": arguments[1]
                 }
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     queryObj.df65d4e = transactions.length;
                     transactions.push(resolve);
                     oWorker.postMessage(queryObj);

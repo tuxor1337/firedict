@@ -7,13 +7,6 @@
 "use strict";
 
 (function (GLOBAL) {
-    function do_async_rec(work, check, terminate) {
-        if(!check()) terminate();
-        else work().then(function () {
-            do_async_rec(work, check, terminate);
-        });
-    }
-
     function DEBUG(msg) {
         /* Set to true for debugging purposes. */
         if(false) console.log("idbwrapper: " + msg);
@@ -35,10 +28,10 @@
                     DEBUG("Opening " + dbName + " v" + version);
                 }
 
-                request.onerror = function (event) {
+                request.onerror = function () {
                    throw new Error("Why didn't you allow my web app to use IndexedDB?!");
                 };
-                request.onsuccess = function (e) {
+                request.onsuccess = function () {
                     indexedDB_handle = request.result;
                     indexedDB_handle.onerror = function (e) {
                         throw new Error("Database error: " + e.target.errorCode);
@@ -51,7 +44,7 @@
             }
 
             this.init = function () {
-                return new Promise(function (resolve,reject) {
+                return new Promise(function (resolve) {
                     open_db(resolve,
                         function (db) {
                             db.createObjectStore("dictionaries");
@@ -65,10 +58,10 @@
                 var aDicts = [],
                     request = indexedDB_handle.transaction("dictionaries")
                         .objectStore("dictionaries").openCursor();
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     request.onsuccess = function (event) {
                         var cursor = event.target.result;
-                        if(!!cursor == false) resolve(aDicts);
+                        if(!!cursor === false) resolve(aDicts);
                         else {
                             aDicts.push(cursor.value);
                             cursor.continue();
@@ -80,7 +73,7 @@
             this.get_history = function () {
                 var request = indexedDB_handle.transaction("history")
                     .objectStore("history").get(0);
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     request.onsuccess = function (evt) {
                         var cache = evt.target.result;
                         if(typeof evt.target.result === "undefined") cache = [];
@@ -92,7 +85,7 @@
             this.add_dictionary = function (data) {
                 var version = parseInt(indexedDB_handle.version)+1;
                 if(typeof data === "undefined") data = {};
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     open_db(
                         function () {
                             data.version = version;
@@ -110,7 +103,7 @@
 
             this.remove_dictionary = function (data) {
                 var version = parseInt(indexedDB_handle.version)+1;
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     open_db(
                         function () {
                             indexedDB_handle.transaction("dictionaries", "readwrite")
@@ -136,7 +129,7 @@
                     request = indexedDB_handle
                         .transaction("dictionaries", "readwrite")
                         .objectStore("dictionaries").put(data, did);
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                      request.onsuccess = function () { resolve(); };
                 });
             };
@@ -145,13 +138,13 @@
                 var did = data.did,
                     request = indexedDB_handle.transaction("dictionaries")
                         .objectStore("dictionaries").get(did);
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     request.onsuccess = function (e) { resolve(e.target.result); };
                 });
             };
 
             this.store_oft = function (data) {
-                var did = data.did, chunksize = data.chunksize,
+                var did = data.did,
                     idb_ostore = "dict" + did,
                     data = data.data,
 
@@ -161,7 +154,7 @@
 
                     request = store.put(data.idxOft, 0);
 
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     request.onsuccess = function () {
                         store.put(data.synOft, 1)
                         .onsuccess = function () { resolve(); };
@@ -179,7 +172,7 @@
                     result = {},
                     request = store.get(0);
 
-                return new Promise(function (resolve, reject) {
+                return new Promise(function (resolve) {
                     request.onsuccess = function (event) {
                         result.idxOft = event.target.result;
                         store.get(1)

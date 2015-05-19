@@ -20,9 +20,9 @@ var console = {
 };
 
 importScripts("lib/promise.min.js");
-importScripts("lib/inflate.js");
-importScripts("lib/dictzip_sync.js");
-importScripts("lib/stardict_sync.js");
+importScripts("lib/pako_inflate.min.js");
+importScripts("lib/dictzip_sync.min.js");
+importScripts("lib/stardict_sync.min.js");
 
 importScripts("dictscanner.js");
 importScripts("idbwrapper.js");
@@ -58,9 +58,7 @@ var dictMan = new DictionaryManager(),
                 obj.reply(entries);
             }
         },
-        clear_history: function (obj) {
-            dictMan.clear_history();
-        },
+        clear_history: function () { dictMan.clear_history(); },
         edit_dictionaries: function (obj) {
             obj.data.forEach(dictMan.edit);
         },
@@ -74,15 +72,14 @@ var dictMan = new DictionaryManager(),
     },
     query = function () {
         if (arguments.length < 1) {
-            throw new TypeError("queryMain - not enough arguments");
-            return;
+            throw new TypeError("query: not enough arguments");
         }
         var queryObj = {
             "vo42t30": arguments[0],
             "e4b869b": 0,
             "rnb93qh": arguments[1]
         };
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             queryObj.e4b869b = transactions.length;
             transactions.push(resolve);
             postMessage(queryObj);

@@ -40,7 +40,7 @@ testing the ui
 Run `make testbuild` in order to get a version of this app that doesn't require
 privileges and permissions. You can run the app `testbuild/index.html` in
 any browser (mobile or non-mobile, offline or online) and test all the ui stuff
-like i10n.js, AngularJS, jQuery and stylesheets. (The test worker uses dummy
+like i10n.js, AngularJS and stylesheets. (The test worker uses dummy
 dictionaries and dummy lookups etc.)
 
 licensing and third-party code

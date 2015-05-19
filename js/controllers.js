@@ -85,7 +85,7 @@ var FireDictControllers = angular.module("FireDictControllers",
         };
         $scope.dictMoveAfter = function (selected, target) {
             var aDictSorted = dictProvider.dicts.sorted();
-            var currVer = parseInt($(selected).find(".color").text()),
+            var currVer = parseInt(selected.querySelector(".color").textContent),
                 currIdx = -1;
             for(var i = 0; i < aDictSorted.length; i++) {
                 if(currVer == aDictSorted[i].id) currIdx = i;
@@ -95,7 +95,7 @@ var FireDictControllers = angular.module("FireDictControllers",
                 aDictSorted.unshift(aDictSorted.splice(currIdx, 1)[0]);
             } else {
                 var curr = aDictSorted.splice(currIdx,1)[0],
-                    targetVer = parseInt($(target).find(".color").text());
+                    targetVer = parseInt(target.querySelector(".color").textContent);
                 for(var i = 0; i < aDictSorted.length; i++) {
                     if(targetVer == aDictSorted[i].id) {
                         aDictSorted.splice(i+1, 0, curr); break;
@@ -191,7 +191,7 @@ var FireDictControllers = angular.module("FireDictControllers",
         };
 
         $scope.pick_word = function ($event) {
-            wordpicker_wrap($event.originalEvent);
+            wordpicker_wrap($event);
             ngDialog.open({
                 type: "wordpicker",
                 range: $event.currentTarget.innerHTML,
@@ -233,9 +233,8 @@ var FireDictControllers = angular.module("FireDictControllers",
         };
 
         $scope.showPreview = function(bol, evt) {
-            $(evt.currentTarget)
-                .siblings(".expandable")
-                .toggleClass("preview", bol);
+            var target = evt.currentTarget.parentNode.querySelector(".expandable");
+            if(target !== null) target.classList.toggle("preview", bol);
         };
 
         $scope.$watch(
@@ -282,205 +281,220 @@ var FireDictControllers = angular.module("FireDictControllers",
                 }
             }
             function render_html_content(html_markup) {
-                var tmp_obj = $("<div />").html(html_markup);
-                $(tmp_obj).find(":not("
-                    + "p, font, span, div, table, tr, td, tbody, strong, "
-                    + "br, i, a, b, u, img, sup, sub, ul, ol, li, abbr, "
-                    + "center, left, right, em, dd, dt, blockquote, small, "
-                    + "code, del, h1, h2, h3, h4, h5, h6, hr"
-                + ")").each(function () {
-                    console.log("Html code injection: " + this.tagName);
-                    if($(this).children().length == 0)
-                        $(this).replaceWith($(this).text());
-                    else $(this).children().unwrap();
+                var $tmpdiv = jq("<div />").html(html_markup),
+                    legal = [
+                        "span", "div",
+                        "font", "strong", "small", "i", "b", "u", "a",
+                        "p", "br", "center", "left", "right",
+                        "table", "tr", "td", "tbody",
+                        "ul", "ol", "li", "dd", "dt",
+                        "img", "blockquote", "hr",
+                        "sup", "sub", "abbr", "em", "code", "del",
+                        "h1", "h2", "h3", "h4", "h5", "h6"
+                    ];
+                angular.forEach($tmpdiv[0].querySelectorAll(
+                    ":not(" + legal.join("):not(") + ")"
+                ), function (el) {
+                    console.log("Html code injection: " + el.tagName);
+                    if(jq(el).children().length == 0)
+                        jq(el).replaceWith(jq(el).text());
+                    else jq(el).children().unwrap();
                 });
-                $(tmp_obj).find("center, left, right").each(function () {
-                    $(this).replaceWith(
-                        $("<p />").html($(this).html())
-                        .css("text-align",this.tagName)
+                angular.forEach($tmpdiv.find("center, left, right"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<p />").html(jq(el).html())
+                        .css("text-align",el.tagName)
                     );
                 });
-                $(tmp_obj).find("font").each(function () {
-                    var replacement = $("<span />").html($(this).html());
-                    if($(this).attr("color")) {
-                       replacement.css("color",$(this).attr("color"));
+                angular.forEach($tmpdiv.find("font"), function (el) {
+                    var replacement = jq("<span />").html(jq(el).html());
+                    if(jq(el).attr("color")) {
+                       replacement.css("color",jq(el).attr("color"));
                     }
-                    if($(this).attr("size")) {
-                        var fontsize = $(this).attr("size");
+                    if(jq(el).attr("size")) {
+                        var fontsize = jq(el).attr("size");
                         if("+-".indexOf(fontsize.charAt(0)) >= 0)
                             fontsize = parseInt(fontsize.trim("+")) + 2;
                         else fontsize = parseInt(fontsize);
                         fontsize = Math.min(7,Math.max(fontsize,1))-1;
                         replacement.css("font-size",Array("0.8","1","1.3","1.5","2","2.7","4")[fontsize]+"em");
                     }
-                    if($(this).attr("face"))
-                       replacement.css("font-family",$(this).attr("face"));
-                    $(this).replaceWith(replacement);
+                    if(jq(el).attr("face"))
+                       replacement.css("font-family",jq(el).attr("face"));
+                    jq(el).replaceWith(replacement);
                 });
-                $(tmp_obj).find("img").each(function () {
-                    var elImg = this,
-                        img_filename = $(elImg).attr("src")
+                angular.forEach($tmpdiv.find("img"), function (el) {
+                    var elImg = el,
+                        img_filename = jq(elImg).attr("src")
                             .replace(/^\x1E/, '').replace(/\x1F$/, '');
-                    $(elImg).attr("src",
+                    jq(elImg).attr("src",
                         "{{resources[" + did + "]['" + img_filename + "']}}");
-                    if($(elImg).attr("align") == "middle") {
-                        $(elImg).removeAttr("align")
+                    if(jq(elImg).attr("align") == "middle") {
+                        jq(elImg).removeAttr("align")
                             .css("vertical-align","middle");
                     }
                     inject_resource(img_filename);
                 });
-                $(tmp_obj).find("a").each(function () {
-                    var linkText = $(this).text(),
-                        linkRef = $(this).attr("href");
-                    if("bword://" != linkRef.substring(0,8)) {
-                        $(this).replaceWith(linkText);
+                angular.forEach($tmpdiv.find("a"), function (el) {
+                    var linkText = jq(el).text(),
+                        linkRef = jq(el).attr("href");
+                    if(typeof linkRef === "undefined"
+                       || "bword://" != linkRef.substring(0,8)) {
+                        jq(el).replaceWith(linkText);
                     } else {
                         linkRef = linkRef.substring(8).replace(/'/g, "\\'")
                             .replace(/^ /g, "");
-                        $(this).attr("href","javascript:void(0)")
+                        jq(el).attr("href","javascript:void(0)")
                                 .attr("ng-click", "show_entry('" + linkRef + "')");
                     }
                 });
-                return $(tmp_obj).html();
+                return $tmpdiv.html();
             }
             function render_pango_content(pango_markup) {
-                var tmp_obj = $("<div/>").html(pango_markup.replace(/\n/g,"<br>"));
-                $(tmp_obj).find(":not("
-                    + "span, big, s, tt, b, i, sub, sup, small, u, br"
-                + ")")
-                .each(function () {
-                    console.log("Pango code injection: " + this.tagName);
-                    if($(this).children().length == 0)
-                        $(this).replaceWith($(this).text());
-                    else $(this).children().unwrap();
+                var $tmpdiv = jq("<div/>").html(pango_markup.replace(/\n/g,"<br>")),
+                    legal = [
+                        "big", "small", "tt", "s", "b", "i", "u",
+                        "span", "sub", "sup", "br"
+                    ];
+                angular.forEach($tmpdiv[0].querySelectorAll(
+                    ":not(" + legal.join("):not(") + ")"
+                ), function (el) {
+                    console.log("Pango code injection: " + el.tagName);
+                    if(jq(el).children().length == 0)
+                        jq(el).replaceWith(jq(el).text());
+                    else jq(el).children().unwrap();
                 });
-                $(tmp_obj).find("span").each(function () {
-                    var replacement = $("<span/>"), sup = false;
-                    $.each(this.attributes, function(dummy, attrib){
+                angular.forEach($tmpdiv.find("span"), function (el) {
+                    var replacement = jq("<span/>"), sup = false;
+                    $.each(el.attributes, function(dummy, attrib){
                         var name = attrib.name;
                         var value = attrib.value;
                         if(name == "font_desc")
-                            $(replacement).css("font", value);
+                            jq(replacement).css("font", value);
                         else if(name == "font_family" || name == "face")
-                            $(replacement).css("font-family", value);
+                            jq(replacement).css("font-family", value);
                         else if(name == "size" && !isNaN(value))
-                            $(replacement).css("font-size", value);
+                            jq(replacement).css("font-size", value);
                         else if(name == "style")
-                            $(replacement).css("font-style", value);
+                            jq(replacement).css("font-style", value);
                         else if(name == "weight") {
                             if(value == "ultrabold") value = "800";
                             else if(value == "heavy") value = "900";
                             else if(value == "light") value = "300";
                             else if(value == "ultralight") value = "200";
-                            $(replacement).css("font-weight", value);
+                            jq(replacement).css("font-weight", value);
                         } else if(name == "variant")
-                            $(replacement).css("font-variant",
+                            jq(replacement).css("font-variant",
                                 value.replace("smallcaps","small-caps"));
                         else if(name == "stretch") {
                             value.replace(/(ultra|extra|semi)(condensed|expanded)/g, "$1-$2");
-                            $(replacement).css("font-stretch", value);
+                            jq(replacement).css("font-stretch", value);
                         } else if(name == "foreground")
-                            $(replacement).css("color", value);
+                            jq(replacement).css("color", value);
                         else if(name == "background")
-                            $(replacement).css("background-color", value);
+                            jq(replacement).css("background-color", value);
                         else if(name == "underline") {
                             if(value == "double")
-                                $(replacement).css("border-bottom", "1px #000 double");
+                                jq(replacement).css("border-bottom", "1px #000 double");
                             else if(value == "low")
-                                $(replacement).css("border-bottom", "1px #000 solid");
+                                jq(replacement).css("border-bottom", "1px #000 solid");
                             else if(value == "single")
-                                $(replacement).css("text-decoration", "underline");
+                                jq(replacement).css("text-decoration", "underline");
                         } else if(name == "strikethrough" && value == "true")
-                            $(replacement).css("text-decoration", "line-through");
+                            jq(replacement).css("text-decoration", "line-through");
                         else if(name == "rise" && value != "0") sup = true;
                     });
                     if(sup) {
-                        $(this).replaceWith(
-                            $(replacement).html($(this).html())
+                        jq(el).replaceWith(
+                            jq(replacement).html(jq(el).html())
                         );
                     } else {
-                        $(this).replaceWith(
-                            $("<sup/>").append(
-                                $(replacement).html($(this).html())
+                        jq(el).replaceWith(
+                            jq("<sup/>").append(
+                                jq(replacement).html(jq(el).html())
                             )
                         );
                     }
                 });
-                $(tmp_obj).find("big").each(function () {
-                    $(this).replaceWith(
-                        $("<span/>").html($(this).html())
+                angular.forEach($tmpdiv.find("big"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<span/>").html(jq(el).html())
                     );
                 });
-                $(tmp_obj).find("tt").each(function () {
-                    $(this).replaceWith(
-                        $("<code/>").html($(this).html())
+                angular.forEach($tmpdiv.find("tt"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<code/>").html(jq(el).html())
                     );
                 });
-                $(tmp_obj).find("s").each(function () {
-                    $(this).replaceWith(
-                        $("<del/>").html($(this).html())
+                angular.forEach($tmpdiv.find("s"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<del/>").html(jq(el).html())
                     );
                 });
-                return render_html_content($(tmp_obj).html());
+                return render_html_content($tmpdiv.html());
             }
             function render_xdxf_content(xdxf_markup) {
-                var tmp_obj = $("<div />").html(xdxf_markup);
-                $(tmp_obj).find(":not("
-                    + "k, pos, abr, c, kref, ex, "
-                    + "big, small, i, sup, sub, b, tt, blockquote"
-                + ")").each(function () {
-                    console.log("XDXF code injection: " + this.tagName);
-                    if($(this).children().length == 0)
-                        $(this).replaceWith($(this).text());
-                    else $(this).children().unwrap();
+                var $tmpdiv = jq("<div />").html(xdxf_markup),
+                    legal = [
+                        "big", "small", "tt", "i", "b",
+                        "k", "c", "abr", "kref", "ex",
+                        "sup", "sub", "pos", "blockquote"
+                    ];
+                angular.forEach($tmpdiv[0].querySelectorAll(
+                    ":not(" + legal.join("):not(") + ")"
+                ), function (el) {
+                    console.log("XDXF code injection: " + el.tagName);
+                    if(jq(el).children().length == 0)
+                        jq(el).replaceWith(jq(el).text());
+                    else jq(el).children().unwrap();
                 });
-                $(tmp_obj).find("k").each(function () {
-                    $(this).replaceWith(
-                        $("<dt/>").html($(this).html())
+                angular.forEach($tmpdiv.find("k"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<dt/>").html(jq(el).html())
                     );
                 });
-                $(tmp_obj).find("pos").each(function () {
-                    $(this).replaceWith(
-                        $("<p/>").append(
-                            $("<i/>").html($(this).html())
+                angular.forEach($tmpdiv.find("pos"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<p/>").append(
+                            jq("<i/>").html(jq(el).html())
                         )
                     );
                     ;
                 });
-                $(tmp_obj).find("big").each(function () {
-                    $(this).replaceWith(
-                        $("<span/>").html($(this).html())
+                angular.forEach($tmpdiv.find("big"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<span/>").html(jq(el).html())
                     );
                 });
-                $(tmp_obj).find("tt").each(function () {
-                    $(this).replaceWith(
-                        $("<code/>").html($(this).html())
+                angular.forEach($tmpdiv.find("tt"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<code/>").html(jq(el).html())
                     );
                 });
-                $(tmp_obj).find("abr").each(function () {
-                    $(this).replaceWith(
-                        $("<abbr/>").html($(this).html())
+                angular.forEach($tmpdiv.find("abr"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<abbr/>").html(jq(el).html())
                     );
                 });
-                $(tmp_obj).find("c").each(function () {
-                    $(this).replaceWith(
-                        $("<span/>").html($(this).html())
-                        .css("color",$(this).attr("c"))
+                angular.forEach($tmpdiv.find("c"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<span/>").html(jq(el).html())
+                        .css("color",jq(el).attr("c"))
                     );
                 });
-                $(tmp_obj).find("kref").each(function () {
-                    $(this).replaceWith(
-                        $("<a/>").html($(this).html())
-                        .attr("href","bword://"+$(this).text().trim())
+                angular.forEach($tmpdiv.find("kref"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<a/>").html(jq(el).html())
+                        .attr("href","bword://"+jq(el).text().trim())
                     );
                 });
-                $(tmp_obj).find("ex").each(function () {
-                    $(this).replaceWith(
-                        $("<span/>").html($(this).html())
+                angular.forEach($tmpdiv.find("ex"), function (el) {
+                    jq(el).replaceWith(
+                        jq("<span/>").html(jq(el).html())
                         .css("color","#4682B4")
                     );
                 });
-                return render_html_content($(tmp_obj).html());
+                return render_html_content($tmpdiv.html());
             }
             function render_resource_content(res) {
                 var result = [], aRes = res.split("\n");
@@ -498,8 +512,8 @@ var FireDictControllers = angular.module("FireDictControllers",
                 return result.join("<br />\n");
             }
             function render_plain_content(plain_text) {
-                var div = $("<div />").text(plain_text);
-                return $(div).html().replace(/(\r\n|\n\r|\r|\n)/g, "<br>");
+                var div = jq("<div />").text(plain_text);
+                return jq(div).html().replace(/(\r\n|\n\r|\r|\n)/g, "<br>");
             }
             if("g" == d.type)
                 return render_pango_content(d.content);

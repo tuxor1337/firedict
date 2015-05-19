@@ -34,13 +34,25 @@ function hexToRGB(hex) {
     return [r,g,b];
 }
 
+function touchXY(evt) {
+    if(evt.originalEvent) evt = evt.originalEvent;
+    var changed = evt.changedTouches;
+    changed = (changed)?changed[0]:evt;
+    return {
+        "Y": changed.pageY,
+        "X": changed.pageX
+    }
+}
+
 function wordpicker_wrap(event) {
     var oContent = event.currentTarget,
         oPicked = event.explicitOriginalTarget,
         oParent = oPicked.parentNode,
-        aSpans = [];
+        aSpans = [],
+        oTouches;
     wordpicker_unwrap(oContent);
     if(oPicked.nodeType === 3) {
+        oTouches = touchXY(event);
         oPicked.textContent.split(" ").forEach(function (sWord) {
             var oChild = document.createElement("span");
             oChild.textContent = sWord + " ";
@@ -48,7 +60,7 @@ function wordpicker_wrap(event) {
             aSpans.push(oChild);
         });
         oParent.removeChild(oPicked);
-        document.elementFromPoint(event.clientX, event.clientY)
+        document.elementFromPoint(oTouches.X,oTouches.Y)
             .classList.add("picked");
         aSpans.forEach(function (oSpan) {
             if(!oSpan.classList.contains("picked")) {
