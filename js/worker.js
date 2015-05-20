@@ -24,10 +24,10 @@ importScripts("lib/pako_inflate.min.js");
 importScripts("lib/dictzip_sync.min.js");
 importScripts("lib/stardict_sync.min.js");
 
-importScripts("dictscanner.js");
-importScripts("idbwrapper.js");
-importScripts("dictionary.js");
-importScripts("dictionarymanager.js");
+importScripts("wrapper-devicestorage.js");
+importScripts("wrapper-indexeddb.js");
+importScripts("worker-dictionary.js");
+importScripts("worker-dictionarymanager.js");
 
 var dictMan = new DictionaryManager(),
     transactions = [],
