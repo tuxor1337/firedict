@@ -17,6 +17,31 @@
   src: local('Fira Sans Medium'), local('FiraSans-Medium'), url(fonts/firasans-medium.woff) format('woff');
 }
 
+/* Begin angular-csp.css
+    Taken from https://code.angularjs.org/snapshot/angular-csp.css
+    See documentation of ngCsp for more information.
+*/
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
+.ng-cloak, .x-ng-cloak,
+.ng-hide:not(.ng-hide-animate) {
+  display: none !important;
+}
+
+ng\:form {
+  display: block;
+}
+
+.ng-animate-shim {
+  visibility:hidden;
+}
+
+.ng-anchor {
+  position:absolute;
+}
+
+/* End angular-csp.css */
+
 html { height: 100%; width: 100%; }
 body {
     font-family: 'Fira Sans', sans-serif;
