@@ -3,11 +3,6 @@
   "description": "A simple offline dictionary app in the spirit of ColorDict and GoldenDict. It scans for StarDict dictionaries stored in subdirectories of the sdcard's <b>dictdata</b> directory.",
   "version": "1.5",
   "default_locale": "en",
-  "locales": {
-    "de": {
-        "description": "App zum Nachschlagen in Offline-Wörterbüchern, angelehnt an ColorDict und GoldenDict. Unterstützt werden Wörterbücher im StarDict-Format in Unterverzeichnissen des <b>dictdata</b> Verzeichnisses der SD-Karte.\n\nMomentan ist die komplette Oberfläche nur auf Englisch verfügbar. Da das Projekt Open Source ist, fühle sich jeder dazu aufgefordert, bei Interesse die nötigen Änderungen selbst vorzunehmen und ggf. über die Projektseite einzureichen."
-    }
-  },
   "launch_path": "/index.html",
   "type": "privileged",
   "icons": {
