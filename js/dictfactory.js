@@ -6,8 +6,8 @@
 
 "use strict";
 
-var FireDictProvider = angular.module("FireDictProvider", ["FireDictDirectives"])
-.factory("dictProvider", ["$rootScope", "ngDialog", function ($rootScope, ngDialog) {
+var FireDictProvider = angular.module("FireDictProvider", [])
+.factory("dictProvider", ["$rootScope", "$timeout", function ($rootScope, $timeout) {
     var groupProvider, dictWorker, dictionaries, settingsProvider;
 
     groupProvider = (function () {
@@ -128,16 +128,18 @@ var FireDictProvider = angular.module("FireDictProvider", ["FireDictDirectives"]
                 && oEvent.data.hasOwnProperty("e4b869b")
                 && oEvent.data.hasOwnProperty("rnb93qh")) {
                 var tid = oEvent.data.e4b869b;
-                oListeners[oEvent.data.vo42t30]({
-                    tid: tid,
-                    data: oEvent.data.rnb93qh,
-                    reply: function (data) {
-                        oWorker.postMessage({
-                            "bk4e1h0": "reply",
-                            "df65d4e": tid,
-                            "ktp3fm1": data
-                        });
-                    }
+                $timeout(function () {
+                    oListeners[oEvent.data.vo42t30]({
+                        tid: tid,
+                        data: oEvent.data.rnb93qh,
+                        reply: function (data) {
+                            oWorker.postMessage({
+                                "bk4e1h0": "reply",
+                                "df65d4e": tid,
+                                "ktp3fm1": data
+                            });
+                        }
+                    });
                 });
             } else console.log("Wk: " + oEvent.data);
         };
@@ -168,9 +170,8 @@ var FireDictProvider = angular.module("FireDictProvider", ["FireDictDirectives"]
         };
 
         workerObj.addListener("init_ready", function (obj) {
-            ngDialog.close();
+            $rootScope.dialog.close();
             dictionaries.set(obj.data);
-            if(!$rootScope.$$phase) { $rootScope.$apply(); }
         });
 
         workerObj.addListener("progress", function (obj) {
@@ -178,16 +179,15 @@ var FireDictProvider = angular.module("FireDictProvider", ["FireDictDirectives"]
                 value = [];
             if(data.hasOwnProperty("total"))
                 value = [data.status, data.total];
-            if(ngDialog.type() == "progress") {
-                ngDialog.update(value, data.text);
+            if($rootScope.dialog.type() == "progress") {
+                $rootScope.dialog.update(value, data.text);
             } else {
-                ngDialog.open({
+                $rootScope.dialog.open({
                     type: "progress",
                     text: data.text,
                     value: value
                 });
             }
-            if(!$rootScope.$$phase) { $rootScope.$apply(); }
         });
 
         workerObj.addListener("IdbWrapper", function (obj) {
@@ -262,23 +262,24 @@ var FireDictProvider = angular.module("FireDictProvider", ["FireDictDirectives"]
 
     settingsProvider = (function () {
         var DEFAULT_SETTINGS = [
-            ["settings-greyscale", "false"],
-            ["settings-expandable", "true"],
-            ["settings-fontsize", "1.0"]
-        ];
+                ["greyscale", "false"],
+                ["expandable", "true"],
+                ["fontsize", "1.0"]
+            ],
+            SETTINGS_PREFIX = "settings-";
 
         DEFAULT_SETTINGS.forEach(function (el) {
-            var key = "settings-" + el[0];
+            var key = SETTINGS_PREFIX + el[0];
             if(localStorage.getItem(key) === null)
                 localStorage.setItem(key, el[1]);
         });
 
         return {
             "get": function (key) {
-                return localStorage.getItem("settings-" + key);
+                return localStorage.getItem(SETTINGS_PREFIX + key);
             },
             "set": function (key, val) {
-                localStorage.setItem("settings-" + key, val);
+                localStorage.setItem(SETTINGS_PREFIX + key, val);
             }
         };
     })();

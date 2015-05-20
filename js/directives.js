@@ -6,7 +6,8 @@
 
 "use strict";
 
-var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider"])
+var FireDictDirectives = angular.module("FireDictDirectives",
+    ["FireDictProvider", "ngRoute"])
 .directive("ngHeader", function ($timeout) {
     return {
         replace: true,
@@ -25,13 +26,15 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
             $scope.type = $attrs.type;
             $scope.onClear = function () {
                 $scope.searchTerm = "";
-                $timeout(function() { $element.find("form input").focus(); });
+                $timeout(function() {
+                    $element.find("input")[0].focus();
+                });
             };
-            $element.find("form input").on("keydown keypress",
+            $element.find("input").on("keydown keypress",
                 function (e) {
                     if(e.which === 13) {
-                        $scope.onEnter(e);
                         e.preventDefault();
+                        $timeout(function() { $scope.onEnter(e); });
                     }
                 }
             );
@@ -50,7 +53,10 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
         link: function ($scope, $element) {
             var c_div = $element[0].children[1];
             $scope.$watch(
-            function () { return c_div.querySelector(".picked").textContent; },
+            function () {
+                var picked = c_div.querySelector(".picked");
+                return (picked)?picked.textContent:"";
+            },
             function (value) {
                 $scope.picked = value
                 .replace(/[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*$/,'')
@@ -61,8 +67,8 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
         templateUrl: "partials/wordpicker.html"
     };
 })
-.directive("ngGrouppicker", ["$rootScope", "dictProvider", "ngDialog",
-    function ($rootScope, dictProvider, ngDialog) {
+.directive("ngGrouppicker", ["$rootScope", "dictProvider",
+    function ($rootScope, dictProvider) {
         return {
             replace: true,
             restrict: "A",
@@ -105,7 +111,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                     }
                 };
                 $scope.remove = function (group) {
-                    ngDialog.open({
+                    $rootScope.dialog.open({
                         l20n: {
                             text: "dialog-remove-group",
                             success: "dialog-yes-sure",
@@ -118,7 +124,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                     });
                 };
                 $scope.rename = function (group) {
-                    ngDialog.open({
+                    $rootScope.dialog.open({
                         type: "prompt",
                         l20n: {
                             text: "dialog-rename-group"
@@ -139,7 +145,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
                             did: dict.id
                         });
                     });
-                    ngDialog.open({
+                    $rootScope.dialog.open({
                         type: "group_membership",
                         l20n: {
                             text: "dialog-change-members"
@@ -158,7 +164,7 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
             templateUrl: "partials/grouppicker.html"
         };
 }])
-.directive("ngDrawer", function () {
+.directive("ngDrawer", ["$location", function ($location) {
     return {
         replace: true,
         transclude: true,
@@ -167,30 +173,31 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
             $scope.title = $attrs.title;
             $scope.menuitems = [
                 {
-                    "route": "#/lookup",
+                    "route": "/lookup",
                     "l10n": "section-lookup-words"
                 },
                 {
-                    "route": "#/manage",
+                    "route": "/manage",
                     "l10n": "section-manage-dicts"
                 },
                 {
-                    "route": "#/groups",
+                    "route": "/groups",
                     "l10n": "section-manage-groups"
                 },
                 {
-                    "route": "#/settings",
+                    "route": "/settings",
                     "l10n": "section-settings"
                 },
                 {
-                    "route": "#/about",
+                    "route": "/about",
                     "l10n": "section-about"
                 }
             ];
+            $scope.go = function (path) { $location.path(path); };
         },
         templateUrl: "partials/sidebar.html"
     };
-})
+}])
 .directive("ngSortable", function () {
     return {
         compile: function () {
@@ -298,7 +305,6 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
 
                 $element
                 .on("touchstart mousedown", function(e) {
-                        var handle;
                         if(e.target.classList.contains("handle")
                            && jq(this).children().length > 1) {
                             e.preventDefault();
@@ -391,81 +397,4 @@ var FireDictDirectives = angular.module("FireDictDirectives", ["FireDictProvider
         },
         templateUrl: "partials/dialog.html"
     };
-})
-.factory("ngDialog", ["$document", "$compile", "$rootScope",
-    function ($document, $compile, $rootScope) {
-        var defaults = {
-              type: "confirm",
-              range: null,
-              l20n: null,
-              value: null,
-              callbk: null,
-              validate: null
-            },
-            defaults_l20n = {
-              text: "",
-              success: "dialog-ok",
-              cancel: "dialog-cancel"
-            },
-            body = $document.find("body"),
-            modalEl = angular.element('<div ng:dialog data="modal"></div>'),
-            validateFn = function () { return true; },
-            $scope = $rootScope.$new();
-
-        function set_opts(options) {
-            if(options.type == "progress" && typeof options.value === "undefined")
-                options.value = [];
-            options = angular.extend({}, defaults, options);
-            if(options.type == "confirm") options.value = true;
-            if(options.type == "prompt") {
-                window.screen.mozLockOrientation("portrait-primary");
-            } else {
-                window.screen.mozUnlockOrientation();
-            }
-            if(options.l20n instanceof Object)
-                options.l20n = angular.extend({}, defaults_l20n, options.l20n);
-            $scope.modal = {
-                visible: false,
-                result: options.value,
-                range: options.range,
-                type: options.type,
-                text: options.text,
-                l20n: options.l20n,
-                callbk: function (result) {
-                    var callFn = options.callbk || validateFn;
-                    callFn(result);
-                    $scope.$modalClose();
-                },
-                validate: function (result) {
-                    var callFn = options.validate || validateFn;
-                    return callFn(result);
-                }
-            };
-            if(!$scope.$$phase) { $scope.$apply(); }
-        }
-
-        $scope.$modalClose = function () { set_opts(defaults); };
-        set_opts(defaults);
-        $compile(modalEl)($scope);
-        body.append(modalEl);
-
-        return {
-            update: function (res, text) {
-                $scope.modal.result = res;
-                if(typeof text !== "undefined")
-                    $scope.modal.text = text;
-                if(!$scope.$$phase) { $scope.$apply(); }
-            },
-            close: function () {
-                set_opts(defaults);
-            },
-            open: function (options) {
-                set_opts(options);
-                $scope.modal.visible = true;
-            },
-            type: function () {
-                return $scope.modal.type;
-            }
-        };
-    }
-]);
+});
