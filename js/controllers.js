@@ -6,10 +6,88 @@
 
 "use strict";
 
-var FireDictControllers = angular.module("FireDictControllers",
-    ["FireDictDirectives", "FireDictProvider"])
-.controller("manageCtrl", ["$scope", "$rootScope", "dictProvider",
-    function ($scope, $rootScope, dictProvider) {
+angular.module("FireDictControllers")
+.controller("MainCtrl", function ($scope, $rootScope) {
+    $scope.drawerOpen = false;
+    $scope.toggleSidebar = function ($event, drawerOpen) {
+        if(typeof drawerOpen === "undefined")
+            drawerOpen = !$scope.drawerOpen;
+        $scope.drawerOpen = drawerOpen;
+        if($event.currentTarget.getAttribute("id") !== "mainArea")
+            $event.stopPropagation();
+    };
+
+    var defaults = {
+          type: "confirm",
+          range: null,
+          l20n: null,
+          value: null,
+          callbk: null,
+          validate: null
+        },
+        defaults_l20n = {
+          text: "",
+          success: "dialog-ok",
+          cancel: "dialog-cancel"
+        },
+        validateFn = function () { return true; };
+
+    function set_opts(options) {
+        if(options.type == "progress" && typeof options.value === "undefined")
+            options.value = [];
+        options = angular.extend({}, defaults, options);
+        if(options.type == "confirm") options.value = true;
+        if(options.type == "prompt") {
+            window.screen.mozLockOrientation("portrait-primary");
+        } else {
+            window.screen.mozUnlockOrientation();
+        }
+        if(options.l20n instanceof Object)
+            options.l20n = angular.extend({}, defaults_l20n, options.l20n);
+        $scope.modal = {
+            visible: false,
+            result: options.value,
+            range: options.range,
+            type: options.type,
+            text: options.text,
+            l20n: options.l20n,
+            callbk: function (result) {
+                var callFn = options.callbk || validateFn;
+                callFn(result);
+                set_opts(defaults);
+            },
+            validate: function (result) {
+                var callFn = options.validate || validateFn;
+                return callFn(result);
+            }
+        };
+    }
+
+    set_opts(defaults);
+
+    $scope.dialog = {
+        update: function (res, text) {
+            $scope.modal.result = res;
+            if(typeof text !== "undefined")
+                $scope.modal.text = text;
+        },
+        close: function () {
+            set_opts(defaults);
+        },
+        open: function (options) {
+            set_opts(options);
+            $scope.modal.visible = true;
+        },
+        type: function () {
+            return $scope.modal.type;
+        }
+    };
+
+    /* Make the dialog available from all scopes, e.g. for isolated scopes. */
+    $rootScope.dialog = $scope.dialog;
+})
+.controller("manageCtrl", ["$scope", "dictProvider",
+    function ($scope, dictProvider) {
         $scope.title = "section-manage-dicts";
         $scope.dictionaries = dictProvider.dicts;
         $scope.selected = -1;
@@ -29,7 +107,7 @@ var FireDictControllers = angular.module("FireDictControllers",
             else dict.active = true;
         };
         $scope.rename = function (dict) {
-            $rootScope.dialog.open({
+            $scope.dialog.open({
                 type: "prompt",
                 l20n: {
                     text: "dialog-new-alias"
@@ -42,7 +120,7 @@ var FireDictControllers = angular.module("FireDictControllers",
             });
         };
         $scope.setColor = function (dict) {
-            $rootScope.dialog.open({
+            $scope.dialog.open({
                 type: "color",
                 l20n: {
                     text: "dialog-choose-color"
@@ -62,7 +140,7 @@ var FireDictControllers = angular.module("FireDictControllers",
                     name: group
                 });
             });
-            $rootScope.dialog.open({
+            $scope.dialog.open({
                 type: "group_membership",
                 l20n: {
                     text: "dialog-change-groups",
@@ -108,11 +186,11 @@ var FireDictControllers = angular.module("FireDictControllers",
         };
     }
 ])
-.controller("groupsCtrl", ["$scope", "$rootScope", "dictProvider",
-    function ($scope, $rootScope, dictProvider) {
+.controller("groupsCtrl", ["$scope", "dictProvider",
+    function ($scope, dictProvider) {
         $scope.title = "section-manage-groups";
         $scope.addGroup = function () {
-            $rootScope.dialog.open({
+            $scope.dialog.open({
                 type: "prompt",
                 l20n: {
                     text: "dialog-add-new-group"
@@ -127,8 +205,8 @@ var FireDictControllers = angular.module("FireDictControllers",
     }
 ])
 .controller("lookupCtrl", [
-    "$scope", "$rootScope", "$timeout", "dictProvider",
-    function ($scope, $rootScope, $timeout, dictProvider) {
+    "$scope", "$timeout", "dictProvider",
+    function ($scope, $timeout, dictProvider) {
         $scope.idle = false;
         $scope.matches = [];
         $scope.entries = [];
@@ -180,7 +258,7 @@ var FireDictControllers = angular.module("FireDictControllers",
         };
 
         $scope.choose_groups = function () {
-            $rootScope.dialog.open({
+            $scope.dialog.open({
                 type: "grouppicker",
                 l20n: {
                     text: "dialog-choose-groups",
@@ -192,7 +270,7 @@ var FireDictControllers = angular.module("FireDictControllers",
 
         $scope.pick_word = function ($event) {
             wordpicker_wrap($event);
-            $rootScope.dialog.open({
+            $scope.dialog.open({
                 type: "wordpicker",
                 range: $event.currentTarget.innerHTML,
                 l20n: {
@@ -545,15 +623,15 @@ var FireDictControllers = angular.module("FireDictControllers",
         };
     }
 ])
-.controller("settingsCtrl", ["$scope", "$rootScope", "dictProvider",
-    function ($scope, $rootScope, dictProvider) {
+.controller("settingsCtrl", ["$scope", "dictProvider",
+    function ($scope, dictProvider) {
         $scope.title = "section-settings";
         $scope.settings = [
             {
                 type: "action",
                 name: "settings-clear-history",
                 onclick: function () {
-                    $rootScope.dialog.open({
+                    $scope.dialog.open({
                         l20n: {
                             text: "dialog-clear-history",
                             success: "dialog-yes-sure",
@@ -574,7 +652,7 @@ var FireDictControllers = angular.module("FireDictControllers",
                     return dictProvider.settings.get("fontsize");
                 },
                 onclick: function () {
-                    $rootScope.dialog.open({
+                    $scope.dialog.open({
                         type: "fontsize",
                         l20n: {
                             text: "dialog-set-fontsize"

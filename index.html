@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-ng-csp>
     <head>
         <title>firedict</title>
 
@@ -17,7 +17,6 @@
 
         <link rel="resource" type="application/l10n" href="locales/locales.ini" />
 
-        <script src="js/util.js"></script>
         <script src="js/idbwrapper.js"></script>
         <script src="js/dictscanner.js"></script>
         <script src="js/lib/l10n.min.js"></script>
@@ -27,12 +26,13 @@
         <script src="js/lib/angular-route.min.js"></script>
         <script src="js/lib/angular-sanitize.min.js"></script>
         <script src="js/lib/angular-touch.min.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/app.js"></script>
         <script src="js/dictfactory.js"></script>
         <script src="js/directives.js"></script>
         <script src="js/controllers.js"></script>
-        <script src="js/app.js"></script>
     </head>
-    <body data-ng-app="FireDict" data-ng-csp>
+    <body data-ng-app="FireDict" data-ng-controller="MainCtrl">
         <div data-ng-drawer title="FireDict">
             <li data-ng-repeat="item in menuitems">
                 <a data-ng-click="toggleSidebar($event, false); go(item.route)"

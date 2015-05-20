@@ -6,8 +6,7 @@
 
 "use strict";
 
-var FireDictDirectives = angular.module("FireDictDirectives",
-    ["FireDictProvider", "ngRoute"])
+angular.module("FireDictDirectives")
 .directive("ngHeader", function ($timeout) {
     return {
         replace: true,
@@ -67,102 +66,100 @@ var FireDictDirectives = angular.module("FireDictDirectives",
         templateUrl: "partials/wordpicker.html"
     };
 })
-.directive("ngGrouppicker", ["$rootScope", "dictProvider",
-    function ($rootScope, dictProvider) {
-        return {
-            replace: true,
-            restrict: "A",
-            link: function ($scope, $element, $attrs) {
-                $scope.selectable = $attrs.selectable;
-                $scope.selected = -1;
-                $scope.dictColor = $rootScope.dictColor;
-                $scope.groups = dictProvider.groups;
-                $scope.dictionaries = dictProvider.dicts;
-                $scope.select = function (group) {
-                    if($scope.selectable) {
-                        if($scope.selected == group) $scope.selected = -1;
-                        else $scope.selected = group;
-                    }
-                };
-                $scope.isSelected = function (group) {
-                    return ($scope.selected === group)? "selected" : "";
+.directive("ngGrouppicker", ["dictProvider", function (dictProvider) {
+    return {
+        replace: true,
+        restrict: "A",
+        link: function ($scope, $element, $attrs) {
+            $scope.selectable = $attrs.selectable;
+            $scope.selected = -1;
+            $scope.groups = dictProvider.groups;
+            $scope.dictionaries = dictProvider.dicts;
+            $scope.select = function (group) {
+                if($scope.selectable) {
+                    if($scope.selected == group) $scope.selected = -1;
+                    else $scope.selected = group;
                 }
-                $scope.groupDictFilter = function (group) {
-                    return function (dict) {
-                        return dictProvider.groups.members(group).indexOf(dict.id) >= 0;
-                    };
+            };
+            $scope.isSelected = function (group) {
+                return ($scope.selected === group)? "selected" : "";
+            }
+            $scope.groupDictFilter = function (group) {
+                return function (dict) {
+                    return dictProvider.groups.members(group).indexOf(dict.id) >= 0;
                 };
-                $scope.all_active = function (bol) {
-                    var aDicts = dictProvider.dicts;
-                    function is_active() {
-                        var result = 0;
-                        aDicts.forEach(function (dict) {
-                            if(dict.active) result += 1;
-                        });
-                        if(result == 0) return "inactive";
-                        if(result < aDicts.length) return "";
-                        return "active";
+            };
+            $scope.all_active = function (bol) {
+                var aDicts = dictProvider.dicts;
+                function is_active() {
+                    var result = 0;
+                    aDicts.forEach(function (dict) {
+                        if(dict.active) result += 1;
+                    });
+                    if(result == 0) return "inactive";
+                    if(result < aDicts.length) return "";
+                    return "active";
+                }
+                var target = false;
+                if(typeof bol === "undefined") return is_active();
+                else {
+                    if(is_active() === "inactive") target = true;
+                    aDicts.forEach(function (dict) { dict.active = target; });
+                }
+            };
+            $scope.remove = function (group) {
+                $scope.dialog.open({
+                    l20n: {
+                        text: "dialog-remove-group",
+                        success: "dialog-yes-sure",
+                        cancel: "dialog-no-forget-it"
+                    },
+                    value: group,
+                    callbk: function (result) {
+                        if(result === true) dictProvider.groups.remove_group(group);
                     }
-                    var target = false;
-                    if(typeof bol === "undefined") return is_active();
-                    else {
-                        if(is_active() === "inactive") target = true;
-                        aDicts.forEach(function (dict) { dict.active = target; });
-                    }
-                };
-                $scope.remove = function (group) {
-                    $rootScope.dialog.open({
-                        l20n: {
-                            text: "dialog-remove-group",
-                            success: "dialog-yes-sure",
-                            cancel: "dialog-no-forget-it"
-                        },
-                        value: group,
-                        callbk: function (result) {
-                            if(result === true) dictProvider.groups.remove_group(group);
-                        }
+                });
+            };
+            $scope.rename = function (group) {
+                $scope.dialog.open({
+                    type: "prompt",
+                    l20n: {
+                        text: "dialog-rename-group"
+                    },
+                    value: group,
+                    callbk: function (alias) {
+                        if(alias !== null) dictProvider.groups.rename_group(group, alias);
+                    },
+                    validate: function (alias) { return alias != ""; }
+                });
+            };
+            $scope.setMembers = function (group) {
+                var aDicts = [];
+                dictProvider.dicts.sorted().forEach(function (dict) {
+                    aDicts.push({
+                        active: dictProvider.groups.is_member(group, dict.id),
+                        name: dict.alias,
+                        did: dict.id
                     });
-                };
-                $scope.rename = function (group) {
-                    $rootScope.dialog.open({
-                        type: "prompt",
-                        l20n: {
-                            text: "dialog-rename-group"
-                        },
-                        value: group,
-                        callbk: function (alias) {
-                            if(alias !== null) dictProvider.groups.rename_group(group, alias);
-                        },
-                        validate: function (alias) { return alias != ""; }
-                    });
-                };
-                $scope.setMembers = function (group) {
-                    var aDicts = [];
-                    dictProvider.dicts.sorted().forEach(function (dict) {
-                        aDicts.push({
-                            active: dictProvider.groups.is_member(group, dict.id),
-                            name: dict.alias,
-                            did: dict.id
+                });
+                $scope.dialog.open({
+                    type: "group_membership",
+                    l20n: {
+                        text: "dialog-change-members"
+                    },
+                    value: aDicts,
+                    callbk: function (dicts) {
+                        if(dicts === null) return;
+                        dicts.forEach(function (d) {
+                            if(d.active) dictProvider.groups.add_to_group(group, d.did);
+                            else dictProvider.groups.remove_from_group(group, d.did);
                         });
-                    });
-                    $rootScope.dialog.open({
-                        type: "group_membership",
-                        l20n: {
-                            text: "dialog-change-members"
-                        },
-                        value: aDicts,
-                        callbk: function (dicts) {
-                            if(dicts === null) return;
-                            dicts.forEach(function (d) {
-                                if(d.active) dictProvider.groups.add_to_group(group, d.did);
-                                else dictProvider.groups.remove_from_group(group, d.did);
-                            });
-                        }
-                    });
-                };
-            },
-            templateUrl: "partials/grouppicker.html"
-        };
+                    }
+                });
+            };
+        },
+        templateUrl: "partials/grouppicker.html"
+    };
 }])
 .directive("ngDrawer", ["$location", function ($location) {
     return {

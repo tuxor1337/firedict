@@ -6,8 +6,8 @@
 
 "use strict";
 
-var FireDictProvider = angular.module("FireDictProvider", [])
-.factory("dictProvider", ["$rootScope", "$timeout", function ($rootScope, $timeout) {
+angular.module("FireDictProvider")
+.factory("dictProvider", function ($timeout, $rootScope) {
     var groupProvider, dictWorker, dictionaries, settingsProvider;
 
     groupProvider = (function () {
@@ -290,4 +290,4 @@ var FireDictProvider = angular.module("FireDictProvider", [])
         "groups": groupProvider,
         "settings": settingsProvider
     };
-}]);
+});

@@ -6,6 +6,28 @@
 
 "use strict";
 
+var jq = angular.element;
+
+jq.prototype.index = function () {
+    var i = 0, child = this[0];
+    while((child = child.previousSibling) != null) {
+        if(child.nodeType === 1) i++;
+    }
+    return i;
+};
+
+jq.prototype.next = function () {
+    var cur = this[0];
+    while((cur = cur.nextSibling) && cur.nodeType !== 1) {}
+    return jq(cur);
+};
+
+jq.prototype.prev = function () {
+    var cur = this[0];
+    while((cur = cur.previousSibling) && cur.nodeType !== 1) {}
+    return jq(cur);
+};
+
 function escapeHtml(text) {
     var map = {
         '&': '&amp;',
