@@ -19,7 +19,7 @@ var console = {
     }
 };
 
-importScripts("lib/promise.min.js");
+importScripts("lib/es6-promise.min.js");
 importScripts("lib/pako_inflate.min.js");
 importScripts("lib/dictzip_sync.min.js");
 importScripts("lib/stardict_sync.min.js");

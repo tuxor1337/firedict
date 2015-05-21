@@ -1,0 +1,6 @@
+[submodule "thirdparty/stardict.js"]
+	path = thirdparty/stardict.js
+	url = https://github.com/tuxor1337/stardict.js
+[submodule "thirdparty/dictzip.js"]
+	path = thirdparty/dictzip.js
+	url = https://github.com/tuxor1337/dictzip.js

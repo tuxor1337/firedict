@@ -15,7 +15,7 @@ var console = {
     }
 };
 
-importScripts("lib/promise.min.js");
+importScripts("lib/es6-promise.min.js");
 
 function random_color() {
     var min = 0x33, max = 0xbb, result = "#";

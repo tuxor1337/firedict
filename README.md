@@ -33,17 +33,22 @@ translators are as follows:
 * Czech - Jan Knížek
 
 If you are interested in contributing to the localization of FireDict, have a
-look at the localizable strings in `locales/firedict.en-US.properties` and feel
+look at the localizable strings in `src/locales/firedict.en-US.properties` and feel
 free to send a pull request.
 
-testing the ui
---------------
+build and run
+-------------
 
-Run `make testbuild` in order to get a version of this app that doesn't require
-privileges and permissions. You can run the app `testbuild/index.html` in
-any browser (mobile or non-mobile, offline or online) and test all the ui stuff
-like i10n.js, AngularJS and stylesheets. (The test worker uses dummy
-dictionaries and dummy lookups etc.)
+The build process requires the Node package manager `npm`. Apart from that you
+just have to run `make` in order to get a fully working version of FireDict in
+`build/live` (simply open in WebIDE as packaged app). The file `build/package.zip`
+is the one that is uploaded to the Firefox Marketplace.
+
+Furthermore, `make` creates a version of this app that doesn't require
+privileges and permissions. You can run it by opening
+`build/testbuild/index.html` in any browser (mobile or non-mobile, offline or
+online) and test all the ui stuff like i10n.js, AngularJS and stylesheets. (The
+test worker uses dummy dictionaries and dummy lookups etc.)
 
 licensing and third-party code
 ----------------

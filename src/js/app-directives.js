@@ -360,10 +360,7 @@ angular.module("FireDictDirectives")
         compile: function () {
             return function (scope, element, attrs) {
                 attrs.$observe('ngMozL10n', function () {
-                    element.attr('data-l10n-id', attrs.ngMozL10n);
-                    navigator.mozL10n.once(function () {
-                        navigator.mozL10n.localize(element[0], attrs.ngMozL10n);
-                    });
+                    element.attr("data-l10n-id", attrs.ngMozL10n);
                 });
             };
         }

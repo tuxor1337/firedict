@@ -1,32 +1,37 @@
-The following files are distributed with this package under their respective 
+The following files are distributed with this git repository under their respective 
 licenses. The author of FireDict does not own the copyright for these libraries,
 plug-ins and art work. The corresponding copyright owners are listed below.
 
-`icon-scalable.svg` and `icon-scalable-detail.svg`
+`src/icon-scalable.svg` and `src/icon-scalable-detail.svg`
 Author: Ulisse Perusin and Lapo Calamandrei
 URL: https://git.gnome.org/browse/adwaita-icon-theme/tree/src/fullcolor/accessories-dictionary.svg
 License: CC-BY-SA, http://creativecommons.org/licenses/by-sa/3.0/
 (with minor modifications by tuxor1337, 2013)
 
-`js/lib/pako_inflate.min.js`
-Author: Thomas Down 2010-2011
-URL: https://github.com/dasmoth/jszlib
-License: BSD-style license (https://github.com/dasmoth/jszlib/blob/master/LICENSE.txt)
-
-`js/lib/wiki2html.js`
+`thirdparty/wiki2html.js`
 Author: remy sharp / http://remysharp.com
 URL: http://remysharp.com/2008/04/01/wiki-to-html-using-javascript/
 License: Creative Commons License - ShareAlike http://creativecommons.org/licenses/by-sa/3.0/
 
-`js/lib/promise.min.js`
-Author: 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors
-URL: https://github.com/jakearchibald/es6-promise
-License: MIT - https://github.com/jakearchibald/es6-promise/blob/master/LICENSE
-
-`js/lib/l10n.min.js`
+`thirdparty/l10n.js`
 Author: Mozilla Foundation (copyright holder)
 URL: https://github.com/mozilla-b2g/gaia/blob/master/shared/js/l10n.js
 License: Apache 2.0 - http://www.apache.org/licenses/LICENSE-2.0
+
+The following files are fetched as part of the build process and are distributed
+with the packaged version of FireDict. The author of FireDict does not own the
+copyright for these libraries, plug-ins and art work. The corresponding
+copyright owners are listed below.
+
+`js/lib/pako_inflate.min.js`
+Author: 2014 Vitaly Puzrin
+URL: https://github.com/nodeca/pako
+License: MIT - https://github.com/nodeca/pako/blob/master/LICENSE
+
+`js/lib/es6-promise.min.js`
+Author: 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors
+URL: https://github.com/jakearchibald/es6-promise
+License: MIT - https://github.com/jakearchibald/es6-promise/blob/master/LICENSE
 
 `js/lib/dictzip_sync.min.js`
 Author: tuxor1337
