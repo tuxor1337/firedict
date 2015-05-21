@@ -30,6 +30,7 @@ translators are as follows:
 * English, German - tuxor1337
 * Russian - Svetlana A. Tkachenko
 * French - anonymous contributor
+* Czech - Jan Knížek
 
 If you are interested in contributing to the localization of FireDict, have a
 look at the localizable strings in `locales/firedict.en-US.properties` and feel
