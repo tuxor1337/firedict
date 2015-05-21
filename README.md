@@ -15,10 +15,11 @@ can be truncated by default.
 screenshots
 -----------
 
-See the files `screen*.png` for more screenshots.
+Screenshots are hosted on tovotu.de and displayed on the marketplace as well as
+on the project's homepage on http://tuxor1337.github.io/firedict/.
 
-![screenshot1](https://raw.github.com/tuxor1337/firedict/master/screen1.png "list of matches") # 
-![screenshot2](https://raw.github.com/tuxor1337/firedict/master/screen2.png "displaying an entry")
+![screenshot1](http://tovotu.de/data/firedict/screenshots/latest/screen1.png "list of matches") #
+![screenshot2](http://tovotu.de/data/firedict/screenshots/latest/screen2.png "displaying an entry")
 
 localization
 ------------
