@@ -3,7 +3,9 @@ SRC_DIR := src
 OUTPUT_DIR := build
 
 FONT_DIR := $(OUTPUT_DIR)/fonts
-FONT_FILES := FiraSans-Light.woff FiraSans-Medium.woff FiraSans-Regular.woff
+FONT_FLAVORS := light regular medium
+FONT_FILES := $(FONT_FLAVORS:%=firasansot-%-webfont.woff)
+FONT_URL := "https://github.com/mozilla/fireplace/blob/master/src/media/fonts/FiraSans"
 FONTS := $(FONT_FILES:%=$(FONT_DIR)/%)
 
 LOCALES_DIR := $(OUTPUT_DIR)/locales
@@ -57,18 +59,26 @@ $(LOCALES):
 $(FONTS):
 	mkdir -p $(FONT_DIR)
 	for file in $(FONT_FILES); do \
-		curl http://code.cdn.mozilla.net/fonts/woff/$$file -o $(FONT_DIR)/$$file ; \
+		curl $(FONT_URL)/$$file -o $(FONT_DIR)/$$file ; \
 	done
 
-$(ICON_DIR)/icon-%.png: $(ICON_SRC)
+$(ICONS): $(ICON_SRC)
 	mkdir -p $(ICON_DIR)
-	if [ $* -lt 100 ] ; then \
-		convert -background transparent $(word 1, $^) -resize $*x$* $@ ; \
-	else \
-		convert -background transparent $(word 2, $^) -resize $*x$* $@ ; \
-	fi
+	for res in $(ICON_RESOLUTIONS); do \
+		if [ $$res -lt 100 ] ; then \
+			convert -background transparent \
+			        $(word 1, $^) \
+			        -resize "$$res"x"$$res" \
+			        $(ICON_DIR)/icon-$$res.png ; \
+		else \
+			convert -background transparent \
+			        $(word 2, $^) \
+			        -resize "$$res"x"$$res" \
+			        $(ICON_DIR)/icon-$$res.png ; \
+		fi ; \
+	done
 
-$(TESTBUILD): $(ICON_DIR)/icon-60.png $(THIRDPARTY) $(LOCALES) $(FONTS)
+$(TESTBUILD): $(LIVE_DIR)
 	mkdir -p $@ $@/locales $@/js/lib $@/style/fonts
 	cp -r $(SRC_DIR)/partials \
 	      $(SRC_DIR)/style \
