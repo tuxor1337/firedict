@@ -5,7 +5,7 @@ OUTPUT_DIR := build
 FONT_DIR := $(OUTPUT_DIR)/fonts
 FONT_FLAVORS := light regular medium
 FONT_FILES := $(FONT_FLAVORS:%=firasansot-%-webfont.woff)
-FONT_URL := "https://github.com/mozilla/fireplace/blob/master/src/media/fonts/FiraSans"
+FONT_URL := "https://raw.githubusercontent.com/mozilla/fireplace/master/src/media/fonts/FiraSans"
 FONTS := $(FONT_FILES:%=$(FONT_DIR)/%)
 
 LOCALES_DIR := $(OUTPUT_DIR)/locales
