@@ -42,12 +42,17 @@ ng\:form {
 
 /* End angular-csp.css */
 
-html { height: 100%; width: 100%; }
+html {
+    width: 100%; height: 100%;
+    padding: 0; margin: 0;
+    overflow: hidden;
+}
 body {
+    display: block;
+    width: 100%; height: 100%;
+    padding: 0; margin: 0;
+    overflow: hidden;
     font-family: 'Fira Sans', sans-serif;
-    padding:0; margin: 0;
-    height:100%; width:100%;
-    display:block; overflow:hidden;
 }
 
 button {
