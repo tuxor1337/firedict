@@ -2,6 +2,10 @@
 SRC_DIR := src
 OUTPUT_DIR := build
 
+NODE_MODULES := node_modules
+NODE_BIN := $(NODE_MODULES)/.bin
+UGLIFYJS := $(NODE_BIN)/uglifyjs
+
 FONT_DIR := $(OUTPUT_DIR)/fonts
 FONT_FLAVORS := light regular medium
 FONT_FILES := $(FONT_FLAVORS:%=firasansot-%-webfont.woff)
@@ -19,17 +23,18 @@ ICON_RESOLUTIONS := 60 128 32 90 120 256
 ICONS := $(ICON_RESOLUTIONS:%=$(ICON_DIR)/icon-%.png)
 
 THIRDPARTY_DIR := $(OUTPUT_DIR)/thirdparty
-THIRDPARTY_MINSRC := node_modules/angular/angular.min.js \
-                     node_modules/angular-route/angular-route.min.js \
-                     node_modules/angular-sanitize/angular-sanitize.min.js \
-                     node_modules/angular-touch/angular-touch.min.js \
-                     node_modules/es6-promise/dist/es6-promise.min.js \
-                     node_modules/pako/dist/pako_inflate.min.js
+THIRDPARTY_ANGULAR := $(NODE_MODULES)/angular/angular.min.js \
+                      $(NODE_MODULES)/angular-route/angular-route.min.js \
+                      $(NODE_MODULES)/angular-sanitize/angular-sanitize.min.js \
+                      $(NODE_MODULES)/angular-touch/angular-touch.min.js
+THIRDPARTY_MINSRC := $(NODE_MODULES)/es6-promise/dist/es6-promise.min.js \
+                     $(NODE_MODULES)/pako/dist/pako_inflate.min.js
 THIRDPARTY_SRC :=  thirdparty/dictzip.js/dictzip_sync.js \
                    thirdparty/stardict.js/stardict_sync.js \
                    thirdparty/wiki2html.js \
                    thirdparty/l10n.js
-THIRDPARTY_FILES := $(notdir $(THIRDPARTY_MINSRC)) \
+THIRDPARTY_FILES := angular.min.js \
+                    $(notdir $(THIRDPARTY_MINSRC)) \
                     $(notdir $(THIRDPARTY_SRC:.js=.min.js))
 THIRDPARTY := $(THIRDPARTY_FILES:%=$(THIRDPARTY_DIR)/%)
 
@@ -48,8 +53,9 @@ $(THIRDPARTY):
 	git submodule update --init
 	npm install
 	cp $(THIRDPARTY_MINSRC) $(THIRDPARTY_DIR)
+	$(UGLIFYJS) $(THIRDPARTY_ANGULAR) -cmo $(THIRDPARTY_DIR)/angular.min.js
 	for src in $(THIRDPARTY_SRC); do \
-		uglifyjs "$$src" -cmo "$(THIRDPARTY_DIR)/$$(basename $${src%.*}).min.js" ; \
+		$(UGLIFYJS) "$$src" -cmo "$(THIRDPARTY_DIR)/$$(basename $${src%.*}).min.js" ; \
 	done
 
 $(LOCALES):
