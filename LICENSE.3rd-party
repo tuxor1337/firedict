@@ -43,7 +43,7 @@ Author: tuxor1337
 URL: http://github.com/tuxor1337/stardict.js
 License: MIT - https://github.com/tuxor1337/stardict.js/blob/master/LICENSE
 
-`js/lib/angular.min.js`, `js/lib/angular-touch.min.js`, `js/lib/angular-route.min.js` and `js/lib/angular-sanitize.min.js`
+`js/lib/angular.min.js`
 Author: Google, Inc.
 URL: http://angularjs.org
 License: MIT - https://github.com/angular/angular.js/blob/master/LICENSE
