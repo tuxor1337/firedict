@@ -7,85 +7,87 @@
 "use strict";
 
 angular.module("FireDictControllers")
-.controller("MainCtrl", function ($scope, $rootScope) {
-    $scope.drawerOpen = false;
-    $scope.toggleSidebar = function ($event, drawerOpen) {
-        if(typeof drawerOpen === "undefined")
-            drawerOpen = !$scope.drawerOpen;
-        $scope.drawerOpen = drawerOpen;
-        if($event.currentTarget.getAttribute("id") !== "mainArea")
-            $event.stopPropagation();
-    };
+.controller("MainCtrl", ["$scope", "$rootScope",
+    function ($scope, $rootScope) {
+        $scope.drawerOpen = false;
+        $scope.toggleSidebar = function ($event, drawerOpen) {
+            if(typeof drawerOpen === "undefined")
+                drawerOpen = !$scope.drawerOpen;
+            $scope.drawerOpen = drawerOpen;
+            if($event.currentTarget.getAttribute("id") !== "mainArea")
+                $event.stopPropagation();
+        };
 
-    var defaults = {
-          type: "confirm",
-          range: null,
-          l20n: null,
-          value: null,
-          callbk: null,
-          validate: null
-        },
-        defaults_l20n = {
-          text: "",
-          success: "dialog-ok",
-          cancel: "dialog-cancel"
-        },
-        validateFn = function () { return true; };
+        var defaults = {
+              type: "confirm",
+              range: null,
+              l20n: null,
+              value: null,
+              callbk: null,
+              validate: null
+            },
+            defaults_l20n = {
+              text: "",
+              success: "dialog-ok",
+              cancel: "dialog-cancel"
+            },
+            validateFn = function () { return true; };
 
-    function set_opts(options) {
-        if(options.type == "progress" && typeof options.value === "undefined")
-            options.value = [];
-        options = angular.extend({}, defaults, options);
-        if(options.type == "confirm") options.value = true;
-        if(options.type == "prompt") {
-            window.screen.mozLockOrientation("portrait-primary");
-        } else {
-            window.screen.mozUnlockOrientation();
+        function set_opts(options) {
+            if(options.type == "progress" && typeof options.value === "undefined")
+                options.value = [];
+            options = angular.extend({}, defaults, options);
+            if(options.type == "confirm") options.value = true;
+            if(options.type == "prompt") {
+                window.screen.mozLockOrientation("portrait-primary");
+            } else {
+                window.screen.mozUnlockOrientation();
+            }
+            if(options.l20n instanceof Object)
+                options.l20n = angular.extend({}, defaults_l20n, options.l20n);
+            $scope.modal = {
+                visible: false,
+                result: options.value,
+                range: options.range,
+                type: options.type,
+                text: options.text,
+                l20n: options.l20n,
+                callbk: function (result) {
+                    var callFn = options.callbk || validateFn;
+                    callFn(result);
+                    set_opts(defaults);
+                },
+                validate: function (result) {
+                    var callFn = options.validate || validateFn;
+                    return callFn(result);
+                }
+            };
         }
-        if(options.l20n instanceof Object)
-            options.l20n = angular.extend({}, defaults_l20n, options.l20n);
-        $scope.modal = {
-            visible: false,
-            result: options.value,
-            range: options.range,
-            type: options.type,
-            text: options.text,
-            l20n: options.l20n,
-            callbk: function (result) {
-                var callFn = options.callbk || validateFn;
-                callFn(result);
+
+        set_opts(defaults);
+
+        $scope.dialog = {
+            update: function (res, text) {
+                $scope.modal.result = res;
+                if(typeof text !== "undefined")
+                    $scope.modal.text = text;
+            },
+            close: function () {
                 set_opts(defaults);
             },
-            validate: function (result) {
-                var callFn = options.validate || validateFn;
-                return callFn(result);
+            open: function (options) {
+                set_opts(options);
+                $scope.modal.visible = true;
+            },
+            type: function () {
+                return $scope.modal.type;
             }
         };
+
+        /* Make the dialog available from all scopes, e.g. for isolated scopes. */
+        $rootScope.dialog = $scope.dialog;
     }
-
-    set_opts(defaults);
-
-    $scope.dialog = {
-        update: function (res, text) {
-            $scope.modal.result = res;
-            if(typeof text !== "undefined")
-                $scope.modal.text = text;
-        },
-        close: function () {
-            set_opts(defaults);
-        },
-        open: function (options) {
-            set_opts(options);
-            $scope.modal.visible = true;
-        },
-        type: function () {
-            return $scope.modal.type;
-        }
-    };
-
-    /* Make the dialog available from all scopes, e.g. for isolated scopes. */
-    $rootScope.dialog = $scope.dialog;
-})
+])
 .controller("manageCtrl", ["$scope", "dictProvider",
     function ($scope, dictProvider) {
         $scope.title = "section-manage-dicts";
@@ -204,8 +206,7 @@ angular.module("FireDictControllers")
         };
     }
 ])
-.controller("lookupCtrl", [
-    "$scope", "$timeout", "dictProvider",
+.controller("lookupCtrl", ["$scope", "$timeout", "dictProvider",
     function ($scope, $timeout, dictProvider) {
         $scope.idle = false;
         $scope.matches = [];
@@ -693,18 +694,20 @@ angular.module("FireDictControllers")
         ];
     }
 ])
-.controller("aboutCtrl", function ($scope, $timeout) {
-    $scope.title = "section-about";
-    $scope.manifest = {
-      "name": "FireDict",
-      "description": "",
-      "version": "",
-      "developer": { "url": "https://github.com/tuxor1337" }
+.controller("aboutCtrl", ["$scope", "$timeout",
+    function ($scope, $timeout) {
+        $scope.title = "section-about";
+        $scope.manifest = {
+          "name": "FireDict",
+          "description": "",
+          "version": "",
+          "developer": { "url": "https://github.com/tuxor1337" }
+        }
+        var request = navigator.mozApps.getSelf();
+        request.onsuccess = function() {
+            $timeout(function () {
+                $scope.manifest = request.result.manifest;
+            });
+        };
     }
-    var request = navigator.mozApps.getSelf();
-    request.onsuccess = function() {
-        $timeout(function () {
-            $scope.manifest = request.result.manifest;
-        });
-    };
-});
+]);

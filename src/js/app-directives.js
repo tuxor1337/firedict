@@ -7,7 +7,7 @@
 "use strict";
 
 angular.module("FireDictDirectives")
-.directive("ngHeader", function ($timeout) {
+.directive("ngHeader", ["$timeout", function ($timeout) {
     return {
         replace: true,
         restrict: "A",
@@ -40,7 +40,7 @@ angular.module("FireDictDirectives")
         },
         templateUrl: "partials/header.html"
     };
-})
+}])
 .directive("ngWordpicker", function () {
     return {
         replace: true,
@@ -366,7 +366,7 @@ angular.module("FireDictDirectives")
         }
     };
 })
-.directive('ngRenderTerm', function ($compile) {
+.directive('ngRenderTerm', ["$compile", function ($compile) {
     return {
         restrict: "A",
         link: function (scope, element, attrs) {
@@ -381,7 +381,7 @@ angular.module("FireDictDirectives")
             $compile(element.contents())(scope);
         }
     };
-})
+}])
 .directive("ngDialog", function () {
     return {
         replace: true,
