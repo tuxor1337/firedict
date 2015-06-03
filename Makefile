@@ -1,21 +1,29 @@
 
-SRC_DIR := src
 OUTPUT_DIR := build
 
 NODE_MODULES := node_modules
 NODE_BIN := $(NODE_MODULES)/.bin
 UGLIFYJS := $(NODE_BIN)/uglifyjs
 
+LICENSE := COPYING LICENSE.3rd-party
+
+SRC_DIR := src
+MANIFEST := $(SRC_DIR)/manifest.webapp
+TEST_WORKER := $(SRC_DIR)/test/worker.js
+
+CODE_HTML := $(SRC_DIR)/index.html
+CODE_JS := $(wildcard $(SRC_DIR)/js/*.js)
+CODE_CSS := $(wildcard $(SRC_DIR)/style/*.css)
+CODE_IMG := $(wildcard $(SRC_DIR)/style/images/*.png)
+CODE_PARTIALS := $(wildcard $(SRC_DIR)/partials/*.html)
+CODE_LOCALES := $(wildcard $(SRC_DIR)/locales/firedict.*.properties)
+CODE := $(CODE_HTML) $(CODE_JS) $(CODE_CSS) $(CODE_IMG) $(CODE_PARTIALS) $(CODE_LOCALES)
+
 FONT_DIR := $(OUTPUT_DIR)/fonts
 FONT_FLAVORS := light regular medium
 FONT_FILES := $(FONT_FLAVORS:%=firasansot-%-webfont.woff)
-FONT_URL := "https://raw.githubusercontent.com/mozilla/fireplace/master/src/media/fonts/FiraSans"
+FONT_URL := https://raw.githubusercontent.com/mozilla/fireplace/master/src/media/fonts/FiraSans
 FONTS := $(FONT_FILES:%=$(FONT_DIR)/%)
-
-LOCALES_DIR := $(OUTPUT_DIR)/locales
-LOCALES_FILES := firedict.*.properties
-LOCALES_SRC := $(LOCALES_FILES:%=$(SRC_DIR)/locales/%)
-LOCALES := $(LOCALES_FILES:%=$(LOCALES_DIR)/%)
 
 ICON_DIR := $(OUTPUT_DIR)/icons
 ICON_SRC := $(SRC_DIR)/icon-scalable.svg $(SRC_DIR)/icon-scalable-detail.svg
@@ -29,94 +37,82 @@ THIRDPARTY_ANGULAR := $(NODE_MODULES)/angular/angular.min.js \
                       $(NODE_MODULES)/angular-touch/angular-touch.min.js
 THIRDPARTY_MINSRC := $(NODE_MODULES)/es6-promise/dist/es6-promise.min.js \
                      $(NODE_MODULES)/pako/dist/pako_inflate.min.js
-THIRDPARTY_SRC :=  thirdparty/dictzip.js/dictzip_sync.js \
-                   thirdparty/stardict.js/stardict_sync.js \
-                   thirdparty/wiki2html.js \
-                   thirdparty/l10n.js
+THIRDPARTY_RAWSRC :=  thirdparty/dictzip.js/dictzip_sync.js \
+                      thirdparty/stardict.js/stardict_sync.js \
+                      thirdparty/wiki2html.js \
+                      thirdparty/l10n.js
+THIRDPARTY_SRC := $(THIRDPARTY_RAWSRC) $(THIRDPARTY_MINSRC) $(THIRDPARTY_ANGULAR)
 THIRDPARTY_FILES := angular.min.js \
                     $(notdir $(THIRDPARTY_MINSRC)) \
-                    $(notdir $(THIRDPARTY_SRC:.js=.min.js))
+                    $(notdir $(THIRDPARTY_RAWSRC:.js=.min.js))
+THIRDPARTY_TEST := $(THIRDPARTY_DIR)/{angular*,l10n*,wiki2html*,es6-promise*}.js
 THIRDPARTY := $(THIRDPARTY_FILES:%=$(THIRDPARTY_DIR)/%)
 
 TESTBUILD := $(OUTPUT_DIR)/testbuild
-
-LIVE_DIR := $(OUTPUT_DIR)/live
-
+LIVEBUILD := $(OUTPUT_DIR)/livebuild
+PACKAGE_SUBDIRS := locales \
+                   partials \
+                   js/lib \
+                   style/fonts \
+                   style/images
+PACKAGE_FILES := $(CODE) $(THIRDPARTY) $(TEST_WORKER) \
+                 $(MANIFEST) $(LICENSE) \
+                 $(ICONS) $(FONTS)
 PACKAGE := $(OUTPUT_DIR)/package.zip
 
 all: $(PACKAGE) $(TESTBUILD)
 
-test: $(TESTBUILD)
+%/.d:
+	mkdir -p $(@D)
+	touch $@
 
-$(THIRDPARTY):
-	mkdir -p $(THIRDPARTY_DIR)
+$(THIRDPARTY_SRC):
 	git submodule update --init
 	npm install
+
+$(THIRDPARTY): $(THIRDPARTY_SRC) $(THIRDPARTY_DIR)/.d
 	cp $(THIRDPARTY_MINSRC) $(THIRDPARTY_DIR)
 	$(UGLIFYJS) $(THIRDPARTY_ANGULAR) -cmo $(THIRDPARTY_DIR)/angular.min.js
-	for src in $(THIRDPARTY_SRC); do \
+	for src in $(THIRDPARTY_RAWSRC); do \
 		$(UGLIFYJS) "$$src" -cmo "$(THIRDPARTY_DIR)/$$(basename $${src%.*}).min.js" ; \
 	done
 
-$(LOCALES):
-	mkdir -p $(LOCALES_DIR)
-	cp $(LOCALES_SRC) $(LOCALES_DIR)
+$(FONTS): $(FONT_DIR)/.d
+	curl $(FONT_URL)/$(@F) -o $@
 
-$(FONTS):
-	mkdir -p $(FONT_DIR)
-	for file in $(FONT_FILES); do \
-		curl $(FONT_URL)/$$file -o $(FONT_DIR)/$$file ; \
-	done
+$(ICON_DIR)/icon-%.png: $(ICON_SRC) $(ICON_DIR)/.d
+	$(if $(shell [ $* -lt 100 ] && echo 0), \
+        convert -background transparent $(word 1, $^) -resize "$*x$*" $@, \
+        convert -background transparent $(word 2, $^) -resize "$*x$*" $@ \
+    )
 
-$(ICONS): $(ICON_SRC)
-	mkdir -p $(ICON_DIR)
-	for res in $(ICON_RESOLUTIONS); do \
-		if [ $$res -lt 100 ] ; then \
-			convert -background transparent \
-			        $(word 1, $^) \
-			        -resize "$$res"x"$$res" \
-			        $(ICON_DIR)/icon-$$res.png ; \
-		else \
-			convert -background transparent \
-			        $(word 2, $^) \
-			        -resize "$$res"x"$$res" \
-			        $(ICON_DIR)/icon-$$res.png ; \
-		fi ; \
-	done
+.SECONDEXPANSION:
+$(OUTPUT_DIR)/%build: $$(addprefix $$@/,$(PACKAGE_SUBDIRS:=/.d)) $(PACKAGE_FILES)
+	cp $(CODE_HTML) $@
+	cp $(CODE_PARTIALS) $@/partials
+	cp $(CODE_LOCALES) $@/locales
+	cp $(CODE_JS) $@/js
+	cp $(CODE_CSS) $@/style
+	cp $(CODE_IMG) $@/style/images
+	cp $(FONTS) $@/style/fonts
+	$(if $(findstring test,$*), \
+        cp $(ICON_DIR)/icon-60.png $@, \
+        cp $(MANIFEST) $(LICENSE) $(ICONS) $@ \
+    )
+	$(if $(findstring test,$*), \
+        cp $(TEST_WORKER) $@/js/worker.js \
+    )
+	$(if $(findstring test,$*), \
+        cp $(THIRDPARTY_TEST) $@/js/lib, \
+        cp $(THIRDPARTY) $@/js/lib \
+    )
 
-$(TESTBUILD): $(LIVE_DIR)
-	mkdir -p $@ $@/locales $@/js/lib $@/style/fonts
-	cp -r $(SRC_DIR)/partials \
-	      $(SRC_DIR)/style \
-	      $(SRC_DIR)/js \
-	      $(SRC_DIR)/index.html \
-	      $(ICON_DIR)/icon-60.png \
-	      $@
-	cp -r $(FONTS) $@/style/fonts
-	cp -r $(LOCALES) $@/locales
-	cp -r $(THIRDPARTY_DIR)/{angular*,l10n*,wiki2html*,es6-promise*}.js $@/js/lib
-	cp $(SRC_DIR)/test/worker.js $@/js/worker.js
-
-$(LIVE_DIR): $(ICONS) $(THIRDPARTY) $(LOCALES) $(FONTS)
-	mkdir -p $@ $@/locales $@/js/lib $@/style/fonts
-	cp -r $(SRC_DIR)/js \
-	      $(SRC_DIR)/partials \
-	      $(SRC_DIR)/style \
-	      $(SRC_DIR)/index.html \
-	      $(SRC_DIR)/manifest.webapp \
-	      COPYING \
-	      LICENSE.3rd-party \
-	      $(ICONS) \
-	      $@
-	cp -r $(FONTS) $@/style/fonts
-	cp -r $(LOCALES) $@/locales
-	cp $(THIRDPARTY) $@/js/lib/
-
-$(PACKAGE): $(LIVE_DIR)
-	cd $(LIVE_DIR); zip __.zip -r *
-	mv $(LIVE_DIR)/__.zip $(PACKAGE)
+$(PACKAGE): $(LIVEBUILD)
+	cd $(LIVEBUILD); zip __.zip -r *
+	mv $(LIVEBUILD)/__.zip $(PACKAGE)
 
 clean:
 	rm -rf $(OUTPUT_DIR)
-
+	
+.PRECIOUS: %/.d $(ICONS)
 .PHONY: clean all

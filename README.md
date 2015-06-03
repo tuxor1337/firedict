@@ -41,7 +41,7 @@ build and run
 
 The build process requires the Node package manager `npm`. Apart from that you
 just have to run `make` in order to get a fully working version of FireDict in
-`build/live` (simply open in WebIDE as packaged app). The file `build/package.zip`
+`build/livebuild` (simply open in WebIDE as packaged app). The file `build/package.zip`
 is the one that is uploaded to the Firefox Marketplace.
 
 Furthermore, `make` creates a version of this app that doesn't require
