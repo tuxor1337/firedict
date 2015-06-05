@@ -47,7 +47,7 @@ is the one that is uploaded to the Firefox Marketplace.
 Furthermore, `make` creates a version of this app that doesn't require
 privileges and permissions. You can run it by opening
 `build/testbuild/index.html` in any browser (mobile or non-mobile, offline or
-online) and test all the ui stuff like i10n.js, AngularJS and stylesheets. (The
+online) and test all the ui stuff like l10n.js, AngularJS and stylesheets. (The
 test worker uses dummy dictionaries and dummy lookups etc.)
 
 licensing and third-party code
