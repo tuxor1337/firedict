@@ -71,7 +71,7 @@ angular.module("FireDictDirectives")
         replace: true,
         restrict: "A",
         link: function ($scope, $element, $attrs) {
-            $scope.selectable = $attrs.selectable;
+            $scope.selectable = $attrs.selectable == "true";
             $scope.selected = -1;
             $scope.groups = dictProvider.groups;
             $scope.dictionaries = dictProvider.dicts;
