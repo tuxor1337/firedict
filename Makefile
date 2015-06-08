@@ -23,12 +23,13 @@ FONT_DIR := $(OUTPUT_DIR)/fonts
 FONT_FLAVORS := light regular medium
 FONT_FILES := $(FONT_FLAVORS:%=firasansot-%-webfont.woff)
 FONT_URL := https://raw.githubusercontent.com/mozilla/fireplace/master/src/media/fonts/FiraSans
-FONTS := $(FONT_FILES:%=$(FONT_DIR)/%)
+FONTS := $(addprefix $(FONT_DIR)/,$(FONT_FILES))
 
 ICON_DIR := $(OUTPUT_DIR)/icons
 ICON_SRC := $(SRC_DIR)/icon-scalable.svg $(SRC_DIR)/icon-scalable-detail.svg
 ICON_RESOLUTIONS := 60 128 32 90 120 256
-ICONS := $(ICON_RESOLUTIONS:%=$(ICON_DIR)/icon-%.png)
+ICON_FILES := $(ICON_RESOLUTIONS:%=icon-%.png)
+ICONS := $(addprefix $(ICON_DIR)/,$(ICON_FILES))
 
 THIRDPARTY_DIR := $(OUTPUT_DIR)/thirdparty
 THIRDPARTY_ANGULAR := $(NODE_MODULES)/angular/angular.min.js \
@@ -48,8 +49,9 @@ THIRDPARTY_FILES := angular.min.js \
 THIRDPARTY_TEST := $(THIRDPARTY_DIR)/{angular*,l10n*,wiki2html*,es6-promise*}.js
 THIRDPARTY := $(THIRDPARTY_FILES:%=$(THIRDPARTY_DIR)/%)
 
-TESTBUILD := $(OUTPUT_DIR)/testbuild
-LIVEBUILD := $(OUTPUT_DIR)/livebuild
+BUILD_TEST := $(OUTPUT_DIR)/testbuild
+BUILD_LIVE := $(OUTPUT_DIR)/livebuild
+BUILDS := $(BUILD_LIVE) $(BUILD_TEST)
 PACKAGE_SUBDIRS := locales \
                    partials \
                    js/lib \
@@ -60,11 +62,16 @@ PACKAGE_FILES := $(CODE) $(THIRDPARTY) $(TEST_WORKER) \
                  $(ICONS) $(FONTS)
 PACKAGE := $(OUTPUT_DIR)/package.zip
 
-all: $(PACKAGE) $(TESTBUILD)
+define \n
+
+
+endef
+
+all: $(PACKAGE) $(BUILD_TEST)
 
 %/.d:
 	mkdir -p $(@D)
-	touch $@
+	@touch $@
 
 $(THIRDPARTY_SRC):
 	git submodule update --init
@@ -73,21 +80,21 @@ $(THIRDPARTY_SRC):
 $(THIRDPARTY): $(THIRDPARTY_SRC) $(THIRDPARTY_DIR)/.d
 	cp $(THIRDPARTY_MINSRC) $(THIRDPARTY_DIR)
 	$(UGLIFYJS) $(THIRDPARTY_ANGULAR) -cmo $(THIRDPARTY_DIR)/angular.min.js
-	for src in $(THIRDPARTY_RAWSRC); do \
-		$(UGLIFYJS) "$$src" -cmo "$(THIRDPARTY_DIR)/$$(basename $${src%.*}).min.js" ; \
-	done
+	$(foreach src,$(THIRDPARTY_RAWSRC), \
+		$(UGLIFYJS) "$(src)" -cmo "$(THIRDPARTY_DIR)/$(notdir $(src:.js=.min.js))"${\n} \
+	)
 
 $(FONTS): $(FONT_DIR)/.d
-	curl $(FONT_URL)/$(@F) -o $@
+	curl -s $(FONT_URL)/$(@F) -o $@
 
 $(ICON_DIR)/icon-%.png: $(ICON_SRC) $(ICON_DIR)/.d
 	$(if $(shell [ $* -lt 100 ] && echo 0), \
-        convert -background transparent $(word 1, $^) -resize "$*x$*" $@, \
-        convert -background transparent $(word 2, $^) -resize "$*x$*" $@ \
-    )
+	    convert -background transparent $(word 1, $^) -resize "$*x$*" $@, \
+	    convert -background transparent $(word 2, $^) -resize "$*x$*" $@ \
+	)
 
 .SECONDEXPANSION:
-$(OUTPUT_DIR)/%build: $$(addprefix $$@/,$(PACKAGE_SUBDIRS:=/.d)) $(PACKAGE_FILES)
+$(BUILDS): $(OUTPUT_DIR)/%build: $(PACKAGE_SUBDIRS:%=$$@/%/.d) $(PACKAGE_FILES)
 	cp $(CODE_HTML) $@
 	cp $(CODE_PARTIALS) $@/partials
 	cp $(CODE_LOCALES) $@/locales
@@ -96,20 +103,20 @@ $(OUTPUT_DIR)/%build: $$(addprefix $$@/,$(PACKAGE_SUBDIRS:=/.d)) $(PACKAGE_FILES
 	cp $(CODE_IMG) $@/style/images
 	cp $(FONTS) $@/style/fonts
 	$(if $(findstring test,$*), \
-        cp $(ICON_DIR)/icon-60.png $@, \
-        cp $(MANIFEST) $(LICENSE) $(ICONS) $@ \
-    )
+	    cp $(ICON_DIR)/icon-60.png $@, \
+	    cp $(MANIFEST) $(LICENSE) $(ICONS) $@ \
+	)
 	$(if $(findstring test,$*), \
-        cp $(TEST_WORKER) $@/js/worker.js \
-    )
+	    cp $(TEST_WORKER) $@/js/worker.js \
+	)
 	$(if $(findstring test,$*), \
-        cp $(THIRDPARTY_TEST) $@/js/lib, \
-        cp $(THIRDPARTY) $@/js/lib \
-    )
+	    cp $(THIRDPARTY_TEST) $@/js/lib, \
+	    cp $(THIRDPARTY) $@/js/lib \
+	)
 
-$(PACKAGE): $(LIVEBUILD)
-	cd $(LIVEBUILD); zip __.zip -r *
-	mv $(LIVEBUILD)/__.zip $(PACKAGE)
+$(PACKAGE): $(BUILD_LIVE)
+	cd $(BUILD_LIVE); zip __.zip -q -r ./* -x \*/.d
+	mv $(BUILD_LIVE)/__.zip $(PACKAGE)
 
 clean:
 	rm -rf $(OUTPUT_DIR)
