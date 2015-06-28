@@ -379,7 +379,7 @@ angular.module("FireDictControllers")
                     console.log("Html code injection: " + el.tagName);
                     if(jq(el).children().length == 0)
                         jq(el).replaceWith(jq(el).text());
-                    else jq(el).children().unwrap();
+                    else jq(el).replaceWith(el.childNodes);
                 });
                 angular.forEach($tmpdiv.find("center, left, right"), function (el) {
                     jq(el).replaceWith(
@@ -443,7 +443,7 @@ angular.module("FireDictControllers")
                     console.log("Pango code injection: " + el.tagName);
                     if(jq(el).children().length == 0)
                         jq(el).replaceWith(jq(el).text());
-                    else jq(el).children().unwrap();
+                    else jq(el).replaceWith(el.childNodes);
                 });
                 angular.forEach($tmpdiv.find("span"), function (el) {
                     var replacement = jq("<span/>"), sup = false;
@@ -527,7 +527,7 @@ angular.module("FireDictControllers")
                     console.log("XDXF code injection: " + el.tagName);
                     if(jq(el).children().length == 0)
                         jq(el).replaceWith(jq(el).text());
-                    else jq(el).children().unwrap();
+                    else jq(el).replaceWith(el.childNodes);
                 });
                 angular.forEach($tmpdiv.find("k"), function (el) {
                     jq(el).replaceWith(
