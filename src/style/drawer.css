@@ -19,7 +19,11 @@
     box-shadow: 0 0 10px 5px rgba(0,0,0,0.8);
 }
 
-#mainArea.drawer:before {
+#mainArea > div.before {
+    display: none;
+}
+
+#mainArea.drawer > div.before {
     content: "";
     display: block;
     position: absolute;

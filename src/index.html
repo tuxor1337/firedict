@@ -40,8 +40,10 @@
                 </a>
             </li>
         </div>
-        <section id="mainArea" data-ng-class="{drawer: drawerOpen}"
-                 data-ng-click="toggleSidebar($event, false)">
+        <section id="mainArea" data-ng-class="{drawer: drawerOpen}">
+            <div data-ng-click="toggleSidebar($event, false)"
+                 class="before">
+            </div>
             <div data-ng-view=""></div>
         </section>
         <div data-ng-dialog data="modal"></div>
