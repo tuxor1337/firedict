@@ -1,27 +1,29 @@
-firedict
+FireDict
 ========
 
-A simple offline dictionary software for Firefox OS and Firefox for Android
+A simple offline dictionary software for Firefox OS and Firefox for Android.
 
-Currently, only StarDict dictionaries are supported. Users can organize many
-dictionaries by renaming, coloring, reordering them and by classifying them in
-groups. The last 20 terms that have been looked up are stored and can be accessed
+Currently, only StarDict dictionaries are supported.
+Users can organize many dictionaries by renaming, coloring,
+reordering them and by classifying them in groups.
+The last 20 terms that have been looked up are stored and can be accessed
 directly from the start screen.
 
-The user interface can be customized. Users can change the font size of dictionary
-entries or force all dictionary colors to be greyscale. Furthermore, long entries
-can be truncated by default.
+The user interface can be customized.
+Users can change the font size of dictionary entries or force all dictionary
+colors to be greyscale.
+Furthermore, long entries can be truncated by default.
 
-screenshots
+Screenshots
 -----------
 
 Screenshots are hosted on tovotu.de and displayed on the marketplace as well as
-on the project's homepage on http://tuxor1337.github.io/firedict/.
+on [the project's homepage](http://tuxor1337.github.io/firedict/).
 
 ![screenshot1](http://tovotu.de/data/firedict/screenshots/latest/screen1.png "list of matches") #
 ![screenshot2](http://tovotu.de/data/firedict/screenshots/latest/screen2.png "displaying an entry")
 
-localization
+Localization
 ------------
 
 The languages, currently supported by Firedict, with their respective
@@ -36,7 +38,7 @@ If you are interested in contributing to the localization of FireDict, have a
 look at the localizable strings in `src/locales/firedict.en-US.properties` and feel
 free to send a pull request.
 
-build and run
+Build and run
 -------------
 
 The build process requires the Node package manager `npm`. Apart from that you
@@ -50,7 +52,7 @@ privileges and permissions. You can run it by opening
 online) and test all the ui stuff like l10n.js, AngularJS and stylesheets. (The
 test worker uses dummy dictionaries and dummy lookups etc.)
 
-licensing and third-party code
+Licensing and third-party code
 ----------------
 
 FireDict is free software: you can redistribute it and/or modify
@@ -64,8 +66,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with FireDict (see `COPYING`).  If not, see <http://www.gnu.org/licenses/>.
+along with FireDict (see [COPYING.txt](COPYING.txt)).
+If not, see [gnu.org/licenses/](https://www.gnu.org/licenses/).
 
 However, FireDict is heavily based on third-party code that is listed in
-`LICENSE.3rd-party` along with its corresponding authors and licenses.
-
+[LICENSE.3rd-party](LICENSE.3rd-party) along with its corresponding authors and licenses.
