@@ -165,7 +165,7 @@
                 }
 
                 function get_dictionaries() {
-                    query("progress", { text: "Processing dictionaries..." })
+                    query("progress", { l20n_text: "dialog-progress-process-dicts" });
                     IdbWrapper.get_dictionaries()
                     .then(function (dict_list) {
                         aDicts = dict_list;

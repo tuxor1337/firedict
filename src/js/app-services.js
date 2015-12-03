@@ -186,6 +186,7 @@ angular.module("FireDictProvider")
                     $rootScope.dialog.open({
                         type: "progress",
                         text: data.text,
+                        l20n: { text: data.l20n_text },
                         value: value
                     });
                 }

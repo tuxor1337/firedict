@@ -69,8 +69,9 @@ angular.module("FireDictControllers")
         $scope.dialog = {
             update: function (res, text) {
                 $scope.modal.result = res;
-                if(typeof text !== "undefined")
+                if(typeof text !== "undefined") {
                     $scope.modal.text = text;
+                }
             },
             close: function () {
                 set_opts(defaults);

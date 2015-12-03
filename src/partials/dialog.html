@@ -40,6 +40,7 @@
         <div data-ng-if="modal.type == 'grouppicker'" class="grouppicker">
             <ul data-ng-grouppicker="" data-selectable="false"></ul>
         </div>
+        <div data-ng-if="modal.type == 'progress'">{{modal.text}}</div>
         <progress data-ng-if="modal.type == 'progress' &amp;&amp; modal.result.length &gt;= 2"
                   value="{{modal.result[0]}}"
                   max="{{modal.result[1]}}"></progress>
