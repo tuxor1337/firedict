@@ -5,7 +5,7 @@ NODE_MODULES := node_modules
 NODE_BIN := $(NODE_MODULES)/.bin
 UGLIFYJS := $(NODE_BIN)/uglifyjs
 
-LICENSE := COPYING LICENSE.3rd-party
+LICENSE := COPYING.txt LICENSE.3rd-party
 
 SRC_DIR := src
 MANIFEST := $(SRC_DIR)/manifest.webapp
