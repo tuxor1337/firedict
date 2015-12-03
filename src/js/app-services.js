@@ -192,6 +192,13 @@ angular.module("FireDictProvider")
                 }
             });
 
+            workerObj.addListener("remove_dict", function (obj) {
+                var did = obj.data;
+                groupProvider.list.forEach(function (group) {
+                    groupProvider.remove_from_group(group, did);
+                });
+            });
+
             workerObj.addListener("IdbWrapper", function (obj) {
                 var action = obj.data.action, data = obj.data.data;
                 IdbWrapper[action](data).then(obj.reply);

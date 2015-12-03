@@ -148,6 +148,7 @@
                         }
                         console.debug("Zombie: " + aDicts[n].path);
                         oHistoryManager.clear(aDicts[n].version);
+                        query("remove_dict", aDicts[n].version)
                         IdbWrapper.remove_dictionary(aDicts[n].version)
                         .then(function () {
                             aDicts.splice(n,1);
