@@ -214,15 +214,17 @@ angular.module("FireDictControllers")
         $scope.entries = [];
         $scope.resources = {};
         $scope.search_term = "";
-        $scope.showing_entry = false;
+        $scope.current_entry = null;
         $scope.dictionaries = dictProvider.dicts;
 
         dictProvider.worker.addListener("lookup_continue", function (obj) {
             obj.reply(obj.data.term == $scope.search_term
-                      && $scope.showing_entry === false);
+                      && $scope.current_entry === null);
         });
 
         $scope.lookup = function (val) {
+            if(val != $scope.current_entry)
+                $scope.current_entry = null;
             if(val == $scope.search_term) {
                 $scope.idle = true;
                 $scope.matches = [];
@@ -239,7 +241,7 @@ angular.module("FireDictControllers")
         };
 
         $scope.lookup_enterpressed = function () {
-            if($scope.showing_entry) return;
+            $scope.current_entry = null;
             $scope.lookup($scope.search_term);
         };
 
@@ -248,7 +250,6 @@ angular.module("FireDictControllers")
                 milliseconds = 800 - 150*Math.min(val.length,4);
             $scope.idle = true;
             $scope.matches = [];
-            if($scope.showing_entry) return;
             var delay = (function(){
               var timer = 0;
               return function(callback, ms) {
@@ -302,10 +303,9 @@ angular.module("FireDictControllers")
                 $timeout(function () {
                     $scope.idle = false;
                     if(entries.length > 0) {
-                        $scope.showing_entry = true;
+                        $scope.current_entry = term;
                         $scope.entries = entries;
                     } else {
-                        $scope.showing_entry = false;
                         $scope.lookup_enterpressed();
                     }
                 });
@@ -324,7 +324,7 @@ angular.module("FireDictControllers")
 
         $scope.back = function () {
             if($scope.showing_entry) {
-                $scope.showing_entry = false;
+                $scope.current_entry = null;
                 $scope.lookup($scope.search_term);
             }
         };
