@@ -669,10 +669,6 @@
       var value = rawValue.indexOf('{{') > -1 ?
         this.parseString(rawValue) : rawValue;
 
-      if (rawValue.indexOf('<') > -1 || rawValue.indexOf('&') > -1) {
-        value = { $o: value };
-      }
-
       if (attr) {
         pos = this.entryIds[id];
         if (pos === undefined) {
@@ -773,379 +769,6 @@
 
 
 
-  var MAX_PLACEABLES_L20N = 100;
-
-  var L20nParser = {
-    _patterns: {
-      identifier: /[A-Za-z_]\w*/g,
-      unicode: /\\u([0-9a-fA-F]{1,4})/g,
-      index: /@cldr\.plural\(\$?(\w+)\)/g,
-      placeables: /\{\{\s*\$?([^\s]*?)\s*\}\}/,
-      unesc: /\\({{|u[0-9a-fA-F]{4}|.)/g,
-    },
-
-    parse: function (ctx, string, simple) {
-      this._source = string;
-      this._index = 0;
-      this._length = this._source.length;
-      this.simpleMode = simple;
-      this.ctx = ctx;
-
-      return this.getL20n();
-    },
-
-    getAttributes: function() {
-      var attrs = Object.create(null);
-      var attr, ws1, ch;
-
-      while (true) {
-        attr = this.getKVPWithIndex();
-        attrs[attr[0]] = attr[1];
-        ws1 = this.getRequiredWS();
-        ch = this._source.charAt(this._index);
-        if (ch === '>') {
-          break;
-        } else if (!ws1) {
-          throw this.error('Expected ">"');
-        }
-      }
-      return attrs;
-    },
-
-    getKVP: function() {
-      var key = this.getIdentifier();
-      this.getWS();
-      if (this._source.charAt(this._index) !== ':') {
-        throw this.error('Expected ":"');
-      }
-      ++this._index;
-      this.getWS();
-      return [key, this.getValue()];
-    },
-
-    getKVPWithIndex: function() {
-      var key = this.getIdentifier();
-      var index = null;
-
-      if (this._source.charAt(this._index) === '[') {
-        ++this._index;
-        this.getWS();
-        index = this.getIndex();
-      }
-      this.getWS();
-      if (this._source.charAt(this._index) !== ':') {
-        throw this.error('Expected ":"');
-      }
-      ++this._index;
-      this.getWS();
-      return [
-        key,
-        this.getValue(false, undefined, index)
-      ];
-    },
-
-    getHash: function() {
-      ++this._index;
-      this.getWS();
-      var hi, comma, hash = {};
-      while (true) {
-        hi = this.getKVP();
-        hash[hi[0]] = hi[1];
-        this.getWS();
-
-        comma = this._source.charAt(this._index) === ',';
-        if (comma) {
-          ++this._index;
-          this.getWS();
-        }
-        if (this._source.charAt(this._index) === '}') {
-          ++this._index;
-          break;
-        }
-        if (!comma) {
-          throw this.error('Expected "}"');
-        }
-      }
-      return hash;
-    },
-
-    unescapeString: function(str, opchar) {
-      function replace(match, p1) {
-        switch (p1) {
-          case '\\':
-            return '\\';
-          case '{{':
-            return '{{';
-          case opchar:
-            return opchar;
-          default:
-            if (p1.length === 5 && p1.charAt(0) === 'u') {
-              return String.fromCharCode(parseInt(p1.substr(1), 16));
-            }
-            throw this.error('Illegal unescape sequence');
-        }
-      }
-      return str.replace(this._patterns.unesc, replace.bind(this));
-    },
-
-    getString: function(opchar) {
-      var overlay = false;
-
-      var opcharPos = this._source.indexOf(opchar, this._index + 1);
-
-      outer:
-      while (opcharPos !== -1) {
-        var backtrack = opcharPos - 1;
-        // 92 === '\'
-        while (this._source.charCodeAt(backtrack) === 92) {
-          if (this._source.charCodeAt(backtrack - 1) === 92) {
-            backtrack -= 2;
-          } else {
-            opcharPos = this._source.indexOf(opchar, opcharPos + 1);
-            continue outer;
-          }
-        }
-        break;
-      }
-
-      if (opcharPos === -1) {
-        throw this.error('Unclosed string literal');
-      }
-
-      var buf = this._source.slice(this._index + 1, opcharPos);
-
-      this._index = opcharPos + 1;
-
-      if (!this.simpleMode && buf.indexOf('\\') !== -1) {
-        buf = this.unescapeString(buf, opchar);
-      }
-
-      if (buf.indexOf('<') > -1 || buf.indexOf('&') > -1) {
-        overlay = true;
-      }
-
-      if (!this.simpleMode && buf.indexOf('{{') !== -1) {
-        return [this.parseString(buf), overlay];
-      }
-
-      return [buf, overlay];
-    },
-
-    getValue: function(optional, ch, index) {
-      var val;
-
-      if (ch === undefined) {
-        ch = this._source.charAt(this._index);
-      }
-      if (ch === '\'' || ch === '"') {
-        var valAndOverlay = this.getString(ch);
-        if (valAndOverlay[1]) {
-          val = {'$o': valAndOverlay[0]};
-        } else {
-          val = valAndOverlay[0];
-        }
-      } else if (ch === '{') {
-        val = this.getHash();
-      }
-
-      if (val === undefined) {
-        if (!optional) {
-          throw this.error('Unknown value type');
-        }
-        return null;
-      }
-
-      if (index) {
-        return {'$v': val, '$x': index};
-      }
-
-      return val;
-    },
-
-    getRequiredWS: function() {
-      var pos = this._index;
-      var cc = this._source.charCodeAt(pos);
-      // space, \n, \t, \r
-      while (cc === 32 || cc === 10 || cc === 9 || cc === 13) {
-        cc = this._source.charCodeAt(++this._index);
-      }
-      return this._index !== pos;
-    },
-
-    getWS: function() {
-      var cc = this._source.charCodeAt(this._index);
-      // space, \n, \t, \r
-      while (cc === 32 || cc === 10 || cc === 9 || cc === 13) {
-        cc = this._source.charCodeAt(++this._index);
-      }
-    },
-
-
-    getIdentifier: function() {
-      var reId = this._patterns.identifier;
-      reId.lastIndex = this._index;
-      var match = reId.exec(this._source);
-      if (reId.lastIndex !== this._index + match[0].length) {
-        throw this.error('Identifier has to start with [a-zA-Z_]');
-      }
-      this._index = reId.lastIndex;
-
-      return match[0];
-    },
-
-    getComment: function() {
-      this._index += 2;
-      var start = this._index;
-      var end = this._source.indexOf('*/', start);
-
-      if (end === -1) {
-        throw this.error('Comment without closing tag');
-      }
-      this._index = end + 2;
-      return;
-    },
-
-    getEntity: function(id, index) {
-      var entity = {'$i': id};
-
-      if (index) {
-        entity.$x = index;
-      }
-
-      if (!this.getRequiredWS()) {
-        throw this.error('Expected white space');
-      }
-
-      var ch = this._source.charAt(this._index);
-      var value = this.getValue(index === null, ch);
-      var attrs = null;
-      if (value === null) {
-        if (ch === '>') {
-          throw this.error('Expected ">"');
-        }
-        attrs = this.getAttributes();
-      } else {
-        entity.$v = value;
-        var ws1 = this.getRequiredWS();
-        if (this._source.charAt(this._index) !== '>') {
-          if (!ws1) {
-            throw this.error('Expected ">"');
-          }
-          attrs = this.getAttributes();
-        }
-      }
-
-      // skip '>'
-      ++this._index;
-
-      if (attrs) {
-        /* jshint -W089 */
-        for (var key in attrs) {
-          entity[key] = attrs[key];
-        }
-      }
-
-      return entity;
-    },
-
-    getEntry: function() {
-      // 60 === '<'
-      if (this._source.charCodeAt(this._index) === 60) {
-        ++this._index;
-        var id = this.getIdentifier();
-        // 91 == '['
-        if (this._source.charCodeAt(this._index) === 91) {
-          ++this._index;
-          return this.getEntity(id,
-                           this.getIndex());
-        }
-        return this.getEntity(id, null);
-      }
-      if (this._source.charCodeAt(this._index) === 47 &&
-          this._source.charCodeAt(this._index + 1) === 42) {
-        return this.getComment();
-      }
-      throw this.error('Invalid entry');
-    },
-
-    getL20n: function() {
-      var ast = [];
-
-      this.getWS();
-      while (this._index < this._length) {
-        try {
-          var entry = this.getEntry();
-          if (entry) {
-            ast.push(entry);
-          }
-        } catch (e) {
-          if (this.ctx) {
-            this.ctx._emitter.emit('parsererror', e);
-          } else {
-            throw e;
-          }
-        }
-
-        if (this._index < this._length) {
-          this.getWS();
-        }
-      }
-
-      return ast;
-    },
-
-    getIndex: function() {
-      this.getWS();
-      this._patterns.index.lastIndex = this._index;
-      var match = this._patterns.index.exec(this._source);
-      this._index = this._patterns.index.lastIndex;
-      this.getWS();
-      this._index++;
-
-      return [{t: 'idOrVar', v: 'plural'}, match[1]];
-    },
-
-    parseString: function(str) {
-      var chunks = str.split(this._patterns.placeables);
-      var complexStr = [];
-
-      var len = chunks.length;
-      var placeablesCount = (len - 1) / 2;
-
-      if (placeablesCount >= MAX_PLACEABLES_L20N) {
-        throw new L10nError('Too many placeables (' + placeablesCount +
-                            ', max allowed is ' + MAX_PLACEABLES_L20N + ')');
-      }
-
-      for (var i = 0; i < chunks.length; i++) {
-        if (chunks[i].length === 0) {
-          continue;
-        }
-        if (i % 2 === 1) {
-          complexStr.push({t: 'idOrVar', v: chunks[i]});
-        } else {
-          complexStr.push(chunks[i]);
-        }
-      }
-      return complexStr;
-    },
-
-    error: function(message, pos) {
-      if (pos === undefined) {
-        pos = this._index;
-      }
-      var start = this._source.lastIndexOf('<', pos - 1);
-      var lastClose = this._source.lastIndexOf('>', pos - 1);
-      start = lastClose > start ? lastClose + 1 : start;
-      var context = this._source.slice(start, pos + 10);
-
-      var msg = message + ' at pos ' + pos + ': "' + context + '"';
-      return new L10nError(msg, pos, context);
-    }
-  };
-
-
-
   var KNOWN_MACROS = ['plural'];
 
   var MAX_PLACEABLE_LENGTH = 2500;
@@ -1208,12 +831,8 @@
 
 
   function format(args, entity) {
-    var locals = {
-      overlay: false
-    };
-
     if (typeof entity === 'string') {
-      return [locals, entity];
+      return [{}, entity];
     }
 
     if (entity.dirty) {
@@ -1227,7 +846,7 @@
     // if format fails, we want the exception to bubble up and stop the whole
     // resolving process;  however, we still need to clean up the dirty flag
     try {
-      rv = resolveValue(locals, args, entity.env, entity.value, entity.index);
+      rv = resolveValue({}, args, entity.env, entity.value, entity.index);
     } finally {
       entity.dirty = false;
     }
@@ -1299,9 +918,6 @@
         return [prev[0], prev[1] + cur];
       } else if (cur.t === 'idOrVar'){
         var placeable = subPlaceable(locals, args, env, cur.v);
-        if (placeable[0].overlay) {
-          prev[0].overlay = true;
-        }
         return [prev[0], prev[1] + placeable[1]];
       }
     }, [locals, '']);
@@ -1338,11 +954,6 @@
   function resolveValue(locals, args, env, expr, index) {
     if (!expr) {
       return [locals, expr];
-    }
-
-    if (expr.$o) {
-      expr = expr.$o;
-      locals.overlay = true;
     }
 
     if (typeof expr === 'string' ||
@@ -1420,7 +1031,7 @@
    *
    * Currently, the following pseudolocales are supported:
    *
-   *   qps-ploc - Ȧȧƈƈḗḗƞŧḗḗḓ Ḗḗƞɠŀīīşħ
+   *   fr-x-psaccent - Ȧȧƈƈḗḗƞŧḗḗḓ Ḗḗƞɠŀīīşħ
    *
    *     In Accented English all English letters are replaced by accented
    *     Unicode counterparts which don't impair the readability of the content.
@@ -1429,9 +1040,9 @@
    *     heuristics are used to make certain words longer to better simulate the
    *     experience of international users.
    *
-   *   qps-plocm - ɥsıʅƃuƎ pǝɹoɹɹıW
+   *   ar-x-psbidi - ɥsıʅƃuƎ ıpıԐ
    *
-   *     Mirrored English is a fake RTL locale.  All words are surrounded by
+   *     Bidi English is a fake RTL locale.  All words are surrounded by
    *     Unicode formatting marks forcing the RTL directionality of characters.
    *     In addition, to make the reversed text easier to read, individual
    *     letters are flipped.
@@ -1518,9 +1129,9 @@
   }
 
   var PSEUDO = {
-    'qps-ploc': new Pseudo('qps-ploc', 'Runtime Accented',
+    'fr-x-psaccent': new Pseudo('fr-x-psaccent', 'Runtime Accented',
                            ACCENTED_MAP, makeLonger),
-    'qps-plocm': new Pseudo('qps-plocm', 'Runtime Mirrored',
+    'ar-x-psbidi': new Pseudo('ar-x-psbidi', 'Runtime Bidi',
                             FLIPPED_MAP, makeRTL)
   };
 
@@ -1598,14 +1209,6 @@
       onL10nLoaded(err);
     }
 
-    function onL20nLoaded(err, source) {
-      if (!err && source) {
-        var ast = L20nParser.parse(ctx, source);
-        self.addAST(ast);
-      }
-      onL10nLoaded(err);
-    }
-
     var idToFetch = this.isPseudo() ? ctx.defaultLocale : this.id;
     var appVersion = null;
     var source = 'app';
@@ -1626,9 +1229,6 @@
           break;
         case 'properties':
           cb = onPropLoaded;
-          break;
-        case 'l20n':
-          io.load(path, onL20nLoaded, sync);
           break;
       }
       bindingsIO[source](this.id,
@@ -1730,13 +1330,11 @@
 
   function formatEntity(args, entity) {
     var entityTuple = formatTuple.call(this, args, entity);
-    var locals = entityTuple[0];
     var value = entityTuple[1];
 
     var formatted = {
       value: value,
       attrs: null,
-      overlay: locals.overlay
     };
 
     if (entity.attrs) {
@@ -1747,9 +1345,6 @@
       /* jshint -W089 */
       var attrTuple = formatTuple.call(this, args, entity.attrs[key]);
       formatted.attrs[key] = attrTuple[1];
-      if (attrTuple[0].overlay) {
-        formatted.overlay = true;
-      }
     }
 
     return formatted;
@@ -1954,7 +1549,7 @@
 
 
 
-  var rtlList = ['ar', 'he', 'fa', 'ps', 'qps-plocm', 'ur'];
+  var rtlList = ['ar', 'he', 'fa', 'ps', 'ar-x-psbidi', 'ur'];
   var nodeObserver = null;
   var pendingElements = null;
 
@@ -2021,7 +1616,6 @@
         translateDocument: translateDocument,
         onMetaInjected: onMetaInjected,
         PropertiesParser: PropertiesParser,
-        L20nParser: L20nParser,
         walkContent: walkContent,
         buildLocaleList: buildLocaleList
       };
@@ -2033,20 +1627,19 @@
   }
 
   var readyStates = {
-    'loading': 0,
-    'interactive': 1,
-    'complete': 2
+    loading: 0,
+    interactive: 1,
+    complete: 2
   };
 
-  function waitFor(state, callback) {
-    state = readyStates[state];
-    if (readyStates[document.readyState] >= state) {
+  function whenInteractive(callback) {
+    if (readyStates[document.readyState] >= readyStates.interactive) {
       callback();
       return;
     }
 
     document.addEventListener('readystatechange', function l10n_onrsc() {
-      if (readyStates[document.readyState] >= state) {
+      if (readyStates[document.readyState] >= readyStates.interactive) {
         document.removeEventListener('readystatechange', l10n_onrsc);
         callback();
       }
@@ -2277,6 +1870,16 @@
   }
 
 
+  // match the opening angle bracket (<) in HTML tags, and HTML entities like
+  // &amp;, &#0038;, &#x0026;.
+  var reOverlay = /<|&#?\w+;/;
+  var reHtml = /[&<>]/g;
+  var htmlEntities = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+  };
+
   function translateDocument() {
     document.documentElement.lang = this.language.code;
     document.documentElement.dir = this.language.direction;
@@ -2284,7 +1887,8 @@
   }
 
   function translateFragment(element) {
-    if (element.hasAttribute('data-l10n-id')) {
+    if (typeof element.hasAttribute === 'function' &&
+        element.hasAttribute('data-l10n-id')) {
       translateElement.call(this, element);
     }
 
@@ -2325,6 +1929,10 @@
       .replace(/^-/, '');
   }
 
+  function escapeL10nArgs(match) {
+    return htmlEntities[match];
+  }
+
   function translateElement(element) {
     if (!this.ctx.isReady) {
       if (!pendingElements) {
@@ -2334,28 +1942,25 @@
       return;
     }
 
-    var l10n = getL10nAttributes(element);
+    var l10nId = element.getAttribute('data-l10n-id');
 
-    if (!l10n.id) {
+    if (!l10nId) {
       return false;
     }
 
-    var entity = this.ctx.getEntity(l10n.id, l10n.args);
+    var l10nArgs = element.getAttribute('data-l10n-args');
 
-    var value;
-    if (entity.attrs && entity.attrs.innerHTML) {
-      // XXX innerHTML is treated as value (https://bugzil.la/1142526)
-      value = entity.attrs.innerHTML;
-      console.warn(
-        'L10n Deprecation Warning: using innerHTML in translations is unsafe ' +
-        'and will not be supported in future versions of l10n.js. ' +
-        'See https://bugzil.la/1027117');
-    } else {
-      value = entity.value;
-    }
+    var entity = this.ctx.getEntity(
+      l10nId,
+      l10nArgs ?
+        JSON.parse(l10nArgs.replace(reHtml, escapeL10nArgs)) :
+        undefined
+    );
+
+    var value = entity.value;
 
     if (typeof value === 'string') {
-      if (!entity.overlay) {
+      if (!reOverlay.test(value)) {
         element.textContent = value;
       } else {
         // start with an inert template element and move its children into
@@ -2411,12 +2016,10 @@
       }
 
       if (isElementAllowed(childElement)) {
-        for (k = 0, attr; (attr = childElement.attributes[k]); k++) {
-          if (!isAttrAllowed(attr, childElement)) {
-            childElement.removeAttribute(attr.name);
-          }
-        }
-        result.appendChild(childElement);
+        var sanitizedChild = childElement.ownerDocument.createElement(
+          childElement.nodeName);
+        overlayElement(sanitizedChild, childElement);
+        result.appendChild(sanitizedChild);
         continue;
       }
 
@@ -2531,13 +2134,73 @@
     navigator.mozL10n._config.isPretranslated =
       document.documentElement.lang === navigator.language;
 
-    // XXX always pretranslate if data-no-complete-bug is set;  this is
-    // a workaround for a netError page not firing some onreadystatechange
-    // events;  see https://bugzil.la/444165
-    var pretranslate = document.documentElement.dataset.noCompleteBug ?
-      true : !navigator.mozL10n._config.isPretranslated;
-    waitFor('interactive', init.bind(navigator.mozL10n, pretranslate));
+    var forcePretranslate = !navigator.mozL10n._config.isPretranslated;
+    whenInteractive(init.bind(navigator.mozL10n, forcePretranslate));
   }
+
+  document.l10n = {
+    setAttributes: navigator.mozL10n.setAttributes,
+    getAttributes: navigator.mozL10n.getAttributes,
+    formatValue: function(id, args) {
+      return navigator.mozL10n.formatValue(id, args);
+    },
+    translateFragment: function (frag) {
+      return Promise.resolve(navigator.mozL10n.translateFragment(frag));
+    },
+    ready: new Promise(function(resolve) {
+      navigator.mozL10n.once(resolve);
+    }),
+    formatValues: function() {
+      var keys = arguments;
+      var resp = keys.map(function(key) {
+        if (Array.isArray(key)) {
+          return navigator.mozL10n.formatValue(key[0], key[1]);
+        }
+        return navigator.mozL10n.formatValue(key);
+      });
+
+      return Promise.all(resp);
+    },
+    requestLanguages: function(langs) {
+      // XXX real l20n returns a promise
+      navigator.mozL10n.ctx.requestLocales.apply(
+        navigator.mozL10n.ctx, langs);
+    },
+    pseudo: {
+      'fr-x-psaccent': {
+        getName: function() {
+          return Promise.resolve(navigator.mozL10n.qps['fr-x-psaccent'].name);
+        },
+        processString: function(s) {
+          return Promise.resolve(
+            navigator.mozL10n.qps['fr-x-psaccent'].translate(s));
+        }
+      },
+      'ar-x-psbidi': {
+        getName: function() {
+          return Promise.resolve(navigator.mozL10n.qps['ar-x-psbidi'].name);
+        },
+        processString: function(s) {
+          return Promise.resolve(
+            navigator.mozL10n.qps['ar-x-psbidi'].translate(s));
+        }
+      }
+    },
+  };
+
+  navigator.mozL10n.ready(function() {
+    document.documentElement.setAttribute(
+      'langs', navigator.mozL10n.ctx.supportedLocales.join(' '));
+  });
+
+  navigator.mozL10n.once(function() {
+    window.addEventListener('localized', function() {
+      document.dispatchEvent(new CustomEvent('DOMRetranslated', {
+        bubbles: false,
+        cancelable: false
+      }));
+    });
+  });
 
 })(this);
 
