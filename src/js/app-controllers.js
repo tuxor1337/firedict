@@ -183,9 +183,11 @@ angular.module("FireDictControllers")
                     }
                 }
             }
-            for(var i = 0; i < aDictSorted.length; i++) {
-                aDictSorted[i].rank = i;
-            }
+            $scope.$apply(function () {
+                for(var i = 0; i < aDictSorted.length; i++) {
+                    aDictSorted[i].rank = i;
+                }
+            });
         };
     }
 ])
