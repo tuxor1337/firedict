@@ -4,7 +4,7 @@
          data-enter="lookup_enterpressed"
          data-groups="choose_groups"></div>
     <div role="main">
-        <section data-type="list" data-ng-if="!showing_entry">
+        <section data-type="list" data-ng-if="current_entry === null">
             <ul class="matches">
                 <li data-ng-show="!matches.length &amp;&amp; !idle">
                     <p data-ng-moz-l10n="lookup-no-matches"></p>
@@ -22,7 +22,7 @@
                 </li>
             </ul>
         </section>
-        <section data-type="output" data-ng-if="showing_entry"
+        <section data-type="output" data-ng-if="current_entry !== null"
                  data-ng-style="{'font-size': content_fontsize()}">
             <div data-ng-repeat="dict in dictionaries | filter:entryDictFilter | orderBy: 'rank'"
                  data-ng-style="{'border-color':dict.color}" class="text">

@@ -325,7 +325,7 @@ angular.module("FireDictControllers")
         );
 
         $scope.back = function () {
-            if($scope.showing_entry) {
+            if($scope.current_entry !== null) {
                 $scope.current_entry = null;
                 $scope.lookup($scope.search_term);
             }
