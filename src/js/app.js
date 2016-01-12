@@ -9,7 +9,7 @@
 angular.module("FireDictProvider", []);
 angular.module("FireDictControllers", ["FireDictProvider"]);
 angular.module("FireDictDirectives", ["FireDictProvider", "ngRoute"]);
-angular.module("FireDict", ["FireDictControllers", "FireDictDirectives", "ngRoute", "ngSanitize", "ngTouch"]);
+angular.module("FireDict", ["FireDictControllers", "FireDictDirectives", "ngRoute", "ngSanitize"]);
 
 angular.module("FireDict")
 .config(["$compileProvider", function($compileProvider) {

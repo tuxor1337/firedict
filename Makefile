@@ -34,8 +34,7 @@ ICONS := $(addprefix $(ICON_DIR)/,$(ICON_FILES))
 THIRDPARTY_DIR := $(OUTPUT_DIR)/thirdparty
 THIRDPARTY_ANGULAR := $(NODE_MODULES)/angular/angular.min.js \
                       $(NODE_MODULES)/angular-route/angular-route.min.js \
-                      $(NODE_MODULES)/angular-sanitize/angular-sanitize.min.js \
-                      $(NODE_MODULES)/angular-touch/angular-touch.min.js
+                      $(NODE_MODULES)/angular-sanitize/angular-sanitize.min.js
 THIRDPARTY_MINSRC := $(NODE_MODULES)/es6-promise/dist/es6-promise.min.js \
                      $(NODE_MODULES)/pako/dist/pako_inflate.min.js
 THIRDPARTY_RAWSRC :=  thirdparty/dictzip.js/dictzip_sync.js \

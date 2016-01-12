@@ -72,8 +72,8 @@ function wordpicker_wrap(event) {
         oParent = oPicked.parentNode,
         aSpans = [],
         oTouches;
-    wordpicker_unwrap(oContent);
     if(oPicked.nodeType === 3) {
+        wordpicker_unwrap(oContent);
         oTouches = touchXY(event);
         oPicked.textContent.split(" ").forEach(function (sWord) {
             var oChild = document.createElement("span");
