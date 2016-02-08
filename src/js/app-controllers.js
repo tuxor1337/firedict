@@ -1,6 +1,6 @@
 /**
  * This file is part of FireDict.
- * (c) 2013-2015 https://github.com/tuxor1337/firedict
+ * (c) 2013-2016 https://github.com/tuxor1337/firedict
  * License: GPLv3
  */
 
