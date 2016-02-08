@@ -43,7 +43,7 @@
 
         return new Promise(function (resolve) {
             request.onsuccess = function () {
-                if(!this.result) {
+                if(this.done || !this.result) {
                     sort_files();
                     resolve(subdirs);
                 } else {
@@ -62,7 +62,8 @@
                         });
                     }
                     filelist.push(this.result);
-                    this.continue();
+                    // Prevents `too much recursion` error...
+                    setTimeout(function (that) { that.continue(); }, 0, this);
                 }
             };
 
