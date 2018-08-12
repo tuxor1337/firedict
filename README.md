@@ -18,7 +18,7 @@ Screenshots
 -----------
 
 Screenshots are hosted on tovotu.de and displayed on the marketplace as well as
-on [the project's homepage](http://tuxor1337.github.io/firedict/).
+on [the project's homepage](http://tuxor1337.frama.io/firedict/).
 
 ![screenshot1](http://tovotu.de/data/firedict/screenshots/latest/screen1.png "list of matches") #
 ![screenshot2](http://tovotu.de/data/firedict/screenshots/latest/screen2.png "displaying an entry")

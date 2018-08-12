@@ -1,4 +1,4 @@
-The following files are distributed with this git repository under their respective 
+The following files are distributed with this git repository under their respective
 licenses. The author of FireDict does not own the copyright for these libraries,
 plug-ins and art work. The corresponding copyright owners are listed below.
 
@@ -35,13 +35,13 @@ License: MIT - https://github.com/jakearchibald/es6-promise/blob/master/LICENSE
 
 `js/lib/dictzip_sync.min.js`
 Author: tuxor1337
-URL: https://github.com/tuxor1337/dictzip.js
-License: MIT - https://github.com/tuxor1337/dictzip.js/blob/master/LICENSE
+URL: https://framagit.org/tuxor1337/dictzip.js
+License: MIT - https://framagit.org/tuxor1337/dictzip.js/blob/master/LICENSE
 
 `js/lib/stardict_sync.min.js`
 Author: tuxor1337
-URL: http://github.com/tuxor1337/stardict.js
-License: MIT - https://github.com/tuxor1337/stardict.js/blob/master/LICENSE
+URL: http://framagit.org/tuxor1337/stardict.js
+License: MIT - https://framagit.org/tuxor1337/stardict.js/blob/master/LICENSE
 
 `js/lib/angular.min.js`
 Author: Google, Inc.
